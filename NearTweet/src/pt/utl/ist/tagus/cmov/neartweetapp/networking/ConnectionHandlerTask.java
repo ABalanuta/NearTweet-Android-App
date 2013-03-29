@@ -80,7 +80,7 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 		if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
 			TweetDTO t = (TweetDTO) values[0];
 			
-			// Cenas do Tufa para actualizar a lista
+			// Cenas do Tufa para actualizar a lista de tweets
 			
 			ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 
@@ -99,7 +99,6 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 //			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
 //					android.R.layout.simple_list_item_2, keys, ids);
 //			setListAdapter(adapter);
-			
 			
 			//MainActivity.receveTextBox.append(t.getTweet()+"\n");
 		}
