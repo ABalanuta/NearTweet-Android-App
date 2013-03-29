@@ -84,21 +84,21 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 			
 			ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 
-			for (Tweet tweet : mTweetsArray){
-				String text = tweet.getText();
-				String userId = tweet.getUId();
-
-				HashMap<String,String> tweetInterface = new HashMap<String,String>();
-				tweetInterface.put(KEY_TEXT,text);
-				tweetInterface.put(KEY_TWEETER,userId);
-				tweets.add(tweetInterface);
-			}
-
-			String[] keys = {KEY_TEXT,KEY_TWEETER };
-			int[] ids = {android.R.id.text1, android.R.id.text2};
-			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
-					android.R.layout.simple_list_item_2, keys, ids);
-			setListAdapter(adapter);
+//			for (Tweet tweet : mTweetsArray){
+//				String text = tweet.getText();
+//				String userId = tweet.getUId();
+//
+//				HashMap<String,String> tweetInterface = new HashMap<String,String>();
+//				tweetInterface.put(KEY_TEXT,text);
+//				tweetInterface.put(KEY_TWEETER,userId);
+//				tweets.add(tweetInterface);
+//			}
+//
+//			String[] keys = {KEY_TEXT,KEY_TWEETER };
+//			int[] ids = {android.R.id.text1, android.R.id.text2};
+//			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
+//					android.R.layout.simple_list_item_2, keys, ids);
+//			setListAdapter(adapter);
 			
 			
 			//MainActivity.receveTextBox.append(t.getTweet()+"\n");
