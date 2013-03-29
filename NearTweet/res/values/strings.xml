@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">NearTweet</string>
+    <string name="app_name">NearTweet V0.02</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-	<string name="Send">Send</string>
-	
+    <string name="error_title">Erro a carregar tweets</string>
+    <string name="error_message">Erro</string>
+    <string name="no_items">Não há tweets</string>
+
 </resources>

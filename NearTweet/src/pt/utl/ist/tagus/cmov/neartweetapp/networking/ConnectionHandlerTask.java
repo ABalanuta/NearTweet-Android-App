@@ -45,37 +45,38 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 				} catch (InterruptedException e1) {}
 			}
 		}
+		return null;
 		
-		MainActivity.receveTextBox.append("Connected to server \n");
-		MainActivity.connHandler = new ConnectionHandler(localSock);
-		MainActivity.connHandler.start();
+//		MAINACTIVITY.RECEVETEXTBOX.APPEND("CONNECTED TO SERVER \N");
+//		MAINACTIVITY.CONNHANDLER = NEW CONNECTIONHANDLER(LOCALSOCK);
+//		MAINACTIVITY.CONNHANDLER.START();
 
 
-		while(true){
-
-			if(MainActivity.connHandler.recevedObjects()){
-				ArrayList<BasicDTO> objects  = MainActivity.connHandler.receve();
-				for(BasicDTO oo : objects){
-					publishProgress(oo);
-				}
-			}else{
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+//		while(true){
+//
+//			if(MainActivity.connHandler.recevedObjects()){
+//				ArrayList<BasicDTO> objects  = MainActivity.connHandler.receve();
+//				for(BasicDTO oo : objects){
+//					publishProgress(oo);
+//				}
+//			}else{
+//				try {
+//					Thread.sleep(500);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 
 	}
 
 	@Override
 	protected void onProgressUpdate(BasicDTO... values) {
 
-		if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
-			TweetDTO t = (TweetDTO) values[0];
-			MainActivity.receveTextBox.append(t.getTweet()+"\n");
-		}
+//		if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
+//			TweetDTO t = (TweetDTO) values[0];
+//			MainActivity.receveTextBox.append(t.getTweet()+"\n");
+//		}
 
 	}
 }
