@@ -42,6 +42,7 @@ public class MainActivity extends ListActivity {
 			mProgressBar.setVisibility(View.VISIBLE);
 			GetTweetsTask getTweetsTask = new GetTweetsTask();
 			getTweetsTask.execute();
+			
 		}
 		else {
 			Toast.makeText(this, "nao ha net", Toast.LENGTH_LONG).show();
