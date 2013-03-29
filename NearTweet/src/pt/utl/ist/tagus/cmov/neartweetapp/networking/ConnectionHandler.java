@@ -1,4 +1,7 @@
-package pt.utl.ist.tagus.cmov.neartweet.CentralizedServer;
+package pt.utl.ist.tagus.cmov.neartweetapp.networking;
+
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.*;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+
 
 public class ConnectionHandler extends Thread{
 
@@ -15,11 +19,10 @@ public class ConnectionHandler extends Thread{
 	private InputConnectionHandler inc = null;
 	private OutConnectionHandler outc = null;
 	private boolean running = false;
-	private ArrayList<BasicDTO> objects;
+	private ArrayList<BasicDTO> objects = new ArrayList<BasicDTO>();
 
-	public ConnectionHandler(Socket sock, ArrayList<BasicDTO> objects) {
+	public ConnectionHandler(Socket sock) {
 		this.localSock = sock;
-		this.objects = objects;
 	}
 
 	public void send(Object oo){
@@ -29,11 +32,35 @@ public class ConnectionHandler extends Thread{
 		}
 	}
 
+	public ArrayList<BasicDTO> receve(){
+		synchronized (objects) {
+			ArrayList<BasicDTO> objectscopy = (ArrayList<BasicDTO>) objects.clone();
+			objects.clear();
+			return objectscopy;
+		}
+	}
+
+	ArrayList<BasicDTO> getObjectList(){
+		return objects;
+	}
+
+	public boolean recevedObjects() {
+
+		synchronized (objects){
+			if(objects.size() > 0){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+	}
+
+
 	public void close(){
 		try {
 			out.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -65,13 +92,14 @@ public class ConnectionHandler extends Thread{
 
 
 
-		inc = new InputConnectionHandler(in, objects);
+		inc = new InputConnectionHandler(this.in , this);
+
 		inc.start();
 		System.out.println("Input Channel Created");
 
 
 
-		outc = new OutConnectionHandler(out);
+		outc = new OutConnectionHandler(this.out);
 		outc.start();
 		System.out.println("Output Channel Created");
 
@@ -102,17 +130,23 @@ public class ConnectionHandler extends Thread{
 
 	}
 
+	public interface OnObjectReceived {
+
+		public void InformArivval(BasicDTO dto);
+
+	}
+
 }
 
 class InputConnectionHandler extends Thread{
 
-	private ObjectInputStream in;
+	private ObjectInputStream in = null;
 	private boolean running = false;
-	private ArrayList<BasicDTO> objects= null;
+	private ConnectionHandler connectionHandler = null;
 
-	public InputConnectionHandler(ObjectInputStream in, ArrayList<BasicDTO> objects) {
+	public InputConnectionHandler(ObjectInputStream in, ConnectionHandler connHandler) {
 		this.in = in;
-		this.objects = objects;
+		this.connectionHandler = connHandler;
 	}
 
 	public boolean isRunning(){
@@ -124,17 +158,16 @@ class InputConnectionHandler extends Thread{
 		this.running = true;
 
 		while (this.running) {
-
 			try {
 
 				Object oo = in.readObject();
 				if(oo != null){
-					System.out.println(((BasicDTO) oo).getValue());
-					
-					synchronized (objects) {
-						objects.add((BasicDTO) oo);	
+
+					synchronized (this.connectionHandler.getObjectList()) {
+						this.connectionHandler.getObjectList().add((BasicDTO) oo);
 					}
-					
+					System.out.println("Object Receved");
+
 				}else{
 					System.out.println("Null Value Receved");
 				}
