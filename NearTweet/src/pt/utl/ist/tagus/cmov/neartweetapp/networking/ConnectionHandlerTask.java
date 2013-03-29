@@ -13,7 +13,8 @@ import android.os.AsyncTask;
 
 public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 
-	private	final static String serverIP = "10.0.2.2";
+	//private	final static String serverIP = "10.0.2.2";
+	private	final static String serverIP = "172.20.81.13";
 	private	final static int serverPort = 4444;
 
 	@Override
@@ -72,7 +73,7 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 
 		if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
 			TweetDTO t = (TweetDTO) values[0];
-			MainActivity.receveTextBox.append(t.getTweet());
+			MainActivity.receveTextBox.append(t.getTweet()+"\n");
 		}
 
 	}

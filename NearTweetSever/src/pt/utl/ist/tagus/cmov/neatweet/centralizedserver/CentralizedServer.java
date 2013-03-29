@@ -15,7 +15,7 @@ public class CentralizedServer{
 	public static void main(String[] args) {
 
 		ConnectionInicializer conHandler = new ConnectionInicializer(connections, objects);
-		SwichingHandler sHandler = new SwichingHandler(connections, objects);
+		SwitchingHandler sHandler = new SwitchingHandler(connections, objects);
 
 		sHandler.start();
 		conHandler.start();
@@ -79,13 +79,13 @@ class ConnectionInicializer extends Thread{
 
 }
 
-class SwichingHandler extends Thread{
+class SwitchingHandler extends Thread{
 
 	private ArrayList<ConnectionHandler> connections = null;
 	private ArrayList<BasicDTO> objects = null;
 	private boolean running = false;
 
-	public SwichingHandler(ArrayList<ConnectionHandler> conn, ArrayList<BasicDTO> obj) {
+	public SwitchingHandler(ArrayList<ConnectionHandler> conn, ArrayList<BasicDTO> obj) {
 		this.connections = conn;
 		this.objects = obj;
 	}
