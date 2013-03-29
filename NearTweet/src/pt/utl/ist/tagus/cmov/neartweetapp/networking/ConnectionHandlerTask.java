@@ -4,17 +4,22 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweetapp.MainActivity;
+import pt.utl.ist.tagus.cmov.neartweetapp.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
 import android.os.AsyncTask;
+import android.view.View;
+import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 
-	//private	final static String serverIP = "10.0.2.2";
-	private	final static String serverIP = "172.20.81.13";
+	private	final static String serverIP = "10.0.2.2";
+	//private	final static String serverIP = "172.20.81.13";
 	private	final static int serverPort = 4444;
 
 	@Override
@@ -45,38 +50,59 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 				} catch (InterruptedException e1) {}
 			}
 		}
-		return null;
 		
-//		MAINACTIVITY.RECEVETEXTBOX.APPEND("CONNECTED TO SERVER \N");
-//		MAINACTIVITY.CONNHANDLER = NEW CONNECTIONHANDLER(LOCALSOCK);
-//		MAINACTIVITY.CONNHANDLER.START();
+		MainActivity.connectionHandler = new ConnectionHandler(localSock);
+		MainActivity.connectionHandler.start();
+		
+		MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
 
+		while(true){
 
-//		while(true){
-//
-//			if(MainActivity.connHandler.recevedObjects()){
-//				ArrayList<BasicDTO> objects  = MainActivity.connHandler.receve();
-//				for(BasicDTO oo : objects){
-//					publishProgress(oo);
-//				}
-//			}else{
-//				try {
-//					Thread.sleep(500);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
+			if(MainActivity.connectionHandler.recevedObjects()){
+				ArrayList<BasicDTO> objects  = MainActivity.connectionHandler.receve();
+				for(BasicDTO oo : objects){
+					publishProgress(oo);
+				}
+			}else{
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
 	}
 
 	@Override
 	protected void onProgressUpdate(BasicDTO... values) {
 
-//		if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
-//			TweetDTO t = (TweetDTO) values[0];
-//			MainActivity.receveTextBox.append(t.getTweet()+"\n");
-//		}
+		if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
+			TweetDTO t = (TweetDTO) values[0];
+			
+			// Cenas do Tufa para actualizar a lista
+			
+			ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
+
+			for (Tweet tweet : mTweetsArray){
+				String text = tweet.getText();
+				String userId = tweet.getUId();
+
+				HashMap<String,String> tweetInterface = new HashMap<String,String>();
+				tweetInterface.put(KEY_TEXT,text);
+				tweetInterface.put(KEY_TWEETER,userId);
+				tweets.add(tweetInterface);
+			}
+
+			String[] keys = {KEY_TEXT,KEY_TWEETER };
+			int[] ids = {android.R.id.text1, android.R.id.text2};
+			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
+					android.R.layout.simple_list_item_2, keys, ids);
+			setListAdapter(adapter);
+			
+			
+			//MainActivity.receveTextBox.append(t.getTweet()+"\n");
+		}
 
 	}
 }
