@@ -45,7 +45,8 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 				} catch (InterruptedException e1) {}
 			}
 		}
-
+		
+		MainActivity.receveTextBox.append("Connected to server \n");
 		MainActivity.connHandler = new ConnectionHandler(localSock);
 		MainActivity.connHandler.start();
 

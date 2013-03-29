@@ -15,7 +15,7 @@ import android.widget.EditText;
 public class MainActivity extends Activity {
 
 	public static ConnectionHandler connHandler = null;
-	
+
 	private Button sendButton;	
 	private EditText sendTextBox;
 	public static EditText receveTextBox;
@@ -29,10 +29,10 @@ public class MainActivity extends Activity {
 		sendTextBox = (EditText) findViewById(R.id.sendEditText);
 		receveTextBox = (EditText) findViewById(R.id.receveEditText);
 
-		
+
 		receveTextBox.setText("#Calling Home..."+"\n");
 		new ConnectionHandlerTask().execute();
-		
+
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -40,12 +40,12 @@ public class MainActivity extends Activity {
 				sendTextBox.setText(null);
 			}
 		});
-		
+
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		
+
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;

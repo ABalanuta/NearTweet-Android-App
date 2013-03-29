@@ -55,7 +55,7 @@ class ConnectionInicializer extends Thread{
 				Socket sock = serverSocket.accept();
 				System.out.println("New Client Request");
 
-				ConnectionHandler ch = new ConnectionHandler(sock, objects);
+				ConnectionHandler ch = new ConnectionHandler(sock, objects, connections);
 				ch.start();
 				synchronized (connections) {
 					connections.add(ch);
@@ -94,6 +94,7 @@ class SwitchingHandler extends Thread{
 		this.running = false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 		super.run();
@@ -114,16 +115,16 @@ class SwitchingHandler extends Thread{
 
 				for(BasicDTO oo : objclone){
 
-					for(ConnectionHandler ch : connections){
+					synchronized (connections) {
+						for(ConnectionHandler ch : connections){
 
-						System.out.println("Swiching to " + ch.getId());
-
-						if(ch.isRunning()){
-							ch.send(oo);
+							System.out.println("Swiching to " + ch.getId());
+							if(ch.isRunning()){
+								ch.send(oo);
+							}
 						}
 					}
 				}
-
 			}
 
 			else{

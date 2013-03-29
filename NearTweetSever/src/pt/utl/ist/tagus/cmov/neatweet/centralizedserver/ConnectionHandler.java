@@ -18,11 +18,13 @@ public class ConnectionHandler extends Thread{
 	private InputConnectionHandler inc = null;
 	private OutConnectionHandler outc = null;
 	private boolean running = false;
-	private ArrayList<BasicDTO> objects;
+	private ArrayList<BasicDTO> objects = null;
+	ArrayList<ConnectionHandler> connections = null;
 
-	public ConnectionHandler(Socket sock, ArrayList<BasicDTO> objects) {
+	public ConnectionHandler(Socket sock, ArrayList<BasicDTO> objects, ArrayList<ConnectionHandler> connections) {
 		this.localSock = sock;
 		this.objects = objects;
+		this.connections = connections;
 	}
 
 	public void send(Object oo){
@@ -91,18 +93,20 @@ public class ConnectionHandler extends Thread{
 			if(!this.outc.isRunning()){
 				System.out.println("Out Channel Down, Killing CONNNECTION_HANDELER");
 				this.running = false;
-				return;
+				break;
 			}
 
 			if(!this.inc.isRunning()){
 				System.out.println("In Channel Down, Killing CONNNECTION_HANDELER");
 				this.running = false;
-				return;
+				break;
 			}
-
-
 		}
 
+		// If conecction was closed remove this socket reference
+		synchronized (connections) {
+			this.connections.remove(this);
+		}
 	}
 
 }
@@ -132,13 +136,13 @@ class InputConnectionHandler extends Thread{
 
 				Object oo = in.readObject();
 				if(oo != null){
-					
+
 					// System.out.println("cenas");
-					
+
 					synchronized (objects) {
 						objects.add((BasicDTO) oo);	
 					}
-					
+
 				}else{
 					System.out.println("Null Value Receved");
 				}
@@ -199,7 +203,7 @@ class OutConnectionHandler extends Thread{
 		while (this.running) {
 
 			try {
-				Thread.sleep(100);
+				Thread.sleep(250);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
