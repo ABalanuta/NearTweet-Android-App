@@ -16,15 +16,17 @@ import android.view.View;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
+public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
 
 	private	final static String serverIP = "10.0.2.2";
+	protected final String KEY_TEXT = "texto";
+	protected final String KEY_TWEETER = "utilizador";
+	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	//private	final static String serverIP = "172.20.81.13";
 	private	final static int serverPort = 4444;
 
 	@Override
-	protected Void doInBackground(String... message) {
-
+	protected Tweet doInBackground(String... message) {
 
 		InetAddress serverAddr = null;
 		try {
@@ -53,7 +55,6 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 		
 		MainActivity.connectionHandler = new ConnectionHandler(localSock);
 		MainActivity.connectionHandler.start();
-		
 		MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
 
 		while(true){
@@ -81,9 +82,20 @@ public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Void> {
 			TweetDTO t = (TweetDTO) values[0];
 			
 			// Cenas do Tufa para actualizar a lista de tweets
+			HashMap<String,String> tweetInterface = new HashMap<String,String>();
+			tweetInterface.put(KEY_TEXT,t.getTweet());
+			tweetInterface.put(KEY_TWEETER,"Balanuta");
+			tweets.add(tweetInterface);
 			
-			ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
+			int[] ids = {android.R.id.text1, android.R.id.text2};
+			String[] keys = {KEY_TEXT,KEY_TWEETER };
+	//		SimpleAdapter adapter = new SimpleAdapter(MainActivity, tweets, android.R.layout.simple_list_item_2, keys, ids);
+		//	setListAdapter(adapter);
 
+			
+			
+			
+			
 //			for (Tweet tweet : mTweetsArray){
 //				String text = tweet.getText();
 //				String userId = tweet.getUId();

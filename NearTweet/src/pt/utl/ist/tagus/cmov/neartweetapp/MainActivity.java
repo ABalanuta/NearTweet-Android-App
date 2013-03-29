@@ -1,13 +1,18 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
 
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerTask;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -33,6 +38,7 @@ public class MainActivity extends ListActivity {
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
 	ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
+	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	public static ConnectionHandler connectionHandler = null;
 	
 	public static Button mSendButton;
@@ -49,7 +55,6 @@ public class MainActivity extends ListActivity {
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 
 		//converter tweets de arraylist para hashmap para sse poder mostrar na interface
-
 		if (isNetworkAvailable()){
 			mProgressBar.setVisibility(View.VISIBLE);
 			//GetTweetsTask getTweetsTask = new GetTweetsTask();
@@ -58,20 +63,16 @@ public class MainActivity extends ListActivity {
 			new ConnectionHandlerTask().execute();
 
 		}
-		else {
+		else{
 			Toast.makeText(this, "nao ha net", Toast.LENGTH_LONG).show();
 		}
-		
 		mSendButton.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				connectionHandler.send(new TweetDTO(mSendTextBox.getText().toString()));
 				mSendTextBox.setText(null);
 			}
-		});
-		
-		
+		});	
 	}
 
 	private boolean isNetworkAvailable() {
@@ -119,6 +120,77 @@ public class MainActivity extends ListActivity {
 //			handleServerResponse();
 //		}
 //	}
+	public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
+
+		private	final static String serverIP = "10.0.2.2";
+		protected final String KEY_TEXT = "texto";
+		protected final String KEY_TWEETER = "utilizador";
+		ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
+		//private	final static String serverIP = "172.20.81.13";
+		private	final static int serverPort = 4444;
+
+		@Override
+		protected Tweet doInBackground(String... message) {
+
+			InetAddress serverAddr = null;
+			try {
+				serverAddr = InetAddress.getByName(serverIP);
+			} catch (UnknownHostException e2) {
+				e2.printStackTrace();
+			}
+
+			Socket localSock = null;
+			ConnectionHandler ch = null;
+
+
+			// Contacting the Server , Retry if error
+			while(true){
+				try{
+					localSock = new Socket(serverAddr, serverPort);
+					break;
+				}catch(Exception e){
+					System.out.println("TCP " + " Sleeping 5s");
+					System.out.println(e.toString());
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e1) {}
+				}
+			}
+			
+			MainActivity.connectionHandler = new ConnectionHandler(localSock);
+			MainActivity.connectionHandler.start();
+			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+
+			while(true){
+
+				if(MainActivity.connectionHandler.recevedObjects()){
+					ArrayList<BasicDTO> objects  = MainActivity.connectionHandler.receve();
+					for(BasicDTO oo : objects){
+						publishProgress(oo);
+					}
+				}else{
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		}
+
+		@Override
+		protected void onProgressUpdate(BasicDTO... values) {
+
+			if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
+				TweetDTO t = (TweetDTO) values[0];				
+				// Cenas do Tufa para actualizar a lista de tweets
+				mTweetsArray.add(new Tweet(t.getTweet(),"Balanuta","lalalala"));
+				handleServerResponse();
+			}
+
+		}
+	}
 	public void handleServerResponse() {
 		mProgressBar.setVisibility(View.INVISIBLE);
 		if (mTweetsArray == null){
