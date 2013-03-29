@@ -44,7 +44,7 @@ public class MainActivity extends ListActivity {
 			getTweetsTask.execute();
 		}
 		else {
-			Toast.makeText(this, "n�o h� net", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "nao ha net", Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -67,14 +67,14 @@ public class MainActivity extends ListActivity {
 
 	private void updateDisplayForError() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(getString(R.string.error_title));
-		builder.setMessage(getString(R.string.error_message));
+		builder.setTitle("erro");
+		builder.setMessage("erro");
 		builder.setPositiveButton(android.R.string.ok, null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 
 		TextView emptyTextView = (TextView) getListView().getEmptyView();
-		emptyTextView.setText(getString(R.string.no_items));
+		emptyTextView.setText("nao ha tweeets");
 	} 
 
 	private class GetTweetsTask extends AsyncTask<Object, Void, ArrayList<Tweet>> {
