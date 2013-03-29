@@ -56,11 +56,11 @@ public class MainActivity extends ListActivity {
 
 		//converter tweets de arraylist para hashmap para sse poder mostrar na interface
 		if (isNetworkAvailable()){
-			mProgressBar.setVisibility(View.VISIBLE);
 			//GetTweetsTask getTweetsTask = new GetTweetsTask();
 			//getTweetsTask.execute();
 
 			new ConnectionHandlerTask().execute();
+			//mProgressBar.setVisibility(View.VISIBLE);
 
 		}
 		else{
@@ -175,10 +175,8 @@ public class MainActivity extends ListActivity {
 						e.printStackTrace();
 					}
 				}
-			}
-			
+			}	
 		}
-
 		@Override
 		protected void onProgressUpdate(BasicDTO... values) {
 
