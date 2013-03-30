@@ -18,11 +18,11 @@ import android.widget.Toast;
 
 public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
 
-	private	final static String serverIP = "10.0.2.2";
+	//private	final static String serverIP = "10.0.2.2";
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
-	//private	final static String serverIP = "172.20.81.13";
+	private	final static String serverIP = "172.20.81.13";
 	private	final static int serverPort = 4444;
 
 	@Override
