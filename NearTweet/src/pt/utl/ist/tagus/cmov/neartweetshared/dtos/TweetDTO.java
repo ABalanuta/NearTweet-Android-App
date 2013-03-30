@@ -6,11 +6,13 @@ public class TweetDTO extends BasicDTO{
 	 * Default Serial Version
 	 */
 	private static final long serialVersionUID = 1L;
+	private String nickName = null;
 	private String tweet = null;
 	
-	public TweetDTO(String tweet) {
+	public TweetDTO(String nickName, String tweet) {
 		super(TypeofDTO.TWEET_DTO);
 		this.tweet = tweet;
+		this.nickName = nickName;
 	}
 
 	
@@ -20,6 +22,10 @@ public class TweetDTO extends BasicDTO{
 	
 	public String getTweet(){
 		return this.tweet;
+	}
+	
+	public String getNickName(){
+		return this.nickName;
 	}
 
 }

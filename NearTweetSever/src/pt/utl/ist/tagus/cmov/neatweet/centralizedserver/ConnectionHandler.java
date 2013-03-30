@@ -1,6 +1,7 @@
 package pt.utl.ist.tagus.cmov.neatweet.centralizedserver;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.*;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -19,12 +20,15 @@ public class ConnectionHandler extends Thread{
 	private OutConnectionHandler outc = null;
 	private boolean running = false;
 	private ArrayList<BasicDTO> objects = null;
-	ArrayList<ConnectionHandler> connections = null;
+	private ArrayList<ConnectionHandler> connections = null;
+	private ArrayList<BasicDTO> sentObjects = null;
 
-	public ConnectionHandler(Socket sock, ArrayList<BasicDTO> objects, ArrayList<ConnectionHandler> connections) {
+	public ConnectionHandler(Socket sock, ArrayList<BasicDTO> objects, ArrayList<ConnectionHandler> connections,
+			ArrayList<BasicDTO> sentObjects) {
 		this.localSock = sock;
 		this.objects = objects;
 		this.connections = connections;
+		this.sentObjects = sentObjects;
 	}
 
 	public void send(Object oo){
@@ -79,7 +83,16 @@ public class ConnectionHandler extends Thread{
 		outc = new OutConnectionHandler(out);
 		outc.start();
 		System.out.println("Output Channel Created");
+		
+		
+		// Envia o Historico da Conversa
+		synchronized (sentObjects) {
+			for(BasicDTO oo : sentObjects){
+				send(oo);
+			}
+		}
 
+		
 		while(this.running){
 
 			try {

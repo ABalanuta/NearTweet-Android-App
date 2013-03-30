@@ -12,11 +12,12 @@ public class CentralizedServer{
 
 	private static ArrayList<ConnectionHandler> connections = new ArrayList<ConnectionHandler>();
 	private static ArrayList<BasicDTO> objects = new  ArrayList<BasicDTO>();
+	private static ArrayList<BasicDTO> sentObjects = new  ArrayList<BasicDTO>();
 
 	public static void main(String[] args) {
 
-		ConnectionInicializer conHandler = new ConnectionInicializer(connections, objects);
-		SwitchingHandler sHandler = new SwitchingHandler(connections, objects);
+		ConnectionInicializer conHandler = new ConnectionInicializer(connections, objects, sentObjects);
+		SwitchingHandler sHandler = new SwitchingHandler(connections, objects, sentObjects);
 
 		sHandler.start();
 		conHandler.start();
@@ -31,11 +32,14 @@ class ConnectionInicializer extends Thread{
 	private ArrayList<ConnectionHandler> connections = null;
 	ArrayList<BasicDTO> objects = null;
 	private ServerSocket serverSocket = null;
+	private ArrayList<BasicDTO> sentObjects = null;
 
 
-	public ConnectionInicializer(ArrayList<ConnectionHandler> connections, ArrayList<BasicDTO> objects) {
+	public ConnectionInicializer(ArrayList<ConnectionHandler> connections, ArrayList<BasicDTO> objects,
+			ArrayList<BasicDTO> sentObjects) {
 		this.connections = connections;
 		this.objects = objects;
+		this.sentObjects = sentObjects;
 	}
 
 
@@ -56,12 +60,12 @@ class ConnectionInicializer extends Thread{
 				Socket sock = serverSocket.accept();
 				System.out.println("New Client Request");
 
-				ConnectionHandler ch = new ConnectionHandler(sock, objects, connections);
+				ConnectionHandler ch = new ConnectionHandler(sock, objects, connections, sentObjects);
 				ch.start();
 				synchronized (connections) {
 					connections.add(ch);
 				}
-
+				
 				System.out.println("Listening Again...");
 			}
 
@@ -84,11 +88,13 @@ class SwitchingHandler extends Thread{
 
 	private ArrayList<ConnectionHandler> connections = null;
 	private ArrayList<BasicDTO> objects = null;
+	private ArrayList<BasicDTO> sentObjects = null;
 	private boolean running = false;
 
-	public SwitchingHandler(ArrayList<ConnectionHandler> conn, ArrayList<BasicDTO> obj) {
+	public SwitchingHandler(ArrayList<ConnectionHandler> conn, ArrayList<BasicDTO> obj, ArrayList<BasicDTO> sentObjects) {
 		this.connections = conn;
 		this.objects = obj;
+		this.sentObjects = sentObjects;
 	}
 
 	public void stopSwiching(){
@@ -125,6 +131,10 @@ class SwitchingHandler extends Thread{
 							}
 						}
 					}
+				}
+				
+				synchronized (sentObjects) {
+					sentObjects.addAll(objclone);
 				}
 			}
 

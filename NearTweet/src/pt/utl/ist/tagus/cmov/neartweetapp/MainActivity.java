@@ -37,17 +37,18 @@ public class MainActivity extends ListActivity {
 	public static ProgressBar mProgressBar;
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
+	private String MyNickName = "SuperUser";
 	ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	public static ConnectionHandler connectionHandler = null;
-	
+
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
@@ -69,7 +70,7 @@ public class MainActivity extends ListActivity {
 		mSendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				connectionHandler.send(new TweetDTO(mSendTextBox.getText().toString()));
+				connectionHandler.send(new TweetDTO(MyNickName, mSendTextBox.getText().toString()));
 				mSendTextBox.setText(null);
 			}
 		});	
@@ -104,22 +105,22 @@ public class MainActivity extends ListActivity {
 		emptyTextView.setText("nao ha tweeets");
 	} 
 
-//	private class GetTweetsTask extends AsyncTask<Object, Void, ArrayList<Tweet>> {
-//		@Override
-//		protected ArrayList<Tweet> doInBackground(Object... arg0) {
-//			//TODO: retrieve tweets from the server
-//			ArrayList<Tweet> tweetsArray = null;
-//			Tweet stupidTweet = new Tweet();
-//			tweetsArray = stupidTweet.generateTweets();
-//			return tweetsArray;
-//		}	
-//
-//		@Override 
-//		protected void onPostExecute(ArrayList<Tweet> result){
-//			mTweetsArray = result;
-//			handleServerResponse();
-//		}
-//	}
+	//	private class GetTweetsTask extends AsyncTask<Object, Void, ArrayList<Tweet>> {
+	//		@Override
+	//		protected ArrayList<Tweet> doInBackground(Object... arg0) {
+	//			//TODO: retrieve tweets from the server
+	//			ArrayList<Tweet> tweetsArray = null;
+	//			Tweet stupidTweet = new Tweet();
+	//			tweetsArray = stupidTweet.generateTweets();
+	//			return tweetsArray;
+	//		}	
+	//
+	//		@Override 
+	//		protected void onPostExecute(ArrayList<Tweet> result){
+	//			mTweetsArray = result;
+	//			handleServerResponse();
+	//		}
+	//	}
 	public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
 
 		private	final static String serverIP = "10.0.2.2";
@@ -156,7 +157,7 @@ public class MainActivity extends ListActivity {
 					} catch (InterruptedException e1) {}
 				}
 			}
-			
+
 			MainActivity.connectionHandler = new ConnectionHandler(localSock);
 			MainActivity.connectionHandler.start();
 			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
@@ -181,14 +182,16 @@ public class MainActivity extends ListActivity {
 		protected void onProgressUpdate(BasicDTO... values) {
 
 			if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
-				TweetDTO t = (TweetDTO) values[0];				
+				TweetDTO t = (TweetDTO) values[0];		
+
 				// Cenas do Tufa para actualizar a lista de tweets
-				mTweetsArray.add(new Tweet(t.getTweet(),"Balanuta","lalalala"));
+				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
 				handleServerResponse();
 			}
 
 		}
 	}
+
 	public void handleServerResponse() {
 		mProgressBar.setVisibility(View.INVISIBLE);
 		if (mTweetsArray == null){
