@@ -18,3 +18,9 @@ local.properties
 # Eclipse project files
 .classpath
 .project
+
+#android images
+res/drawable-ldpi
+res/drawable-mdpi
+res/drawable-xhdpi
+

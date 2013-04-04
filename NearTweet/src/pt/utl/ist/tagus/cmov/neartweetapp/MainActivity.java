@@ -9,11 +9,10 @@ import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
-import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerTask;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
-
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -55,6 +54,8 @@ public class MainActivity extends ListActivity {
 		mSendButton = (Button) findViewById(R.id.sendButton);
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 
+
+		
 		//converter tweets de arraylist para hashmap para sse poder mostrar na interface
 		if (isNetworkAvailable()){
 			//GetTweetsTask getTweetsTask = new GetTweetsTask();
@@ -90,6 +91,8 @@ public class MainActivity extends ListActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+		ActionBar actionBar = getActionBar();
+		actionBar.setHomeButtonEnabled(true);
 		return true;
 	}
 
@@ -105,22 +108,7 @@ public class MainActivity extends ListActivity {
 		emptyTextView.setText("nao ha tweeets");
 	} 
 
-	//	private class GetTweetsTask extends AsyncTask<Object, Void, ArrayList<Tweet>> {
-	//		@Override
-	//		protected ArrayList<Tweet> doInBackground(Object... arg0) {
-	//			//TODO: retrieve tweets from the server
-	//			ArrayList<Tweet> tweetsArray = null;
-	//			Tweet stupidTweet = new Tweet();
-	//			tweetsArray = stupidTweet.generateTweets();
-	//			return tweetsArray;
-	//		}	
-	//
-	//		@Override 
-	//		protected void onPostExecute(ArrayList<Tweet> result){
-	//			mTweetsArray = result;
-	//			handleServerResponse();
-	//		}
-	//	}
+
 	public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
 
 		private	final static String serverIP = "10.0.2.2";
