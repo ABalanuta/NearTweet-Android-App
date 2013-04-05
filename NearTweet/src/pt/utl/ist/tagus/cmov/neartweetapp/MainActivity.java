@@ -41,7 +41,7 @@ public class MainActivity extends ListActivity {
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
 	private String MyNickName = "SuperUser";
-	ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
+	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	public static ConnectionHandler connectionHandler = null;
 
@@ -180,10 +180,10 @@ class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
 			TweetDTO t = (TweetDTO) values[0];		
 
 			// Cenas do Tufa para actualizar a lista de tweets
-			mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
+			MainActivity.mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
 			ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
 
-			for (Tweet tweet : mTweetsArray){
+			for (Tweet tweet : MainActivity.mTweetsArray){
 				String text = tweet.getText();
 				String userId = tweet.getUId();
 
