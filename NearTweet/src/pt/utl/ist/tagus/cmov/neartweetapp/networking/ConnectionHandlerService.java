@@ -12,8 +12,9 @@ import android.util.Log;
 
 public class ConnectionHandlerService extends Service {
 
-	private ConnectionHandler mConectionHandler;
+	private ConnectionHandler mConectionHandler = null;
 	private final IBinder mBinder = new LocalBinder();
+	private ArrayList<BasicDTO> oldTweetsBuff = new ArrayList<BasicDTO>(); 
 
 	@Override
 	public void onCreate() {
@@ -21,21 +22,22 @@ public class ConnectionHandlerService extends Service {
 
 		this.mConectionHandler = new ConnectionHandler();
 		mConectionHandler.start();
-		Log.e("ServiceP", "Created");
+		Log.e("ServiceP", "TCP Service Created");
 
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
-		Log.e("ServiceP", "Started");
+		Log.e("ServiceP", "TCP Service Started");
 
 		// If we get killed, after returning from here, restart
-		return START_NOT_STICKY;
+		return START_STICKY;
 	}
 
 	@Override
 	public IBinder onBind(Intent arg0) {
+		Log.e("ServiceP", "TCP Service Binded");
 		return mBinder;
 	}
 
@@ -43,9 +45,10 @@ public class ConnectionHandlerService extends Service {
 	@Override
 	public void onDestroy() {
 
-		Log.e("ServiceP", "Destroing");
+		Log.e("ServiceP", "TCP Service Destroy");
 
 		this.mConectionHandler.close();
+		super.onDestroy();
 
 	}
 
@@ -57,9 +60,14 @@ public class ConnectionHandlerService extends Service {
 		}
 	}
 
+	public ArrayList<BasicDTO> receveOldTweets(){		  
+		return oldTweetsBuff;
+	}
 
 	public ArrayList<BasicDTO> receveNewTweets(){		  
-		return this.mConectionHandler.receve();
+		ArrayList<BasicDTO> tmp = this.mConectionHandler.receve();
+		oldTweetsBuff.addAll(tmp);
+		return tmp;
 	}
 
 
@@ -68,6 +76,9 @@ public class ConnectionHandlerService extends Service {
 	}
 	
 	public boolean hasTweets(){
+		if(mConectionHandler == null){
+			return false;
+		}
 		return mConectionHandler.recevedObjects();
 	}
 

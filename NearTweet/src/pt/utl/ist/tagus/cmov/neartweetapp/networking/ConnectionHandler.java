@@ -50,7 +50,7 @@ public class ConnectionHandler extends Thread{
 	public boolean recevedObjects() {
 
 		synchronized (objects){
-			if(objects.size() > 0){
+			if(objects != null && objects.size() > 0){
 				return true;
 			}
 			else{

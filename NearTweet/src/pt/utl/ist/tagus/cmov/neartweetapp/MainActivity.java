@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
-import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
@@ -12,7 +11,6 @@ import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
 
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -44,10 +42,11 @@ public class MainActivity extends ListActivity {
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
 
+
 	// Connection to Service Vriables
-	public static ConnectionHandlerService mService;
 	public boolean mBound = false;
 	private Intent service;
+	public ConnectionHandlerService mService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,34 +61,25 @@ public class MainActivity extends ListActivity {
 
 		//converter tweets de arraylist para hashmap para sse poder mostrar na interface
 		if (isNetworkAvailable()){
-			//GetTweetsTask getTweetsTask = new GetTweetsTask();
-			//getTweetsTask.execute();
 
-			//new ConnectionHandlerTask().execute();
-			//mProgressBar.setVisibility(View.VISIBLE);
-
-
-			// Criar um serviço que estabelece a communicação com o server
-			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-			startService(service);
-
-			// vamos efectuar uma ligação com o servidor
-			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+			mProgressBar.setVisibility(View.VISIBLE);
 
 			// Inicia thread que actualiza as messagens
-			ConnectionHandlerTask cht = new ConnectionHandlerTask();
-			cht.execute("");
-			
+			new ConnectionHandlerTask().execute();
+
 		}  
 		else{
 			Toast.makeText(this, "nao ha net", Toast.LENGTH_LONG).show();
 		}
+
+
+
 		mSendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				mService.sendTweet(new TweetDTO(MyNickName, mSendTextBox.getText().toString()));
 				mSendTextBox.setText(null);
-			}
+			}		
 		});	
 	}
 
@@ -109,11 +99,19 @@ public class MainActivity extends ListActivity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
+
+	@Override
+	protected void onDestroy() {
+
+		Log.e("ServiceP", "Killing Main Activity");
+		// unbinding from the Service
+		unbindService(mConnection);
+		super.onDestroy();
+	}
 
 	// Não Mexer
 	/** Defines callbacks for service binding, passed to bindService() */
-	private ServiceConnection mConnection = new ServiceConnection() {
+	public ServiceConnection mConnection = new ServiceConnection() {
 
 		@Override
 		public void onServiceConnected(ComponentName className,
@@ -129,36 +127,57 @@ public class MainActivity extends ListActivity {
 			mBound = false;
 		}
 	};
-	
-	
-	
-	
-	class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
+
+	class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,String> {
 
 		protected final String KEY_TEXT = "texto";
 		protected final String KEY_TWEETER = "utilizador";
 		ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 
-		@Override
-		protected Tweet doInBackground(String... message) {
 
+
+		@Override
+		protected String doInBackground(String... message) {
+
+			// Criar um serviço que estabelece a communicação com o server
+			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+
+			startService(service);
 			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+
+			// vamos efectuar uma ligação com o servidor
+			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+			//startService(service);
+
+			boolean loadedOld = false;
 
 			while(true){
 
-				if(mService.hasTweets()){
-					ArrayList<BasicDTO> objects  = MainActivity.mService.receveNewTweets();
-					for(BasicDTO oo : objects){
-						publishProgress(oo);
+				if(mService != null){
+
+					ArrayList<BasicDTO> objects;
+
+					if(!loadedOld){
+						objects  = mService.receveOldTweets();
+						for(BasicDTO oo : objects){
+							publishProgress(oo);
+						}
+						loadedOld = true;
+
+					}else if(mService.hasTweets()){
+						objects = mService.receveNewTweets();
+						for(BasicDTO oo : objects){
+							publishProgress(oo);
+						}
 					}
 				}else{
 					try {
-						Thread.sleep(500);
+						Thread.sleep(250);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-			}	
+			}
 		}
 
 
