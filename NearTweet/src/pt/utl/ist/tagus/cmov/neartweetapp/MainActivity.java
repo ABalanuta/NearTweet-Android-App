@@ -41,7 +41,7 @@ public class MainActivity extends ListActivity {
 	public static ProgressBar mProgressBar;
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
-	ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
+	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	public static ConnectionHandler connectionHandler = null;
 	
@@ -60,7 +60,14 @@ public class MainActivity extends ListActivity {
 			//GetTweetsTask getTweetsTask = new GetTweetsTask();
 			//getTweetsTask.execute();
 
-			new ConnectionHandlerTask().execute();
+			//Online
+			//new ConnectionHandlerTask().execute();
+			
+			//Offline
+			//puts dummy tweets
+			Tweet tweetGenerator = new Tweet();
+			mTweetsArray = tweetGenerator.generateTweets();
+			handleServerResponse();
 			
 			//mProgressBar.setVisibility(View.VISIBLE);
 
@@ -72,24 +79,15 @@ public class MainActivity extends ListActivity {
 	}
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		// TODO Auto-generated method stub
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
-		tweet.getId();
+		
 		Intent details = new Intent(this,TweetDetailsActivity.class);
+		details.putExtra("tweet_id", tweet.getId());
+		
 		startActivity(details);
 	}
-
-	private boolean isNetworkAvailable() {
-		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = manager.getActiveNetworkInfo();
-		boolean isAvaylable = false;
-		if (networkInfo != null && networkInfo.isConnected()){
-			isAvaylable = true;
-		}
-		return isAvaylable;
-	}
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -111,8 +109,16 @@ public class MainActivity extends ListActivity {
 	            return super.onOptionsItemSelected(item);
 	    }
 	}
-	
-	
+
+	private boolean isNetworkAvailable() {
+		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+		boolean isAvaylable = false;
+		if (networkInfo != null && networkInfo.isConnected()){
+			isAvaylable = true;
+		}
+		return isAvaylable;
+	}
 	
 	private void updateDisplayForError() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -125,6 +131,34 @@ public class MainActivity extends ListActivity {
 		TextView emptyTextView = (TextView) getListView().getEmptyView();
 		emptyTextView.setText("nao ha tweeets");
 	} 
+	
+	public void handleServerResponse() {
+
+		mProgressBar.setVisibility(View.INVISIBLE);
+		if (mTweetsArray == null){
+			updateDisplayForError();
+		}
+		else {
+			ArrayList<HashMap<String,String>> tweets = 
+					new ArrayList<HashMap<String,String>>();
+
+			for (Tweet tweet : mTweetsArray){
+				String text = tweet.getText();
+				String userId = tweet.getUId();
+
+				HashMap<String,String> tweetInterface = new HashMap<String,String>();
+				tweetInterface.put(KEY_TEXT,text);
+				tweetInterface.put(KEY_TWEETER,userId);
+				tweets.add(tweetInterface);
+			}
+
+			String[] keys = {KEY_TEXT,KEY_TWEETER };
+			int[] ids = {android.R.id.text1, android.R.id.text2};
+			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
+					android.R.layout.simple_list_item_2, keys, ids);
+			setListAdapter(adapter);
+		}
+	}
 
 	
 	public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
@@ -192,53 +226,10 @@ public class MainActivity extends ListActivity {
 
 				// get tweets from server
 				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
-				//puts dummy tweets
-				Tweet tweetGenerator = new Tweet();
-				ArrayList<Tweet> tweets = tweetGenerator.generateTweets();
 				
-				for (Tweet tweet : tweets){
-					ArrayList<HashMap<String,String>> tweetsI = 
-							new ArrayList<HashMap<String,String>>();
-					String text = tweet.getText();
-					String userId = tweet.getUId();
-
-					HashMap<String,String> tweetInterface = new HashMap<String,String>();
-					tweetInterface.put(KEY_TEXT,text);
-					tweetInterface.put(KEY_TWEETER,userId);
-					tweetsI.add(tweetInterface);
-				}
-				
-				//handleServerResponse();
+				handleServerResponse();
 			}
 
-		}
-	}
-
-	public void handleServerResponse() {
-
-		mProgressBar.setVisibility(View.INVISIBLE);
-		if (mTweetsArray == null){
-			updateDisplayForError();
-		}
-		else {
-			ArrayList<HashMap<String,String>> tweets = 
-					new ArrayList<HashMap<String,String>>();
-
-			for (Tweet tweet : mTweetsArray){
-				String text = tweet.getText();
-				String userId = tweet.getUId();
-
-				HashMap<String,String> tweetInterface = new HashMap<String,String>();
-				tweetInterface.put(KEY_TEXT,text);
-				tweetInterface.put(KEY_TWEETER,userId);
-				tweets.add(tweetInterface);
-			}
-
-			String[] keys = {KEY_TEXT,KEY_TWEETER };
-			int[] ids = {android.R.id.text1, android.R.id.text2};
-			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
-					android.R.layout.simple_list_item_2, keys, ids);
-			setListAdapter(adapter);
 		}
 	}
 }
