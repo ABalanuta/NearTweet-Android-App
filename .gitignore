@@ -19,8 +19,3 @@ local.properties
 .classpath
 .project
 
-#android images
-res/drawable-ldpi
-res/drawable-mdpi
-res/drawable-xhdpi
-

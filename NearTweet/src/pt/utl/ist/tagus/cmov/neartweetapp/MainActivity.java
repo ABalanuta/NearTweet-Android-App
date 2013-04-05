@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
@@ -16,15 +17,19 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -36,13 +41,10 @@ public class MainActivity extends ListActivity {
 	public static ProgressBar mProgressBar;
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
-	private String MyNickName = "SuperUser";
 	ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	public static ConnectionHandler connectionHandler = null;
-
-	public static Button mSendButton;
-	public static EditText mSendTextBox;
+	
 
 
 	@Override
@@ -51,10 +53,7 @@ public class MainActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
-		mSendButton = (Button) findViewById(R.id.sendButton);
-		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
-
-
+		
 		
 		//converter tweets de arraylist para hashmap para sse poder mostrar na interface
 		if (isNetworkAvailable()){
@@ -62,19 +61,23 @@ public class MainActivity extends ListActivity {
 			//getTweetsTask.execute();
 
 			new ConnectionHandlerTask().execute();
+			
 			//mProgressBar.setVisibility(View.VISIBLE);
 
 		}
 		else{
 			Toast.makeText(this, "nao ha net", Toast.LENGTH_LONG).show();
 		}
-		mSendButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				connectionHandler.send(new TweetDTO(MyNickName, mSendTextBox.getText().toString()));
-				mSendTextBox.setText(null);
-			}
-		});	
+
+	}
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		// TODO Auto-generated method stub
+		super.onListItemClick(l, v, position, id);
+		Tweet tweet = mTweetsArray.get(position);
+		tweet.getId();
+		Intent details = new Intent(this,TweetDetailsActivity.class);
+		startActivity(details);
 	}
 
 	private boolean isNetworkAvailable() {
@@ -96,6 +99,21 @@ public class MainActivity extends ListActivity {
 		return true;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	        case R.id.new_tweet:
+	        	Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
+	        	startActivity(newTweetIntent);
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	
+	
 	private void updateDisplayForError() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("erro");
@@ -108,7 +126,7 @@ public class MainActivity extends ListActivity {
 		emptyTextView.setText("nao ha tweeets");
 	} 
 
-
+	
 	public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
 
 		private	final static String serverIP = "10.0.2.2";
@@ -172,15 +190,32 @@ public class MainActivity extends ListActivity {
 			if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
 				TweetDTO t = (TweetDTO) values[0];		
 
-				// Cenas do Tufa para actualizar a lista de tweets
+				// get tweets from server
 				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
-				handleServerResponse();
+				//puts dummy tweets
+				Tweet tweetGenerator = new Tweet();
+				ArrayList<Tweet> tweets = tweetGenerator.generateTweets();
+				
+				for (Tweet tweet : tweets){
+					ArrayList<HashMap<String,String>> tweetsI = 
+							new ArrayList<HashMap<String,String>>();
+					String text = tweet.getText();
+					String userId = tweet.getUId();
+
+					HashMap<String,String> tweetInterface = new HashMap<String,String>();
+					tweetInterface.put(KEY_TEXT,text);
+					tweetInterface.put(KEY_TWEETER,userId);
+					tweetsI.add(tweetInterface);
+				}
+				
+				//handleServerResponse();
 			}
 
 		}
 	}
 
 	public void handleServerResponse() {
+
 		mProgressBar.setVisibility(View.INVISIBLE);
 		if (mTweetsArray == null){
 			updateDisplayForError();

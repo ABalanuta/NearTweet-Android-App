@@ -7,9 +7,9 @@
     <uses-sdk
         android:minSdkVersion="15"
         android:targetSdkVersion="17" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -25,6 +25,23 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="pt.utl.ist.tagus.cmov.neartweetapp.NewTweetActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="pt.utl.ist.tagus.cmov.neartweet.NewTweetActivity2"
+            android:label="@string/title_activity_new_tweet_activity2" >
+        </activity>
+        <activity
+            android:name="pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity"
+            android:label="@string/title_activity_tweet_details" >
         </activity>
     </application>
 
