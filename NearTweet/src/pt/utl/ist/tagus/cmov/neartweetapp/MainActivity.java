@@ -66,45 +66,24 @@ public class MainActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-
-
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 
-
-		//converter tweets de arraylist para hashmap para sse poder mostrar na interface
+		
 		if (isNetworkAvailable()){
 
 			mProgressBar.setVisibility(View.VISIBLE);
 
 			// Inicia thread que actualiza as messagens
 			new ConnectionHandlerTask().execute();
-
-			//Online
-			//new ConnectionHandlerTask().execute();
-
-			//Offline
-			//puts dummy tweets
-			//Tweet tweetGenerator = new Tweet();
-			//mTweetsArray = tweetGenerator.generateTweets();
-			//handleServerResponse();
-
+			
 		}  
 		else{
-			Toast.makeText(this, "nao ha net", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
-
-
-
-		mSendButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mService.sendTweet(new TweetDTO(MyNickName, mSendTextBox.getText().toString()));
-				mSendTextBox.setText(null);
-			}		
-		});	
-
 	}
+	
+	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
@@ -116,14 +95,14 @@ public class MainActivity extends ListActivity {
 		startActivity(details);
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		ActionBar actionBar = getActionBar();
-		actionBar.setHomeButtonEnabled(true);
-		return true;
-	}
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		// Inflate the menu; this adds items to the action bar if it is present.
+//		getMenuInflater().inflate(R.menu.main, menu);
+//		ActionBar actionBar = getActionBar();
+//		actionBar.setHomeButtonEnabled(true);
+//		return true;
+//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -150,18 +129,22 @@ public class MainActivity extends ListActivity {
 	}
 
 
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		// Inflate the menu; this adds items to the action bar if it is present.
-//		getMenuInflater().inflate(R.menu.main, menu);
-//		return true;
-//	}
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
 
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Main Activity");
+		
 		// unbinding from the Service
-		unbindService(mConnection);
+		if(mBound){
+			unbindService(mConnection);
+		}
+		
 		super.onDestroy();
 	}
 
@@ -237,7 +220,7 @@ public class MainActivity extends ListActivity {
 			// Criar um serviço que estabelece a communicação com o server
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 
-			startService(service);
+			//startService(service);
 			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
 
 			// vamos efectuar uma ligação com o servidor

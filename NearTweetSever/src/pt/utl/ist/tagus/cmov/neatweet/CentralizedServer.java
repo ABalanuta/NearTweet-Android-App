@@ -81,7 +81,7 @@ class ConnectionInicializer extends Thread{
 		}
 
 	}
-
+	
 }
 
 class SwitchingHandler extends Thread{
