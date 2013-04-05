@@ -1,4 +1,4 @@
-package pt.utl.ist.tagus.cmov.neatweet.centralizedserver;
+package pt.utl.ist.tagus.cmov.neatweet;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.*;
 

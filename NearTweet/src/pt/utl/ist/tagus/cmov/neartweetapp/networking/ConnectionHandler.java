@@ -9,10 +9,14 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class ConnectionHandler extends Thread{
 
+	private	final String serverIP = "10.0.2.2";
+	//private	final String serverIP = "172.20.81.13";
+	private	final int serverPort = 4444;
 	private Socket localSock = null;
 	private ObjectInputStream in = null;
 	private ObjectOutputStream out = null;
@@ -21,8 +25,7 @@ public class ConnectionHandler extends Thread{
 	private boolean running = false;
 	private ArrayList<BasicDTO> objects = new ArrayList<BasicDTO>();
 
-	public ConnectionHandler(Socket sock) {
-		this.localSock = sock;
+	public ConnectionHandler() {
 	}
 
 	public void send(Object oo){
@@ -40,7 +43,7 @@ public class ConnectionHandler extends Thread{
 		}
 	}
 
-	ArrayList<BasicDTO> getObjectList(){
+	public ArrayList<BasicDTO> getObjectList(){
 		return objects;
 	}
 
@@ -73,7 +76,21 @@ public class ConnectionHandler extends Thread{
 	public void run() {
 
 		this.running = true;
-
+		
+		// Contacting the Server , Retry if error
+		while(true){
+			try{
+				this.localSock = new Socket(this.serverIP, this.serverPort);
+				break;
+			}catch(Exception e){
+				System.out.println("Cannot Reach the Server " +this.serverIP + ":"+this.serverPort+"   Sleeping for 5s");
+				System.out.println(e.toString());
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {}
+			}
+		}
+		
 		System.out.println("Thread with Client"+ localSock.getRemoteSocketAddress().toString() + " started.");
 
 		try {
