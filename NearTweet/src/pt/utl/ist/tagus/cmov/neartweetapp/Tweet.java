@@ -6,8 +6,16 @@ public class Tweet {
 	String mText;
 	String muId;
 	String mMacAddress;
+	String mTweetId;
 	
 	public Tweet(){
+	}
+	
+	public Tweet(String texto, String uId, String macAddress, String id){
+		mText = texto;
+		muId = uId;
+		mMacAddress = macAddress;
+		mTweetId = id;
 	}
 	
 	public Tweet(String texto, String uId, String macAddress){
@@ -15,11 +23,14 @@ public class Tweet {
 		muId = uId;
 		mMacAddress = macAddress;
 	}
-	
+
 	public String getUId() {
 		return muId;
 	}
 
+	public String getId(){
+		return mTweetId;
+	}
 
 	public String getMacAddress() {
 		return mMacAddress;
@@ -32,21 +43,17 @@ public class Tweet {
 	
 	public ArrayList<Tweet> generateTweets(){
 		ArrayList<Tweet> tweets = new ArrayList<Tweet>();
-		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 2, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 3, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 4, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 5, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 6, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 7, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 8, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 9, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 10, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 11, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 12, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 13, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 14, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
-		tweets.add(new Tweet("texto do tweet 15, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "1"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "2"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "3"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "4"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "5"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "6"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "7"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "8"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "9"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "10"));
+		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", "11"));
 		return tweets;
 	}
 }
