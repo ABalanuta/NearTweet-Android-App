@@ -65,7 +65,7 @@ class ConnectionInicializer extends Thread{
 				synchronized (connections) {
 					connections.add(ch);
 				}
-				
+
 				System.out.println("Listening Again...");
 			}
 
@@ -132,7 +132,7 @@ class SwitchingHandler extends Thread{
 						}
 					}
 				}
-				
+
 				synchronized (sentObjects) {
 					sentObjects.addAll(objclone);
 				}

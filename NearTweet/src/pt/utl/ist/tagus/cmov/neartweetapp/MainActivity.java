@@ -105,20 +105,7 @@ public class MainActivity extends ListActivity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
-	private void updateDisplayForError() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("erro");
-		builder.setMessage("erro");
-		builder.setPositiveButton(android.R.string.ok, null);
-		AlertDialog dialog = builder.create();
-		dialog.show();
-
-		TextView emptyTextView = (TextView) getListView().getEmptyView();
-		emptyTextView.setText("nao ha tweeets");
-	} 
-
-
+	
 
 	// Não Mexer
 	/** Defines callbacks for service binding, passed to bindService() */
@@ -193,12 +180,8 @@ public class MainActivity extends ListActivity {
 
 				String[] keys = {KEY_TEXT,KEY_TWEETER };
 				int[] ids = {android.R.id.text1, android.R.id.text2};
-				
-				SimpleAdapter adapter = new SimpleAdapter(getApplicationContext(), tweets, resource, from, to)
-						
-						
-						new SimpleAdapter(this, tweets, android.R.layout.simple_list_item_2, keys, ids);
-				
+				SimpleAdapter adapter = new SimpleAdapter(getApplicationContext(), tweets,
+						android.R.layout.simple_list_item_2, keys, ids);
 				setListAdapter(adapter);
 			}
 
