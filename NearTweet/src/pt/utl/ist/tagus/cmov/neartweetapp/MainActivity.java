@@ -142,63 +142,67 @@ public class MainActivity extends ListActivity {
 			mBound = false;
 		}
 	};
-}
+	
+	
+	
+	
+	class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
 
-class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
+		protected final String KEY_TEXT = "texto";
+		protected final String KEY_TWEETER = "utilizador";
+		ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 
-	protected final String KEY_TEXT = "texto";
-	protected final String KEY_TWEETER = "utilizador";
-	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
+		@Override
+		protected Tweet doInBackground(String... message) {
 
-	@Override
-	protected Tweet doInBackground(String... message) {
+			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
 
-		MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+			while(true){
 
-		while(true){
-
-			if(MainActivity.connectionHandler.recevedObjects()){
-				ArrayList<BasicDTO> objects  = MainActivity.mService.receveNewTweets();
-				for(BasicDTO oo : objects){
-					publishProgress(oo);
+				if(MainActivity.connectionHandler.recevedObjects()){
+					ArrayList<BasicDTO> objects  = MainActivity.mService.receveNewTweets();
+					for(BasicDTO oo : objects){
+						publishProgress(oo);
+					}
+				}else{
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-			}else{
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+			}	
+		}
+
+
+		@Override
+		protected void onProgressUpdate(BasicDTO... values) {
+
+			if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
+				TweetDTO t = (TweetDTO) values[0];		
+
+				// Cenas do Tufa para actualizar a lista de tweets
+				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
+				ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
+
+				for (Tweet tweet : mTweetsArray){
+					String text = tweet.getText();
+					String userId = tweet.getUId();
+
+					HashMap<String,String> tweetInterface = new HashMap<String,String>();
+					tweetInterface.put(KEY_TEXT,text);
+					tweetInterface.put(KEY_TWEETER,userId);
+					tweets.add(tweetInterface);
 				}
-			}
-		}	
-	}
 
-
-	@Override
-	protected void onProgressUpdate(BasicDTO... values) {
-
-		if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
-			TweetDTO t = (TweetDTO) values[0];		
-
-			// Cenas do Tufa para actualizar a lista de tweets
-			MainActivity.mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
-			ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
-
-			for (Tweet tweet : MainActivity.mTweetsArray){
-				String text = tweet.getText();
-				String userId = tweet.getUId();
-
-				HashMap<String,String> tweetInterface = new HashMap<String,String>();
-				tweetInterface.put(KEY_TEXT,text);
-				tweetInterface.put(KEY_TWEETER,userId);
-				tweets.add(tweetInterface);
+				String[] keys = {KEY_TEXT,KEY_TWEETER };
+				int[] ids = {android.R.id.text1, android.R.id.text2};
+				SimpleAdapter adapter = new SimpleAdapter(this, tweets, android.R.layout.simple_list_item_2, keys, ids);
+				setListAdapter(adapter);
 			}
 
-			String[] keys = {KEY_TEXT,KEY_TWEETER };
-			int[] ids = {android.R.id.text1, android.R.id.text2};
-			SimpleAdapter adapter = new SimpleAdapter(this, tweets,android.R.layout.simple_list_item_2, keys, ids);
-			setListAdapter(adapter);
 		}
 
 	}
-
 }
+
