@@ -12,64 +12,64 @@ import android.util.Log;
 
 public class ConnectionHandlerService extends Service {
 
-	  private ConnectionHandler mConectionHandler;
-	  private final IBinder mBinder = new LocalBinder();
+	private ConnectionHandler mConectionHandler;
+	private final IBinder mBinder = new LocalBinder();
 
-	  @Override
-	  public void onCreate() {
-		  super.onCreate();
-		  
-		  this.mConectionHandler = new ConnectionHandler();
-		  mConectionHandler.start();
-		  Log.e("ServiceP", "Created");
-		  
-	  }
+	@Override
+	public void onCreate() {
+		super.onCreate();
 
-	  @Override
-	  public int onStartCommand(Intent intent, int flags, int startId) {
-		  
-	      Log.e("ServiceP", "Started");
-	      
-	      // If we get killed, after returning from here, restart
-	      return START_NOT_STICKY;
-	  }
-	  
-	  @Override
-	  public IBinder onBind(Intent arg0) {
-	    return mBinder;
-	  }
+		this.mConectionHandler = new ConnectionHandler();
+		mConectionHandler.start();
+		Log.e("ServiceP", "Created");
 
-	  
-	  @Override
-	  public void onDestroy() {
-		  
-		  Log.e("ServiceP", "Destroing");
-		  
-		  this.mConectionHandler.close();
-		  
-	  }
-	  
-	  public class LocalBinder extends Binder {
-		  
-		  public ConnectionHandlerService getService() {
-	            // Return this instance of LocalService so clients can call public methods
-	            return ConnectionHandlerService.this;
-	        }
-	    }
-	  
-	  
-	  public ArrayList<BasicDTO> receveNewTweets(){
-		  
-		  if(mConectionHandler.recevedObjects()){
-			  return null;
-		  }
-		  
-		  return this.mConectionHandler.receve();
-	  }
-	  
-	  
-	  public void sendTweet(BasicDTO tweet){
-		  mConectionHandler.send(tweet);
-	  }
-	  
 	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+
+		Log.e("ServiceP", "Started");
+
+		// If we get killed, after returning from here, restart
+		return START_NOT_STICKY;
+	}
+
+	@Override
+	public IBinder onBind(Intent arg0) {
+		return mBinder;
+	}
+
+
+	@Override
+	public void onDestroy() {
+
+		Log.e("ServiceP", "Destroing");
+
+		this.mConectionHandler.close();
+
+	}
+
+	public class LocalBinder extends Binder {
+
+		public ConnectionHandlerService getService() {
+			// Return this instance of LocalService so clients can call public methods
+			return ConnectionHandlerService.this;
+		}
+	}
+
+
+	public ArrayList<BasicDTO> receveNewTweets(){		  
+		return this.mConectionHandler.receve();
+	}
+
+
+	public void sendTweet(BasicDTO tweet){
+		mConectionHandler.send(tweet);
+	}
+	
+	public boolean hasTweets(){
+		return mConectionHandler.recevedObjects();
+	}
+
+
+}

@@ -38,12 +38,8 @@ public class MainActivity extends ListActivity {
 
 	public static final String TAG = MainActivity.class.getSimpleName();
 	public static ProgressBar mProgressBar;
-	protected final String KEY_TEXT = "texto";
-	protected final String KEY_TWEETER = "utilizador";
 	private String MyNickName = "SuperUser";
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
-	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
-	public static ConnectionHandler connectionHandler = null;
 
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
@@ -159,7 +155,7 @@ public class MainActivity extends ListActivity {
 
 			while(true){
 
-				if(MainActivity.connectionHandler.recevedObjects()){
+				if(mService.hasTweets()){
 					ArrayList<BasicDTO> objects  = MainActivity.mService.receveNewTweets();
 					for(BasicDTO oo : objects){
 						publishProgress(oo);
@@ -197,7 +193,12 @@ public class MainActivity extends ListActivity {
 
 				String[] keys = {KEY_TEXT,KEY_TWEETER };
 				int[] ids = {android.R.id.text1, android.R.id.text2};
-				SimpleAdapter adapter = new SimpleAdapter(this, tweets, android.R.layout.simple_list_item_2, keys, ids);
+				
+				SimpleAdapter adapter = new SimpleAdapter(getApplicationContext(), tweets, resource, from, to)
+						
+						
+						new SimpleAdapter(this, tweets, android.R.layout.simple_list_item_2, keys, ids);
+				
 				setListAdapter(adapter);
 			}
 
