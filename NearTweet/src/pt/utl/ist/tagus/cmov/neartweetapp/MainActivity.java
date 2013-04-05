@@ -73,9 +73,13 @@ public class MainActivity extends ListActivity {
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 			startService(service);
 
-			//vamos efectuar uma ligação com o servidor
+			// vamos efectuar uma ligação com o servidor
 			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
+			// Inicia thread que actualiza as messagens
+			ConnectionHandlerTask cht = new ConnectionHandlerTask();
+			cht.execute("");
+			
 		}  
 		else{
 			Toast.makeText(this, "nao ha net", Toast.LENGTH_LONG).show();
