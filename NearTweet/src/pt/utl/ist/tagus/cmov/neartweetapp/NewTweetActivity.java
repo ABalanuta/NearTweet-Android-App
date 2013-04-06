@@ -25,7 +25,7 @@ public class NewTweetActivity extends Activity{
 	///////////////////////////////////<Variables>
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
-	private String MyNickName = "SuperUser";
+	private String mUsername = null;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
@@ -46,7 +46,7 @@ public class NewTweetActivity extends Activity{
 			mBound = false;
 		}
 	};
-	///////////////////////////////////</Variables>
+
 
 
 
@@ -63,13 +63,14 @@ public class NewTweetActivity extends Activity{
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
+		
+		mUsername = getIntent().getExtras().getString("username");
 
-		//TODO send not working on newtweet activity
 		mSendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if(mBound && mService.isConnected()){
-					mService.sendTweet(new TweetDTO(MyNickName, mSendTextBox.getText().toString()));
+					mService.sendTweet(new TweetDTO(mUsername, mSendTextBox.getText().toString()));
 					mSendTextBox.setText(null);
 					Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
 				}else{

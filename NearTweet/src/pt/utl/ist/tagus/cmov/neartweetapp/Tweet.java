@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Tweet {
 	String mText;
-	String muId;
+	String mUsername;
 	String mMacAddress;
 	String mTweetId;
 	
@@ -13,19 +13,19 @@ public class Tweet {
 	
 	public Tweet(String texto, String uId, String macAddress, String id){
 		mText = texto;
-		muId = uId;
+		mUsername = uId;
 		mMacAddress = macAddress;
 		mTweetId = id;
 	}
 	
 	public Tweet(String texto, String uId, String macAddress){
 		mText = texto;
-		muId = uId;
+		mUsername = uId;
 		mMacAddress = macAddress;
 	}
 
-	public String getUId() {
-		return muId;
+	public String getUsername() {
+		return mUsername;
 	}
 
 	public String getId(){

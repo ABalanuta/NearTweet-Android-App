@@ -4,17 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
-
+import pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
-
-import pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity;
-
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
-
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ComponentName;
@@ -30,7 +25,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -43,7 +37,9 @@ public class MainActivity extends ListActivity {
 
 	public static final String TAG = MainActivity.class.getSimpleName();
 	public static ProgressBar mProgressBar;
-	private String MyNickName = "SuperUser";
+
+	private String mUsername = null;
+	private int REQUEST_CODE = 42424242; //Used for Login
 
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
@@ -61,6 +57,13 @@ public class MainActivity extends ListActivity {
 	private Intent service;
 	public ConnectionHandlerService mService;
 
+
+	/***************************************************************************************
+	 * 
+	 * 							 Activity LifeCycle Methods
+	 * 
+	 ***************************************************************************************/
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -71,9 +74,7 @@ public class MainActivity extends ListActivity {
 
 
 		if (isNetworkAvailable()){
-
 			mProgressBar.setVisibility(View.VISIBLE);
-
 			// Inicia thread que actualiza as messagens
 			connectionHandlerTask = new ConnectionHandlerTask();
 			connectionHandlerTask.execute();
@@ -83,6 +84,20 @@ public class MainActivity extends ListActivity {
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
 	}
+
+
+	@Override
+	protected void onResume(){
+		//Check for Login
+		if(mUsername == null){
+			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+			startActivityForResult(i, REQUEST_CODE);		
+		}
+		super.onResume();
+	}
+
+
+
 
 	@Override
 	protected void onPause() {
@@ -101,11 +116,8 @@ public class MainActivity extends ListActivity {
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Main Activity");
-
 		//unbinding from the Service
-		if(mBound){
-			unbindService(mConnection);
-		}
+		if(mBound){ unbindService(mConnection); }
 		connectionHandlerTask.stop();
 		connectionHandlerTask.cancel(true);
 		mTweetsArray.removeAll(mTweetsArray);
@@ -116,21 +128,11 @@ public class MainActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
-
 		Intent details = new Intent(this,TweetDetailsActivity.class);
 		details.putExtra("tweet_id", tweet.getId());
-
 		startActivity(details);
 	}
 
-	//	@Override
-	//	public boolean onCreateOptionsMenu(Menu menu) {
-	//		// Inflate the menu; this adds items to the action bar if it is present.
-	//		getMenuInflater().inflate(R.menu.main, menu);
-	//		ActionBar actionBar = getActionBar();
-	//		actionBar.setHomeButtonEnabled(true);
-	//		return true;
-	//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -138,6 +140,7 @@ public class MainActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
+			newTweetIntent.putExtra("username", mUsername);
 			startActivity(newTweetIntent);
 			return true;
 		default:
@@ -145,6 +148,42 @@ public class MainActivity extends ListActivity {
 		}
 
 	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+
+	/***************************************************************************************
+	 * 
+	 * 							 Calls from other activities
+	 * 
+	 ***************************************************************************************/
+
+
+
+	//This method is called when the child activity finishes 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+			mUsername = data.getExtras().getString("username");		
+		}
+	} 
+
+
+
+
+	/***************************************************************************************
+	 * 
+	 * 							 Network Methods
+	 * 
+	 ***************************************************************************************/
+
+
+
 
 	private boolean isNetworkAvailable() {
 		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -154,14 +193,6 @@ public class MainActivity extends ListActivity {
 			isAvaylable = true;
 		}
 		return isAvaylable;
-	}
-
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
 	}
 
 
@@ -188,7 +219,7 @@ public class MainActivity extends ListActivity {
 
 			for (Tweet tweet : mTweetsArray){
 				String text = tweet.getText();
-				String userId = tweet.getUId();
+				String userId = tweet.getUsername();
 
 				HashMap<String,String> tweetInterface = new HashMap<String,String>();
 				tweetInterface.put(KEY_TEXT,text);
@@ -244,9 +275,6 @@ public class MainActivity extends ListActivity {
 			// Criar um serviço que estabelece a communicação com o server
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 
-			//startService(service);
-			//Log.e("ServiceP", "Service Started");
-
 			// vamos efectuar uma ligação com o servidor
 			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
@@ -257,24 +285,15 @@ public class MainActivity extends ListActivity {
 					publishProgress("Connected");
 					break;
 				}
-				else{
-					try {
-						Thread.sleep(250);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+				else{ try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); } }
 			}
 
 			boolean loadedOld = false;
 
 			Log.e("ServiceP", "Loop Started");
 			while(running){
-
 				if(mService != null){
-
 					ArrayList<BasicDTO> objects;
-
 					if(!loadedOld){
 						objects  = mService.receveOldTweets();
 						for(BasicDTO oo : objects){
@@ -311,18 +330,14 @@ public class MainActivity extends ListActivity {
 
 		@Override
 		protected void onProgressUpdate(Object... values) {
-
-
 			if(values[0] instanceof String){
 				String updadeCommand = (String)values[0];
-
 				if(updadeCommand.equals("Connected")){
 					MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
 					Toast.makeText(getApplicationContext(), "Connected ", Toast.LENGTH_LONG).show();
 					return;
 				}
 			}else if(values[0] instanceof BasicDTO){
-				
 				onProgressUpdateAux((BasicDTO)values[0]);
 			}
 		}
@@ -334,16 +349,16 @@ public class MainActivity extends ListActivity {
 				TweetDTO t = (TweetDTO) dto;		
 
 				// get tweets from server
-				mTweetsArray.add(new Tweet(t.getTweet(),t.getSrcMacAddr(),t.getSrcMacAddr()));
+				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),t.getSrcMacAddr()));
 				ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
 
 				for (Tweet tweet : mTweetsArray){
 					String text = tweet.getText();
-					String userId = tweet.getUId();
+					String username = tweet.getUsername();
 
 					HashMap<String,String> tweetInterface = new HashMap<String,String>();
 					tweetInterface.put(KEY_TEXT,text);
-					tweetInterface.put(KEY_TWEETER,userId);
+					tweetInterface.put(KEY_TWEETER,username);
 					tweets.add(tweetInterface);
 				}
 

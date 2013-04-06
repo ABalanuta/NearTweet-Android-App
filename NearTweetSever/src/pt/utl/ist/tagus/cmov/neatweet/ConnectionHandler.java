@@ -32,14 +32,11 @@ public class ConnectionHandler extends Thread{
 	}
 
 	public void send(Object oo){
-
 		// Out Channel mabe not started yet
 		if(this.running && !outc.isRunning()){
-
 			int x = 20;
 
 			while(this.running && !outc.isRunning() && x > 0){
-
 				try {
 					Thread.sleep(100);
 					System.out.print("*");
@@ -47,7 +44,6 @@ public class ConnectionHandler extends Thread{
 			}
 			x--;
 		}
-
 		synchronized (this) {
 			System.out.println("YES");
 			outc.send(oo);
@@ -55,12 +51,7 @@ public class ConnectionHandler extends Thread{
 	}
 
 	public void close(){
-		try {
-			out.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		try { out.close(); } catch (IOException e) { e.printStackTrace(); }
 	}
 
 	public boolean isRunning(){
@@ -69,55 +60,36 @@ public class ConnectionHandler extends Thread{
 
 	@Override
 	public void run() {
-
 		this.running = true;
-
 		System.out.println("Thread with Client"+ localSock.getRemoteSocketAddress().toString() + " started.");
 
-		try {
-			out = new  ObjectOutputStream(localSock.getOutputStream());
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		try { out = new ObjectOutputStream(localSock.getOutputStream()); } catch (IOException e1) { e1.printStackTrace(); }
 
 
 		try {
 			localSock.getOutputStream().flush();	//Needed to deBlock the inputStream
 			in = new  ObjectInputStream(localSock.getInputStream());
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-
+		} catch (IOException e1) { e1.printStackTrace(); }
 
 		inc = new InputConnectionHandler(in, objects);
 		inc.start();
 		System.out.println("Input Channel Created");
 
-
-
 		outc = new OutConnectionHandler(out);
 		outc.start();
 		System.out.println("Output Channel Created");
 
-
 		// Envia o Historico da Conversa
 		synchronized (sentObjects) {
-			for(BasicDTO oo : sentObjects){
-				send(oo);
-			}
+			for(BasicDTO oo : sentObjects){ send(oo); }
 		}
-
 
 		while(this.running){
 
 			try {
 				Thread.sleep(250); // Time for the Channels to Connect
 				Thread.yield();	
-			} catch (InterruptedException e) {
-				//Never Happens
-			}
-
+			} catch (InterruptedException e) { /*Never Happens*/ }
 
 			if(!this.outc.isRunning()){
 				System.out.println("Out Channel Down, Killing CONNNECTION_HANDELER");
@@ -160,41 +132,21 @@ class InputConnectionHandler extends Thread{
 		this.running = true;
 
 		while (this.running) {
-
 			try {
-
 				Object oo = in.readObject();
 				if(oo != null){
-
-					// System.out.println("cenas");
-
-					synchronized (objects) {
-						objects.add((BasicDTO) oo);	
-					}
-
-				}else{
-					System.out.println("Null Value Receved");
-				}
-			}
-
-			catch(EOFException e){
+					synchronized (objects) { objects.add((BasicDTO) oo); }
+				}else{ System.out.println("Null Value Receved"); }
+			} catch(EOFException e){
 				System.out.println("Channel was closed");
 				this.running = false;
 				return;
-			}
-
-			catch(SocketException e){
+			} catch(SocketException e){
 				System.out.println("Channel is closed");
 				this.running = false;
 				return;
-			}
-
-			catch (IOException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-
+			} catch (IOException e) { e.printStackTrace();
+			} catch (ClassNotFoundException e) { e.printStackTrace(); }
 		}
 	}
 }
@@ -205,13 +157,9 @@ class OutConnectionHandler extends Thread{
 	private ObjectOutputStream out;
 	private boolean running = false;
 
-	public OutConnectionHandler(ObjectOutputStream out) {
-		this.out = out;
-	}
+	public OutConnectionHandler(ObjectOutputStream out) { this.out = out; }
 
-	public boolean isRunning(){
-		return this.running;
-	}
+	public boolean isRunning(){ return this.running; }
 
 	public void send(Object oo){
 		try {
@@ -219,9 +167,7 @@ class OutConnectionHandler extends Thread{
 				out.writeObject(oo);
 				out.flush();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException e) { e.printStackTrace(); }
 
 	}
 
@@ -230,14 +176,7 @@ class OutConnectionHandler extends Thread{
 		this.running = true;
 
 		while (this.running) {
-
-			try {
-				Thread.sleep(250);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			//Thread.yield();
+			try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); }
 		}
 	}
 }

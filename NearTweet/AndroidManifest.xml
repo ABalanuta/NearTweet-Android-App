@@ -10,7 +10,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
@@ -29,11 +29,6 @@
         <activity
             android:name="pt.utl.ist.tagus.cmov.neartweetapp.NewTweetActivity"
             android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name="pt.utl.ist.tagus.cmov.neartweet.NewTweetActivity2"
@@ -47,6 +42,12 @@
         <service
             android:name="pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService"
             android:enabled="true" />
+
+        <activity
+            android:name="pt.utl.ist.tagus.cmov.neartweetapp.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
     </application>
 
 </manifest>
