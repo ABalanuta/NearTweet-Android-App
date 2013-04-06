@@ -15,12 +15,13 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.BounceInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 
 public class NewTweetActivity extends Activity{
-	
-///////////////////////////////////<Variables>
+
+	///////////////////////////////////<Variables>
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
 	private String MyNickName = "SuperUser";
@@ -44,12 +45,12 @@ public class NewTweetActivity extends Activity{
 			mBound = false;
 		}
 	};
-///////////////////////////////////</Variables>
-	
-	
-	
-	
-	
+	///////////////////////////////////</Variables>
+
+
+
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -66,21 +67,23 @@ public class NewTweetActivity extends Activity{
 		mSendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mService.sendTweet(new TweetDTO(MyNickName, mSendTextBox.getText().toString()));
-				mSendTextBox.setText(null);
+				if(mBound){
+					mService.sendTweet(new TweetDTO(MyNickName, mSendTextBox.getText().toString()));
+					mSendTextBox.setText(null);
+				}
 			}
 		});
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing New Tweet Activity");
-		
+
 		// unbinding from the Service
 		if(mBound){
 			unbindService(mConnection);
 		}
-		
+
 		super.onDestroy();
 	}
 

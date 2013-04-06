@@ -9,7 +9,6 @@ import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 
 import pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity;
-import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
@@ -70,7 +69,7 @@ public class MainActivity extends ListActivity {
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 
-		
+
 		if (isNetworkAvailable()){
 
 			mProgressBar.setVisibility(View.VISIBLE);
@@ -78,31 +77,31 @@ public class MainActivity extends ListActivity {
 			// Inicia thread que actualiza as messagens
 			connectionHandlerTask = new ConnectionHandlerTask();
 			connectionHandlerTask.execute();
-			
+
 		}  
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
 	}
-	
+
 	@Override
-    protected void onPause() {
+	protected void onPause() {
 		Log.e("ServiceP", "Pausing Main Activity");
 		super.onPause();
-        // Another activity is taking focus (this activity is about to be "paused").
-    }
-	
+		// Another activity is taking focus (this activity is about to be "paused").
+	}
+
 	@Override
-    protected void onStop() {
+	protected void onStop() {
 		Log.e("ServiceP", "Stoping Main Activity");
 		super.onPause();
-        // Another activity is taking focus (this activity is about to be "paused").
-    }
-	
+		// Another activity is taking focus (this activity is about to be "paused").
+	}
+
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Main Activity");
-		
+
 		//unbinding from the Service
 		if(mBound){
 			unbindService(mConnection);
@@ -112,7 +111,7 @@ public class MainActivity extends ListActivity {
 		mTweetsArray.removeAll(mTweetsArray);
 		super.onDestroy();
 	}
-	
+
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
@@ -124,14 +123,14 @@ public class MainActivity extends ListActivity {
 		startActivity(details);
 	}
 
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		// Inflate the menu; this adds items to the action bar if it is present.
-//		getMenuInflater().inflate(R.menu.main, menu);
-//		ActionBar actionBar = getActionBar();
-//		actionBar.setHomeButtonEnabled(true);
-//		return true;
-//	}
+	//	@Override
+	//	public boolean onCreateOptionsMenu(Menu menu) {
+	//		// Inflate the menu; this adds items to the action bar if it is present.
+	//		getMenuInflater().inflate(R.menu.main, menu);
+	//		ActionBar actionBar = getActionBar();
+	//		actionBar.setHomeButtonEnabled(true);
+	//		return true;
+	//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -225,7 +224,7 @@ public class MainActivity extends ListActivity {
 	};
 
 
-	class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,String> {
+	class ConnectionHandlerTask extends AsyncTask<String,Object,String> {
 
 		protected final String KEY_TEXT = "texto";
 		protected final String KEY_TWEETER = "utilizador";
@@ -240,7 +239,7 @@ public class MainActivity extends ListActivity {
 		protected String doInBackground(String... message) {
 
 			running = true;
-			
+
 			Log.e("ServiceP", "ConnectionHandlerTask Created");
 			// Criar um serviço que estabelece a communicação com o server
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
@@ -251,11 +250,11 @@ public class MainActivity extends ListActivity {
 			// vamos efectuar uma ligação com o servidor
 			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
-			
+
 			// Espera que se ligue ao server
 			while(running){
 				if(mService != null && mService.isConnected()){
-					//MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+					publishProgress("Connected");
 					break;
 				}
 				else{
@@ -266,7 +265,7 @@ public class MainActivity extends ListActivity {
 					}
 				}
 			}
-			
+
 			boolean loadedOld = false;
 
 			Log.e("ServiceP", "Loop Started");
@@ -292,7 +291,7 @@ public class MainActivity extends ListActivity {
 					}else{
 						try {
 							Thread.sleep(250);
-							
+
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
@@ -300,7 +299,7 @@ public class MainActivity extends ListActivity {
 				}else{
 					try {
 						Thread.sleep(250);
-						
+
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -311,10 +310,28 @@ public class MainActivity extends ListActivity {
 
 
 		@Override
-		protected void onProgressUpdate(BasicDTO... values) {
+		protected void onProgressUpdate(Object... values) {
 
-			if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
-				TweetDTO t = (TweetDTO) values[0];		
+
+			if(values[0] instanceof String){
+				String updadeCommand = (String)values[0];
+
+				if(updadeCommand.equals("Connected")){
+					MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+					Toast.makeText(getApplicationContext(), "Connected ", Toast.LENGTH_LONG).show();
+					return;
+				}
+			}else if(values[0] instanceof BasicDTO){
+				
+				onProgressUpdateAux((BasicDTO)values[0]);
+			}
+		}
+
+
+		protected void onProgressUpdateAux(BasicDTO dto){
+
+			if(dto.getType().equals(TypeofDTO.TWEET_DTO)){
+				TweetDTO t = (TweetDTO) dto;		
 
 				// get tweets from server
 				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
@@ -337,7 +354,6 @@ public class MainActivity extends ListActivity {
 				setListAdapter(adapter);
 				handleServerResponse();
 			}
-
 		}
 	}
 }

@@ -87,7 +87,9 @@ public class ConnectionHandlerService extends Service {
 
 
 	public void sendTweet(BasicDTO tweet){
-		mConectionHandler.send(tweet);
+		if(mConectionHandler != null){
+			mConectionHandler.send(tweet);
+		}
 	}
 	
 	public boolean hasTweets(){
