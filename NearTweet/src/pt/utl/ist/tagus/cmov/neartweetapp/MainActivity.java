@@ -83,7 +83,8 @@ public class MainActivity extends ListActivity {
 		Tweet tweet = mTweetsArray.get(position);
 		
 		Intent details = new Intent(this,TweetDetailsActivity.class);
-		details.putExtra("tweet_id", tweet.getId());
+		details.putExtra("tweet_text", tweet.getText());
+		details.putExtra("tweet_uid", tweet.getUId());
 		
 		startActivity(details);
 	}

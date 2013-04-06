@@ -63,4 +63,15 @@
         android:text="@string/replies"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
+    <ListView
+        android:id="@+id/listViewComments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/send_reply"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textView3" >
+
+    </ListView>
+
 </RelativeLayout>

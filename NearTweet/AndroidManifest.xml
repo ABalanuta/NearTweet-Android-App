@@ -10,7 +10,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -36,12 +35,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="pt.utl.ist.tagus.cmov.neartweet.NewTweetActivity2"
-            android:label="@string/title_activity_new_tweet_activity2" >
-        </activity>
-        <activity
             android:name="pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity"
             android:label="@string/title_activity_tweet_details" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="oauth" android:host="t4jsample"/>
+            </intent-filter>
         </activity>
     </application>
 
