@@ -43,6 +43,7 @@ public class MainActivity extends ListActivity {
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	public static ConnectionHandler connectionHandler = null;
+	private LocationManager locationManager;
 	
 
 
@@ -53,8 +54,11 @@ public class MainActivity extends ListActivity {
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 		
+		/**
+		 * Location stuff
+		 */
 		// Acquire a reference to the system Location Manager
-		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
 		// Define a listener that responds to location updates
 		LocationListener locationListener = new LocationListener() {
@@ -63,7 +67,9 @@ public class MainActivity extends ListActivity {
 		      //makeUseOfNewLocation(location);
 		    }
 
-		    public void onStatusChanged(String provider, int status, Bundle extras) {}
+		    public void onStatusChanged(String provider, int status, Bundle extras) {
+		    	
+		    }
 
 		    public void onProviderEnabled(String provider) {}
 
@@ -71,10 +77,8 @@ public class MainActivity extends ListActivity {
 		  };
 
 		// Register the listener with the Location Manager to receive location updates
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 		
-		
-		//converter tweets de arraylist para hashmap para sse poder mostrar na interface
 		if (isNetworkAvailable()){
 			//GetTweetsTask getTweetsTask = new GetTweetsTask();
 			//getTweetsTask.execute();
@@ -123,13 +127,16 @@ public class MainActivity extends ListActivity {
 	    switch (item.getItemId()) {
 	        case R.id.new_tweet:
 	        	Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
-	        	startActivity(newTweetIntent);
+	        	//String gps_location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toString();
+	        	//Toast.makeText(getApplicationContext(), gps_location, Toast.LENGTH_LONG).show();
+	        	//newTweetIntent.putExtra("gps_location",);
+	        	//startActivity(newTweetIntent);
 	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
 	}
-
+	
 	private boolean isNetworkAvailable() {
 		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = manager.getActiveNetworkInfo();

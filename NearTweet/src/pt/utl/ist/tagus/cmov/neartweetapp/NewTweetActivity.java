@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
+
+import pt.utl.ist.tagus.cmov.neartweetapp.MainActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
@@ -14,6 +16,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -34,6 +37,7 @@ public class NewTweetActivity extends Activity{
     private static final int CAMERA_PIC_REQUEST = 1337; 
     private final int CAMERA_PICTURE = 1;
     private final int GALLERY_PICTURE = 2;
+    private static final String gpsLocation = null;
 
 
 	@Override
@@ -47,20 +51,21 @@ public class NewTweetActivity extends Activity{
 		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);
 		
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
-		
 		btnPicture.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View arg0) {
-				//Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-				//startActivityForResult(cameraIntent, CAMERA_PIC_REQUEST); 
 				startDialog();
-				
 			}
 		});
 		
+		Bundle bundle = getIntent().getExtras();
+		String gpsLocation = bundle.getString("gps_location");
+		
+		Toast.makeText(getApplicationContext(), gpsLocation, Toast.LENGTH_LONG).show();
+		
 		//TODO send not working on newtweet activity
-	mSendButton.setOnClickListener(new OnClickListener() {
+		mSendButton.setOnClickListener(new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 
