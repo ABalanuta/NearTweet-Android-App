@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
@@ -10,26 +10,46 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".NewTweetActivity" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="1" >
-
         <EditText
             android:id="@+id/sendTextField"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:ems="10" >
-
-            <requestFocus />
-        </EditText>
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentBottom="true"
+       	 android:layout_alignParentLeft="true"
+       	 android:ems="10"
+       	 android:inputType="textMultiLine" />
 
         <Button
             android:id="@+id/sendButton"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Send" />
+    	    android:layout_width="wrap_content"
+     	   android:layout_height="wrap_content"
+     	   android:layout_alignParentBottom="true"
+    	    android:layout_alignParentRight="true"
+            android:text="@string/send_reply" />
 
-    </LinearLayout>
+        <Switch
+            android:id="@+id/switchGps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:text="@string/localizacao" />
+
+        <Button
+            android:id="@+id/cameraButton"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_alignRight="@+id/sendButton"
+            android:layout_alignTop="@+id/switchGps"
+            android:drawableTop="@drawable/device_camera"
+            android:minHeight="24dip" />
+
+        <ImageView
+            android:id="@+id/imageViewChoosen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/switchGps"
+            android:layout_alignRight="@+id/cameraButton"
+            android:layout_below="@+id/cameraButton" />
     
-</LinearLayout>
+</RelativeLayout>
