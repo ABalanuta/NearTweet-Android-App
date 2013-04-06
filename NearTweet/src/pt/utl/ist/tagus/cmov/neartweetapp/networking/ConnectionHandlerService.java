@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.IdentityDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 import android.R.bool;
@@ -44,6 +45,12 @@ public class ConnectionHandlerService extends Service {
 			Random r = new Random();
 			macAddr = "BogusMac:" + r.nextDouble();
 		}
+		while(!this.isConnected()){
+			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
+		}
+		
+		mConectionHandler.send(new IdentityDTO(macAddr));
+		
 		Log.e("ServiceP", "Mac is " + macAddr);
 		Log.e("ServiceP", "TCP Service Created");
 

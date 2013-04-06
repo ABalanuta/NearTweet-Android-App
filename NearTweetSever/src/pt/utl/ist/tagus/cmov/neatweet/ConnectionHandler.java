@@ -22,6 +22,7 @@ public class ConnectionHandler extends Thread{
 	private ArrayList<BasicDTO> objects = null;
 	private ArrayList<ConnectionHandler> connections = null;
 	private ArrayList<BasicDTO> sentObjects = null;
+	protected String channelMac = null;
 
 	public ConnectionHandler(Socket sock, ArrayList<BasicDTO> objects, ArrayList<ConnectionHandler> connections,
 			ArrayList<BasicDTO> sentObjects) {
@@ -33,8 +34,8 @@ public class ConnectionHandler extends Thread{
 
 	public void send(Object oo){
 		// Out Channel mabe not started yet
-		if(this.running && !outc.isRunning()){
-			int x = 20;
+		if((this.running && !outc.isRunning()) || channelMac != null){
+			int x = 30;
 
 			while(this.running && !outc.isRunning() && x > 0){
 				try {
@@ -44,8 +45,14 @@ public class ConnectionHandler extends Thread{
 			}
 			x--;
 		}
+		/* Se a resposta for Private e o Dest não corresponder, não enviamos */
+		if(oo instanceof TweetResponseDTO){
+			if(((TweetResponseDTO) oo).getDstMacAddr() != channelMac && ((TweetResponseDTO) oo).isPrivate()){
+				return;
+			}	
+		}
+		
 		synchronized (this) {
-			System.out.println("YES");
 			outc.send(oo);
 		}
 	}
@@ -64,7 +71,6 @@ public class ConnectionHandler extends Thread{
 		System.out.println("Thread with Client"+ localSock.getRemoteSocketAddress().toString() + " started.");
 
 		try { out = new ObjectOutputStream(localSock.getOutputStream()); } catch (IOException e1) { e1.printStackTrace(); }
-
 
 		try {
 			localSock.getOutputStream().flush();	//Needed to deBlock the inputStream
@@ -110,75 +116,84 @@ public class ConnectionHandler extends Thread{
 		}
 	}
 
-}
 
-class InputConnectionHandler extends Thread{
 
-	private ObjectInputStream in;
-	private boolean running = false;
-	private ArrayList<BasicDTO> objects= null;
+	class InputConnectionHandler extends Thread{
 
-	public InputConnectionHandler(ObjectInputStream in, ArrayList<BasicDTO> objects) {
-		this.in = in;
-		this.objects = objects;
-	}
+		private ObjectInputStream in;
+		private boolean running = false;
+		private ArrayList<BasicDTO> objects= null;
 
-	public boolean isRunning(){
-		return this.running;
-	}
-
-	@Override
-	public void run() {
-		this.running = true;
-
-		while (this.running) {
-			try {
-				Object oo = in.readObject();
-				if(oo != null){
-					synchronized (objects) { objects.add((BasicDTO) oo); }
-				}else{ System.out.println("Null Value Receved"); }
-			} catch(EOFException e){
-				System.out.println("Channel was closed");
-				this.running = false;
-				return;
-			} catch(SocketException e){
-				System.out.println("Channel is closed");
-				this.running = false;
-				return;
-			} catch (IOException e) { e.printStackTrace();
-			} catch (ClassNotFoundException e) { e.printStackTrace(); }
+		public InputConnectionHandler(ObjectInputStream in, ArrayList<BasicDTO> objects) {
+			this.in = in;
+			this.objects = objects;
 		}
-	}
-}
+
+		public boolean isRunning(){
+			return this.running;
+		}
+
+		@Override
+		public void run() {
+			this.running = true;
+
+			while (this.running) {
+				try {
+					Object oo = in.readObject();
+					if(oo != null){ 
+
+						if(oo instanceof IdentityDTO){
+							channelMac = ((IdentityDTO) oo).getSourceMac();
+							System.out.println("Receive identity: " + channelMac);
+						}
+
+						synchronized (objects) { objects.add((BasicDTO) oo); 
 
 
-class OutConnectionHandler extends Thread{
-
-	private ObjectOutputStream out;
-	private boolean running = false;
-
-	public OutConnectionHandler(ObjectOutputStream out) { this.out = out; }
-
-	public boolean isRunning(){ return this.running; }
-
-	public void send(Object oo){
-		try {
-			if(this.running){
-				out.writeObject(oo);
-				out.flush();
+						}
+					}else{ System.out.println("Null Value Receved"); }
+				} catch(EOFException e){
+					System.out.println("Channel was closed");
+					this.running = false;
+					return;
+				} catch(SocketException e){
+					System.out.println("Channel is closed");
+					this.running = false;
+					return;
+				} catch (IOException e) { e.printStackTrace();
+				} catch (ClassNotFoundException e) { e.printStackTrace(); }
 			}
-		} catch (IOException e) { e.printStackTrace(); }
-
+		}
 	}
 
-	@Override
-	public void run() {
-		this.running = true;
 
-		while (this.running) {
-			try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); }
+	class OutConnectionHandler extends Thread{
+
+		private ObjectOutputStream out;
+		private boolean running = false;
+
+		public OutConnectionHandler(ObjectOutputStream out) { this.out = out; }
+
+		public boolean isRunning(){ return this.running; }
+
+		public void send(Object oo){
+			try {
+				if(this.running){
+					out.writeObject(oo);
+					out.flush();
+				}
+			} catch (IOException e) { e.printStackTrace(); }
+
+		}
+
+		@Override
+		public void run() {
+			this.running = true;
+
+			while (this.running) {
+				try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); }
+			}
 		}
 	}
 }
-
 
