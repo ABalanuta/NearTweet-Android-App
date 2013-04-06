@@ -18,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.view.animation.BounceInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class NewTweetActivity extends Activity{
 
@@ -67,10 +68,14 @@ public class NewTweetActivity extends Activity{
 		mSendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if(mBound){
+				if(mBound && mService.isConnected()){
 					mService.sendTweet(new TweetDTO(MyNickName, mSendTextBox.getText().toString()));
 					mSendTextBox.setText(null);
+					Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
+				}else{
+					Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_LONG).show();
 				}
+					
 			}
 		});
 	}
