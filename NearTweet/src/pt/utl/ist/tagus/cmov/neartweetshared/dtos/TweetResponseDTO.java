@@ -10,16 +10,22 @@ public class TweetResponseDTO extends BasicDTO {
 	private String resp = null;
 	private String srcMacAddr = null;
 	private String dstMacAddr = null;
+	private long desTweetID = -1;
 	private boolean isPrivate;
 	
-	public TweetResponseDTO(String nickName, String resp, String destMac, boolean priv) {
+	public TweetResponseDTO(String nickName, String resp, String destMac,long desTweetID, boolean priv) {
 		super(TypeofDTO.TWEET_RESP_DTO);
 		this.resp = resp;
 		this.nickName = nickName;
 		this.dstMacAddr = destMac;
 		this.isPrivate = priv;
+		this.desTweetID = desTweetID;
 	}
 	
+	public long getDesTweetID() {
+		return desTweetID;
+	}
+
 	public boolean isPrivate(){
 		return isPrivate;
 	}

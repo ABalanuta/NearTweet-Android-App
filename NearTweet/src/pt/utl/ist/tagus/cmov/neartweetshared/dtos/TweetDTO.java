@@ -9,6 +9,7 @@ public class TweetDTO extends BasicDTO{
 	private String nickName = null;
 	private String tweet = null;
 	private String srcMacAddr = null;
+	private long tweetID = -1;
 	
 	public TweetDTO(String nickName, String tweet) {
 		super(TypeofDTO.TWEET_DTO);
@@ -21,7 +22,15 @@ public class TweetDTO extends BasicDTO{
 	}
 	
 	public void setSrcMacAddr(String srcMacAddr) {
-		srcMacAddr = srcMacAddr;
+		this.srcMacAddr = srcMacAddr;
+	}
+	
+	public void setTweetID(long id) {
+		tweetID = id;
+	}
+	
+	public long getTweetID() {
+		return this.tweetID;
 	}
 	
 	public TypeofDTO getType() {

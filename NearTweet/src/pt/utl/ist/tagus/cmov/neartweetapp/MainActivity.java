@@ -334,7 +334,7 @@ public class MainActivity extends ListActivity {
 				TweetDTO t = (TweetDTO) dto;		
 
 				// get tweets from server
-				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
+				mTweetsArray.add(new Tweet(t.getTweet(),t.getSrcMacAddr(),t.getSrcMacAddr()));
 				ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
 
 				for (Tweet tweet : mTweetsArray){

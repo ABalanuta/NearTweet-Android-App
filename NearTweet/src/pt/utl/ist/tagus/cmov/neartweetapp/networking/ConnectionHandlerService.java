@@ -2,9 +2,11 @@ package pt.utl.ist.tagus.cmov.neartweetapp.networking;
 
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 import android.R.bool;
 import android.app.Service;
 import android.content.Context;
@@ -22,6 +24,7 @@ public class ConnectionHandlerService extends Service {
 	private ArrayList<BasicDTO> oldTweetsBuff = new ArrayList<BasicDTO>();
 	private int Clients = 0;
 	private String macAddr = null;
+	private long tweetID = 0;
 
 
 	@Override
@@ -35,7 +38,13 @@ public class ConnectionHandlerService extends Service {
 		WifiManager wifiMan = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInf = wifiMan.getConnectionInfo();
 		macAddr = wifiInf.getMacAddress();
-
+		
+		// if Emulator gives null
+		if(macAddr == null){
+			Random r = new Random();
+			macAddr = "BogusMac:" + r.nextDouble();
+		}
+		Log.e("ServiceP", "Mac is " + macAddr);
 		Log.e("ServiceP", "TCP Service Created");
 
 	}
@@ -94,11 +103,31 @@ public class ConnectionHandlerService extends Service {
 	public ArrayList<BasicDTO> receveNewTweets(){		  
 		ArrayList<BasicDTO> tmp = this.mConectionHandler.receve();
 		oldTweetsBuff.addAll(tmp);
+		
+		
+		// Actualizar O tweetID
+		for(BasicDTO b : tmp){
+			if(b instanceof TweetDTO){
+				if( ((TweetDTO)b).getTweetID() > this.tweetID){
+					this.tweetID = ((TweetDTO) b).getTweetID();
+				}
+			}
+		}
+		
 		return tmp;
 	}
 
 
 	public void sendTweet(TweetDTO tweet){
+
+		if(mConectionHandler != null){
+			tweet.setSrcMacAddr(this.macAddr);
+			tweet.setTweetID(this.tweetID);
+			mConectionHandler.send(tweet);
+		}
+	}
+	
+	public void sendResponseTweet(TweetResponseDTO tweet){
 
 		if(mConectionHandler != null){
 			tweet.setSrcMacAddr(this.macAddr);
