@@ -8,6 +8,7 @@ public class TweetDTO extends BasicDTO{
 	private static final long serialVersionUID = 1L;
 	private String nickName = null;
 	private String tweet = null;
+	private String srcMacAddr = null;
 	
 	public TweetDTO(String nickName, String tweet) {
 		super(TypeofDTO.TWEET_DTO);
@@ -15,6 +16,13 @@ public class TweetDTO extends BasicDTO{
 		this.nickName = nickName;
 	}
 
+	public String getSrcMacAddr() {
+		return srcMacAddr;
+	}
+	
+	public void setSrcMacAddr(String srcMacAddr) {
+		srcMacAddr = srcMacAddr;
+	}
 	
 	public TypeofDTO getType() {
 		return super.getType();

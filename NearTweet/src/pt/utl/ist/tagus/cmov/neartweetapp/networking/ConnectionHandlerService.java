@@ -4,9 +4,13 @@ package pt.utl.ist.tagus.cmov.neartweetapp.networking;
 import java.util.ArrayList;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import android.R.bool;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -17,6 +21,8 @@ public class ConnectionHandlerService extends Service {
 	private final IBinder mBinder = new LocalBinder();
 	private ArrayList<BasicDTO> oldTweetsBuff = new ArrayList<BasicDTO>();
 	private int Clients = 0;
+	private String macAddr = null;
+
 
 	@Override
 	public void onCreate() {
@@ -24,6 +30,12 @@ public class ConnectionHandlerService extends Service {
 
 		this.mConectionHandler = new ConnectionHandler();
 		mConectionHandler.start();
+
+		// Gets MAC Adress
+		WifiManager wifiMan = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wifiInf = wifiMan.getConnectionInfo();
+		macAddr = wifiInf.getMacAddress();
+
 		Log.e("ServiceP", "TCP Service Created");
 
 	}
@@ -43,18 +55,18 @@ public class ConnectionHandlerService extends Service {
 		Clients++;
 		return mBinder;
 	}
-	
-	 @Override
-	    public boolean onUnbind(Intent intent) {
-		 Log.e("ServiceP", "TCP Service unBinded, now " + (Clients-1) + " are binded");
-			Clients--;
-			super.onUnbind(intent);
-			if(Clients == 0){
-				Log.e("ServiceP", "No Clients Binded to Service Killing Service");
-				this.stopSelf();
-			}
-	        return 	true;
-	    }
+
+	@Override
+	public boolean onUnbind(Intent intent) {
+		Log.e("ServiceP", "TCP Service unBinded, now " + (Clients-1) + " are binded");
+		Clients--;
+		super.onUnbind(intent);
+		if(Clients == 0){
+			Log.e("ServiceP", "No Clients Binded to Service Killing Service");
+			this.stopSelf();
+		}
+		return 	true;
+	}
 
 
 	@Override
@@ -86,24 +98,26 @@ public class ConnectionHandlerService extends Service {
 	}
 
 
-	public void sendTweet(BasicDTO tweet){
+	public void sendTweet(TweetDTO tweet){
+
 		if(mConectionHandler != null){
+			tweet.setSrcMacAddr(this.macAddr);
 			mConectionHandler.send(tweet);
 		}
 	}
-	
+
 	public boolean hasTweets(){
 		if(mConectionHandler == null){
 			return false;
 		}
 		return mConectionHandler.recevedObjects();
 	}
-	
+
 	public boolean isConnected(){
 		if(mConectionHandler == null){
 			return false;
 		}
-		
+
 		return mConectionHandler.isConnected();
 	}
 }
