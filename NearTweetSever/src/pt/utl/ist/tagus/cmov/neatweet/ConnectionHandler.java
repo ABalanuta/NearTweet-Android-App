@@ -33,7 +33,23 @@ public class ConnectionHandler extends Thread{
 
 	public void send(Object oo){
 
-		if(this.running && outc.isRunning()){
+		// Out Channel mabe not started yet
+		if(this.running && !outc.isRunning()){
+
+			int x = 20;
+
+			while(this.running && !outc.isRunning() && x > 0){
+
+				try {
+					Thread.sleep(100);
+					System.out.print("*");
+				} catch (InterruptedException e) {e.printStackTrace();}
+			}
+			x--;
+		}
+
+		synchronized (this) {
+			System.out.println("YES");
 			outc.send(oo);
 		}
 	}
@@ -83,8 +99,8 @@ public class ConnectionHandler extends Thread{
 		outc = new OutConnectionHandler(out);
 		outc.start();
 		System.out.println("Output Channel Created");
-		
-		
+
+
 		// Envia o Historico da Conversa
 		synchronized (sentObjects) {
 			for(BasicDTO oo : sentObjects){
@@ -92,7 +108,7 @@ public class ConnectionHandler extends Thread{
 			}
 		}
 
-		
+
 		while(this.running){
 
 			try {

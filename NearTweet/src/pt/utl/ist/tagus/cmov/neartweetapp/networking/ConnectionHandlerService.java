@@ -4,6 +4,7 @@ package pt.utl.ist.tagus.cmov.neartweetapp.networking;
 import java.util.ArrayList;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
+import android.R.bool;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -14,7 +15,8 @@ public class ConnectionHandlerService extends Service {
 
 	private ConnectionHandler mConectionHandler = null;
 	private final IBinder mBinder = new LocalBinder();
-	private ArrayList<BasicDTO> oldTweetsBuff = new ArrayList<BasicDTO>(); 
+	private ArrayList<BasicDTO> oldTweetsBuff = new ArrayList<BasicDTO>();
+	private int Clients = 0;
 
 	@Override
 	public void onCreate() {
@@ -32,14 +34,27 @@ public class ConnectionHandlerService extends Service {
 		Log.e("ServiceP", "TCP Service Started");
 
 		// If we get killed, after returning from here, restart
-		return START_STICKY;
+		return START_NOT_STICKY;
 	}
 
 	@Override
 	public IBinder onBind(Intent arg0) {
-		Log.e("ServiceP", "TCP Service Binded");
+		Log.e("ServiceP", "TCP Service Binded, now " + (Clients+1) + " are binded");
+		Clients++;
 		return mBinder;
 	}
+	
+	 @Override
+	    public boolean onUnbind(Intent intent) {
+		 Log.e("ServiceP", "TCP Service unBinded, now " + (Clients-1) + " are binded");
+			Clients--;
+			super.onUnbind(intent);
+			if(Clients == 0){
+				Log.e("ServiceP", "No Clients Binded to Service Killing Service");
+				this.stopSelf();
+			}
+	        return 	true;
+	    }
 
 
 	@Override
@@ -81,6 +96,12 @@ public class ConnectionHandlerService extends Service {
 		}
 		return mConectionHandler.recevedObjects();
 	}
-
-
+	
+	public boolean isConnected(){
+		if(mConectionHandler == null){
+			return false;
+		}
+		
+		return mConectionHandler.isConnected();
+	}
 }

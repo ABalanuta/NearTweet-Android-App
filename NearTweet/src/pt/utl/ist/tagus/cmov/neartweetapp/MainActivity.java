@@ -53,7 +53,7 @@ public class MainActivity extends ListActivity {
 	protected final String KEY_TWEETER = "utilizador";
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
-	public static ConnectionHandler connectionHandler = null;
+	ConnectionHandlerTask connectionHandlerTask = null;
 
 
 
@@ -65,6 +65,7 @@ public class MainActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.e("ServiceP", "Created Main Activity");
 
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
@@ -75,7 +76,8 @@ public class MainActivity extends ListActivity {
 			mProgressBar.setVisibility(View.VISIBLE);
 
 			// Inicia thread que actualiza as messagens
-			new ConnectionHandlerTask().execute();
+			connectionHandlerTask = new ConnectionHandlerTask();
+			connectionHandlerTask.execute();
 			
 		}  
 		else{
@@ -83,6 +85,33 @@ public class MainActivity extends ListActivity {
 		}
 	}
 	
+	@Override
+    protected void onPause() {
+		Log.e("ServiceP", "Pausing Main Activity");
+		super.onPause();
+        // Another activity is taking focus (this activity is about to be "paused").
+    }
+	
+	@Override
+    protected void onStop() {
+		Log.e("ServiceP", "Stoping Main Activity");
+		super.onPause();
+        // Another activity is taking focus (this activity is about to be "paused").
+    }
+	
+	@Override
+	protected void onDestroy() {
+		Log.e("ServiceP", "Killing Main Activity");
+		
+		//unbinding from the Service
+		if(mBound){
+			unbindService(mConnection);
+		}
+		connectionHandlerTask.stop();
+		connectionHandlerTask.cancel(true);
+		mTweetsArray.removeAll(mTweetsArray);
+		super.onDestroy();
+	}
 	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -136,17 +165,7 @@ public class MainActivity extends ListActivity {
 		return true;
 	}
 
-	@Override
-	protected void onDestroy() {
-		Log.e("ServiceP", "Killing Main Activity");
-		
-		// unbinding from the Service
-		if(mBound){
-			unbindService(mConnection);
-		}
-		
-		super.onDestroy();
-	}
+
 
 	private void updateDisplayForError() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -211,25 +230,47 @@ public class MainActivity extends ListActivity {
 		protected final String KEY_TEXT = "texto";
 		protected final String KEY_TWEETER = "utilizador";
 		ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
+		private boolean running = false;
 
-
+		public void stop(){
+			running = false;
+		}
 
 		@Override
 		protected String doInBackground(String... message) {
 
+			running = true;
+			
+			Log.e("ServiceP", "ConnectionHandlerTask Created");
 			// Criar um serviço que estabelece a communicação com o server
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 
 			//startService(service);
-			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+			//Log.e("ServiceP", "Service Started");
 
 			// vamos efectuar uma ligação com o servidor
 			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-			//startService(service);
 
+			
+			// Espera que se ligue ao server
+			while(running){
+				if(mService != null && mService.isConnected()){
+					//MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+					break;
+				}
+				else{
+					try {
+						Thread.sleep(250);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
 			boolean loadedOld = false;
 
-			while(true){
+			Log.e("ServiceP", "Loop Started");
+			while(running){
 
 				if(mService != null){
 
@@ -243,19 +284,29 @@ public class MainActivity extends ListActivity {
 						loadedOld = true;
 
 					}else if(mService.hasTweets()){
+						Log.e("ServiceP", "Loop Receve");
 						objects = mService.receveNewTweets();
 						for(BasicDTO oo : objects){
 							publishProgress(oo);
+						}
+					}else{
+						try {
+							Thread.sleep(250);
+							
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
 					}
 				}else{
 					try {
 						Thread.sleep(250);
+						
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
 			}
+			return "";
 		}
 
 

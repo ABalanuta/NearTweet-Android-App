@@ -12,12 +12,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
 public class NewTweetActivity extends Activity{
+	
+///////////////////////////////////<Variables>
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
 	private String MyNickName = "SuperUser";
@@ -41,7 +44,7 @@ public class NewTweetActivity extends Activity{
 			mBound = false;
 		}
 	};
-
+///////////////////////////////////</Variables>
 	
 	
 	
@@ -55,15 +58,8 @@ public class NewTweetActivity extends Activity{
 		mSendButton = (Button) findViewById(R.id.sendButton);
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 
-		///////////////////////////////////////////////////////////////
-		// Communication Block
-		// Criar um serviço que estabelece a communicação com o server
-		
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-		
-		//
-		//////////////////////////////////////////////////////////////
 
 
 		//TODO send not working on newtweet activity
@@ -74,6 +70,18 @@ public class NewTweetActivity extends Activity{
 				mSendTextBox.setText(null);
 			}
 		});
+	}
+	
+	@Override
+	protected void onDestroy() {
+		Log.e("ServiceP", "Killing New Tweet Activity");
+		
+		// unbinding from the Service
+		if(mBound){
+			unbindService(mConnection);
+		}
+		
+		super.onDestroy();
 	}
 
 }

@@ -24,6 +24,7 @@ public class ConnectionHandler extends Thread{
 	private OutConnectionHandler outc = null;
 	private boolean running = false;
 	private ArrayList<BasicDTO> objects = new ArrayList<BasicDTO>();
+	private boolean isConnectedToServer = false;
 
 	public ConnectionHandler() {
 	}
@@ -71,6 +72,10 @@ public class ConnectionHandler extends Thread{
 	public boolean isRunning(){
 		return this.running;
 	}
+	
+	public boolean isConnected(){
+		return this.isConnectedToServer;
+	}
 
 	@Override
 	public void run() {
@@ -90,7 +95,6 @@ public class ConnectionHandler extends Thread{
 				} catch (InterruptedException e1) {}
 			}
 		}
-		
 		System.out.println("Thread with Client"+ localSock.getRemoteSocketAddress().toString() + " started.");
 
 		try {
@@ -123,6 +127,7 @@ public class ConnectionHandler extends Thread{
 		while(this.running){
 
 			try {
+				this.isConnectedToServer = true;
 				Thread.sleep(250); // Time for the Channels to Connect
 				Thread.yield();	
 			} catch (InterruptedException e) {
@@ -133,12 +138,14 @@ public class ConnectionHandler extends Thread{
 			if(!this.outc.isRunning()){
 				System.out.println("Out Channel Down, Killing CONNNECTION_HANDELER");
 				this.running = false;
+				this.isConnectedToServer = false;
 				return;
 			}
 
 			if(!this.inc.isRunning()){
 				System.out.println("In Channel Down, Killing CONNNECTION_HANDELER");
 				this.running = false;
+				this.isConnectedToServer = false;
 				return;
 			}
 
