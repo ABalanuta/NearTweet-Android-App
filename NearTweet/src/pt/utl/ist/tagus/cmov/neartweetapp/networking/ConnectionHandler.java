@@ -9,10 +9,14 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class ConnectionHandler extends Thread{
 
+	//private	final String serverIP = "10.0.2.2";
+	private	final String serverIP = "172.20.29.233";
+	private	final int serverPort = 4444;
 	private Socket localSock = null;
 	private ObjectInputStream in = null;
 	private ObjectOutputStream out = null;
@@ -20,9 +24,9 @@ public class ConnectionHandler extends Thread{
 	private OutConnectionHandler outc = null;
 	private boolean running = false;
 	private ArrayList<BasicDTO> objects = new ArrayList<BasicDTO>();
+	private boolean isConnectedToServer = false;
 
-	public ConnectionHandler(Socket sock) {
-		this.localSock = sock;
+	public ConnectionHandler() {
 	}
 
 	public void send(Object oo){
@@ -40,14 +44,14 @@ public class ConnectionHandler extends Thread{
 		}
 	}
 
-	ArrayList<BasicDTO> getObjectList(){
+	public ArrayList<BasicDTO> getObjectList(){
 		return objects;
 	}
 
 	public boolean recevedObjects() {
 
 		synchronized (objects){
-			if(objects.size() > 0){
+			if(objects != null && objects.size() > 0){
 				return true;
 			}
 			else{
@@ -68,12 +72,29 @@ public class ConnectionHandler extends Thread{
 	public boolean isRunning(){
 		return this.running;
 	}
+	
+	public boolean isConnected(){
+		return this.isConnectedToServer;
+	}
 
 	@Override
 	public void run() {
 
 		this.running = true;
-
+		
+		// Contacting the Server , Retry if error
+		while(true){
+			try{
+				this.localSock = new Socket(this.serverIP, this.serverPort);
+				break;
+			}catch(Exception e){
+				System.out.println("Cannot Reach the Server " +this.serverIP + ":"+this.serverPort+"   Sleeping for 5s");
+				System.out.println(e.toString());
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {}
+			}
+		}
 		System.out.println("Thread with Client"+ localSock.getRemoteSocketAddress().toString() + " started.");
 
 		try {
@@ -106,35 +127,30 @@ public class ConnectionHandler extends Thread{
 		while(this.running){
 
 			try {
+				this.isConnectedToServer = true;
 				Thread.sleep(250); // Time for the Channels to Connect
 				Thread.yield();	
-			} catch (InterruptedException e) {
-				//Never Happens
-			}
+			} catch (InterruptedException e) { /*Never Happens*/ }
 
 
 			if(!this.outc.isRunning()){
 				System.out.println("Out Channel Down, Killing CONNNECTION_HANDELER");
 				this.running = false;
+				this.isConnectedToServer = false;
 				return;
 			}
 
 			if(!this.inc.isRunning()){
 				System.out.println("In Channel Down, Killing CONNNECTION_HANDELER");
 				this.running = false;
+				this.isConnectedToServer = false;
 				return;
 			}
-
-
 		}
 
 	}
 
-	public interface OnObjectReceived {
-
-		public void InformArivval(BasicDTO dto);
-
-	}
+	public interface OnObjectReceived { public void informArrival(BasicDTO dto); }
 
 }
 

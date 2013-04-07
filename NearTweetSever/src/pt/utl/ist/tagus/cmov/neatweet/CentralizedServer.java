@@ -1,4 +1,4 @@
-package pt.utl.ist.tagus.cmov.neatweet.centralizedserver;
+package pt.utl.ist.tagus.cmov.neatweet;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.*;
 
@@ -15,25 +15,22 @@ public class CentralizedServer{
 	private static ArrayList<BasicDTO> sentObjects = new  ArrayList<BasicDTO>();
 
 	public static void main(String[] args) {
-
 		ConnectionInicializer conHandler = new ConnectionInicializer(connections, objects, sentObjects);
 		SwitchingHandler sHandler = new SwitchingHandler(connections, objects, sentObjects);
 
 		sHandler.start();
 		conHandler.start();
-
 	}
 }
 
-class ConnectionInicializer extends Thread{
 
+class ConnectionInicializer extends Thread{
 	public static final int SERVERPORT = 4444;
 	private boolean running = false;
 	private ArrayList<ConnectionHandler> connections = null;
 	ArrayList<BasicDTO> objects = null;
 	private ServerSocket serverSocket = null;
 	private ArrayList<BasicDTO> sentObjects = null;
-
 
 	public ConnectionInicializer(ArrayList<ConnectionHandler> connections, ArrayList<BasicDTO> objects,
 			ArrayList<BasicDTO> sentObjects) {
@@ -42,43 +39,27 @@ class ConnectionInicializer extends Thread{
 		this.sentObjects = sentObjects;
 	}
 
-
 	@Override
 	public void run() {
 		super.run();
-
 		this.running = true;
-
 		try {
-
 			serverSocket = new ServerSocket(SERVERPORT);
 			System.out.println("S: Listening...");
 
 			while(true){
-
 				// Cria um socket novo por cada pedido
 				Socket sock = serverSocket.accept();
 				System.out.println("New Client Request");
-
 				ConnectionHandler ch = new ConnectionHandler(sock, objects, connections, sentObjects);
 				ch.start();
-				synchronized (connections) {
-					connections.add(ch);
-				}
-				
+				synchronized (connections) { connections.add(ch); }
 				System.out.println("Listening Again...");
 			}
-
 		} catch (Exception e) {
 			System.out.println("S: Error");
 			e.printStackTrace();
-		} finally{
-			try {
-				serverSocket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		} finally{ try { serverSocket.close(); } catch (IOException e) { e.printStackTrace(); } }
 
 	}
 
@@ -132,7 +113,7 @@ class SwitchingHandler extends Thread{
 						}
 					}
 				}
-				
+
 				synchronized (sentObjects) {
 					sentObjects.addAll(objclone);
 				}
@@ -140,7 +121,7 @@ class SwitchingHandler extends Thread{
 
 			else{
 				try {
-					Thread.sleep(500);
+					Thread.sleep(250);
 					System.out.print(".");
 				} catch (InterruptedException e) {
 					e.printStackTrace();

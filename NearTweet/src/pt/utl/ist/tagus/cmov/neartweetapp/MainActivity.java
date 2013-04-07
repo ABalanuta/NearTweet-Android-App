@@ -1,23 +1,21 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
-
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity;
-import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
+import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
+import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,9 +23,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
@@ -38,90 +40,166 @@ public class MainActivity extends ListActivity {
 
 	public static final String TAG = MainActivity.class.getSimpleName();
 	public static ProgressBar mProgressBar;
+
+	private String mUsername = null;
+	private int REQUEST_CODE = 42424242; //Used for Login
+
+	public static Button mSendButton;
+	public static EditText mSendTextBox;
+
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
-	public static ConnectionHandler connectionHandler = null;
+	ConnectionHandlerTask connectionHandlerTask = null;
 	private LocationManager locationManager;
-	
 
+
+
+	// Connection to Service Vriables
+	public boolean mBound = false;
+	private Intent service;
+	public ConnectionHandlerService mService;
+
+
+	/***************************************************************************************
+	 * 
+	 * 							 Activity LifeCycle Methods
+	 * 
+	 ***************************************************************************************/
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
+		Log.e("ServiceP", "Created Main Activity");
+
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 		
-		/**
-		 * Location stuff
-		 */
-		// Acquire a reference to the system Location Manager
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-		// Define a listener that responds to location updates
-		LocationListener locationListener = new LocationListener() {
-		    public void onLocationChanged(Location location) {
-		      // Called when a new location is found by the network location provider.
-		      //makeUseOfNewLocation(location);
-		    }
-
-		    public void onStatusChanged(String provider, int status, Bundle extras) {
-		    	
-		    }
-
-		    public void onProviderEnabled(String provider) {}
-
-		    public void onProviderDisabled(String provider) {}
-		  };
-
-		// Register the listener with the Location Manager to receive location updates
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+//		/**
+//		 * Location stuff
+//		 */
+//		// Acquire a reference to the system Location Manager
+//		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+//
+//		// Define a listener that responds to location updates
+//		LocationListener locationListener = new LocationListener() {
+//		    public void onLocationChanged(Location location) {
+//		      // Called when a new location is found by the network location provider.
+//		      //makeUseOfNewLocation(location);
+//		    }
+//
+//		    public void onStatusChanged(String provider, int status, Bundle extras) {
+//		    	
+//		    }
+//
+//		    public void onProviderEnabled(String provider) {}
+//
+//		    public void onProviderDisabled(String provider) {}
+//		  };
+//
+//		// Register the listener with the Location Manager to receive location updates
+//		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		
 		
 		if (isNetworkAvailable()){
-			//GetTweetsTask getTweetsTask = new GetTweetsTask();
-			//getTweetsTask.execute();
+			mProgressBar.setVisibility(View.VISIBLE);
+			// Inicia thread que actualiza as messagens
+			connectionHandlerTask = new ConnectionHandlerTask();
+			connectionHandlerTask.execute();
 
-			//Online
-			//new ConnectionHandlerTask().execute();
-			
-			//Offline
-			//puts dummy tweets
-			Tweet tweetGenerator = new Tweet();
-			mTweetsArray = tweetGenerator.generateTweets();
-			handleServerResponse();
-			
-			//mProgressBar.setVisibility(View.VISIBLE);
-
-		}
+		}  
 		else{
-			Toast.makeText(this, "nao ha net", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
-
 	}
+
+
+	@Override
+	protected void onResume(){
+		//Check for Login
+		if(mUsername == null){
+			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+			startActivityForResult(i, REQUEST_CODE);		
+		}
+		super.onResume();
+	}
+
+
+
+
+	@Override
+	protected void onPause() {
+		Log.e("ServiceP", "Pausing Main Activity");
+		super.onPause();
+		// Another activity is taking focus (this activity is about to be "paused").
+	}
+
+	@Override
+	protected void onStop() {
+		Log.e("ServiceP", "Stoping Main Activity");
+		super.onPause();
+		// Another activity is taking focus (this activity is about to be "paused").
+	}
+
+	@Override
+	protected void onDestroy() {
+		Log.e("ServiceP", "Killing Main Activity");
+		//unbinding from the Service
+		if(mBound){ unbindService(mConnection); }
+		connectionHandlerTask.stop();
+		connectionHandlerTask.cancel(true);
+		mTweetsArray.removeAll(mTweetsArray);
+		super.onDestroy();
+	}
+
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
-		
 		Intent details = new Intent(this,TweetDetailsActivity.class);
+		details.putExtra("tweet_id", tweet.getId());
 		details.putExtra("tweet_text", tweet.getText());
-		details.putExtra("tweet_uid", tweet.getUId());
-		
+		details.putExtra("tweet_uid", tweet.getUsername());
 		startActivity(details);
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-		ActionBar actionBar = getActionBar();
-		actionBar.setHomeButtonEnabled(true);
 		return true;
 	}
 
+
+	/***************************************************************************************
+	 * 
+	 * 							 Calls from other activities
+	 * 
+	 ***************************************************************************************/
+
+
+
+	//This method is called when the child activity finishes 
 	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+			mUsername = data.getExtras().getString("username");		
+		}
+	} 
+
+
+
+
+	/***************************************************************************************
+	 * 
+	 * 							 Network Methods
+	 * 
+	 ***************************************************************************************/
+
+
+
+
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
 	    switch (item.getItemId()) {
@@ -130,7 +208,7 @@ public class MainActivity extends ListActivity {
 	        	//String gps_location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toString();
 	        	//Toast.makeText(getApplicationContext(), gps_location, Toast.LENGTH_LONG).show();
 	        	//newTweetIntent.putExtra("gps_location",);
-	        	//startActivity(newTweetIntent);
+	        	startActivity(newTweetIntent);
 	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
@@ -146,7 +224,9 @@ public class MainActivity extends ListActivity {
 		}
 		return isAvaylable;
 	}
-	
+
+
+
 	private void updateDisplayForError() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("erro");
@@ -154,13 +234,11 @@ public class MainActivity extends ListActivity {
 		builder.setPositiveButton(android.R.string.ok, null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
-
 		TextView emptyTextView = (TextView) getListView().getEmptyView();
 		emptyTextView.setText("nao ha tweeets");
 	} 
-	
-	public void handleServerResponse() {
 
+	public void handleServerResponse() {
 		mProgressBar.setVisibility(View.INVISIBLE);
 		if (mTweetsArray == null){
 			updateDisplayForError();
@@ -171,7 +249,7 @@ public class MainActivity extends ListActivity {
 
 			for (Tweet tweet : mTweetsArray){
 				String text = tweet.getText();
-				String userId = tweet.getUId();
+				String userId = tweet.getUsername();
 
 				HashMap<String,String> tweetInterface = new HashMap<String,String>();
 				tweetInterface.put(KEY_TEXT,text);
@@ -187,77 +265,149 @@ public class MainActivity extends ListActivity {
 		}
 	}
 
-	
-	
-	public class ConnectionHandlerTask extends AsyncTask<String,BasicDTO,Tweet> {
+	//Não Mexer
+	/** Defines callbacks for service binding, passed to bindService() */
+	public ServiceConnection mConnection = new ServiceConnection() {
+		
 
-		private	final static String serverIP = "10.0.2.2";
+		@Override
+		public void onServiceConnected(ComponentName className,
+				IBinder service) {
+			// We've bound to LocalService, cast the IBinder and get LocalService instance
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			mBound = true;
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			mBound = false;
+		}
+	};
+
+
+	////////////////////
+	//
+	//		AsyncTasks
+	//
+	//
+	
+	
+	class ConnectionHandlerTask extends AsyncTask<String,Object,String> {
+
 		protected final String KEY_TEXT = "texto";
 		protected final String KEY_TWEETER = "utilizador";
 		ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
-		//private	final static String serverIP = "172.20.81.13";
-		private	final static int serverPort = 4444;
+		private boolean running = false;
+
+		public void stop(){
+			running = false;
+		}
 
 		@Override
-		protected Tweet doInBackground(String... message) {
+		protected String doInBackground(String... message) {
 
-			InetAddress serverAddr = null;
-			try {
-				serverAddr = InetAddress.getByName(serverIP);
-			} catch (UnknownHostException e2) {
-				e2.printStackTrace();
-			}
+			running = true;
 
-			Socket localSock = null;
-			ConnectionHandler ch = null;
+			Log.e("ServiceP", "ConnectionHandlerTask Created");
+			// Criar um serviço que estabelece a communicação com o server
+			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+
+			// vamos efectuar uma ligação com o servidor
+			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 
-			// Contacting the Server , Retry if error
-			while(true){
-				try{
-					localSock = new Socket(serverAddr, serverPort);
+			// Espera que se ligue ao server
+			while(running){
+				if(mService != null && mService.isConnected()){
+					publishProgress("Connected");
 					break;
-				}catch(Exception e){
-					System.out.println("TCP " + " Sleeping 5s");
-					System.out.println(e.toString());
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e1) {}
 				}
+				else{ try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); } }
 			}
 
-			MainActivity.connectionHandler = new ConnectionHandler(localSock);
-			MainActivity.connectionHandler.start();
-			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+			boolean loadedOld = false;
 
-			while(true){
+			Log.e("ServiceP", "Loop Started");
+			while(running){
+				if(mService != null){
+					ArrayList<BasicDTO> objects;
+					if(!loadedOld){
+						objects  = mService.receveOldTweets();
+						for(BasicDTO oo : objects){
+							publishProgress(oo);
+						}
+						loadedOld = true;
 
-				if(MainActivity.connectionHandler.recevedObjects()){
-					ArrayList<BasicDTO> objects  = MainActivity.connectionHandler.receve();
-					for(BasicDTO oo : objects){
-						publishProgress(oo);
+					}else if(mService.hasTweets()){
+						Log.e("ServiceP", "Loop Receve");
+						objects = mService.receveNewTweets();
+						for(BasicDTO oo : objects){
+							publishProgress(oo);
+						}
+					}else{
+						try {
+							Thread.sleep(250);
+
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 				}else{
 					try {
-						Thread.sleep(500);
+						Thread.sleep(250);
+
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-			}	
+			}
+			return "";
 		}
-		@Override
-		protected void onProgressUpdate(BasicDTO... values) {
 
-			if(values[0].getType().equals(TypeofDTO.TWEET_DTO)){
-				TweetDTO t = (TweetDTO) values[0];		
+
+		@Override
+		protected void onProgressUpdate(Object... values) {
+			if(values[0] instanceof String){
+				String updadeCommand = (String)values[0];
+				if(updadeCommand.equals("Connected")){
+					MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+					Toast.makeText(getApplicationContext(), "Connected ", Toast.LENGTH_LONG).show();
+					return;
+				}
+			}else if(values[0] instanceof BasicDTO){
+				onProgressUpdateAux((BasicDTO)values[0]);
+			}
+		}
+
+
+		protected void onProgressUpdateAux(BasicDTO dto){
+
+			if(dto.getType().equals(TypeofDTO.TWEET_DTO)){
+				TweetDTO t = (TweetDTO) dto;		
 
 				// get tweets from server
-				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),"lalalala"));
-				
+				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),t.getSrcMacAddr()));
+				ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
+
+				for (Tweet tweet : mTweetsArray){
+					String text = tweet.getText();
+					String username = tweet.getUsername();
+
+					HashMap<String,String> tweetInterface = new HashMap<String,String>();
+					tweetInterface.put(KEY_TEXT,text);
+					tweetInterface.put(KEY_TWEETER,username);
+					tweets.add(tweetInterface);
+				}
+
+				String[] keys = {KEY_TEXT,KEY_TWEETER };
+				int[] ids = {android.R.id.text1, android.R.id.text2};
+				SimpleAdapter adapter = new SimpleAdapter(getApplicationContext(), tweets,
+						android.R.layout.simple_list_item_2, keys, ids);
+				setListAdapter(adapter);
 				handleServerResponse();
 			}
-
 		}
 	}
 }
+
