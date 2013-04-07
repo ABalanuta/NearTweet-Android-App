@@ -105,8 +105,8 @@ public class MainActivity extends ListActivity {
 		if (isNetworkAvailable()){
 			mProgressBar.setVisibility(View.VISIBLE);
 			// Inicia thread que actualiza as messagens
-			connectionHandlerTask = new ConnectionHandlerTask();
-			connectionHandlerTask.execute();
+			//connectionHandlerTask = new ConnectionHandlerTask();
+			//connectionHandlerTask.execute();
 
 		}  
 		else{
