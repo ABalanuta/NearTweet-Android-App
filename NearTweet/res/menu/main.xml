@@ -4,5 +4,10 @@
           android:icon="@drawable/carlos_martins"
           android:title="@string/hello_world"
           android:showAsAction="ifRoom"/>
+    
+    <item android:id="@+id/new_tweet_pool"
+          android:icon="@drawable/content_new_event"
+          android:title="@string/hello_world"
+          android:showAsAction="ifRoom"/>
 
 </menu>

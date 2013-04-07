@@ -1,9 +1,9 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import pt.utl.ist.tagus.cmov.neartweet.NewTweetPoolActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
@@ -36,7 +36,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -269,6 +268,11 @@ public class MainActivity extends ListActivity implements LocationListener{
 			newTweetIntent.putExtra("username", mUsername);
 			startActivity(newTweetIntent);
 			return true;
+		case R.id.new_tweet_pool:
+			Intent newTweetPoolIntent = new Intent(this,NewTweetPoolActivity.class);
+			startActivity(newTweetPoolIntent);
+			return true;
+			
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -500,14 +504,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 	 * Gestures to mark tweets as spam
 	 */
     class MyGestureDetector extends SimpleOnGestureListener{ 
-
-//        // Detect a single-click and call my own handler.
-//        @Override 
-//        public boolean onSingleTapUp(MotionEvent e) {
-//            ListView lv = getListView();
-//            int pos = lv.pointToPosition((int)e.getX(), (int)e.getY());
-//            return false;
-//        }
 
         @Override 
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) { 

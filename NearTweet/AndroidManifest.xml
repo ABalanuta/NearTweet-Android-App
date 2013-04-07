@@ -37,9 +37,13 @@
             android:label="@string/title_activity_tweet_details" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="oauth" android:host="t4jsample"/>
+
+                <data
+                    android:host="t4jsample"
+                    android:scheme="oauth" />
             </intent-filter>
         </activity>
 
@@ -51,6 +55,10 @@
             android:name="pt.utl.ist.tagus.cmov.neartweetapp.LoginActivity"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
+        <activity
+            android:name="pt.utl.ist.tagus.cmov.neartweet.NewTweetPoolActivity"
+            android:label="@string/title_activity_new_tweet_pool" >
         </activity>
     </application>
 
