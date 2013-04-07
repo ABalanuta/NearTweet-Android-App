@@ -1,5 +1,6 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -27,10 +28,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -55,6 +61,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	private String provider;// location stuff
 	private static SharedPreferences mSharedPreferences;
+    private int REL_SWIPE_MIN_DISTANCE; 
+    private int REL_SWIPE_MAX_OFF_PATH;
+    private int REL_SWIPE_THRESHOLD_VELOCITY;
 
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
@@ -110,7 +119,24 @@ public class MainActivity extends ListActivity implements LocationListener{
 			Toast.makeText(getApplicationContext(), "Localizacao nao disponivel", Toast.LENGTH_LONG).show();
 		}
 
+		/*
+		 * Defining swipe gestures sensetivity & detection
+		 */ 
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        REL_SWIPE_MIN_DISTANCE = (int)(120.0f * dm.densityDpi / 160.0f + 0.5); 
+        REL_SWIPE_MAX_OFF_PATH = (int)(250.0f * dm.densityDpi / 160.0f + 0.5);
+        REL_SWIPE_THRESHOLD_VELOCITY = (int)(200.0f * dm.densityDpi / 160.0f + 0.5);
+        
+        @SuppressWarnings("deprecation")
+		final GestureDetector gestureDetector = new GestureDetector(new MyGestureDetector());
+        View.OnTouchListener gestureListener = new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event); 
+            }};
+        ListView lv = getListView();
+        lv.setOnTouchListener(gestureListener);
 
+		
 		if (isNetworkAvailable()){
 			mProgressBar.setVisibility(View.VISIBLE);
 			// Inicia thread que actualiza as messagens
@@ -469,5 +495,41 @@ public class MainActivity extends ListActivity implements LocationListener{
 				Toast.LENGTH_SHORT).show();
 
 	}
+	
+	/*
+	 * Gestures to mark tweets as spam
+	 */
+    class MyGestureDetector extends SimpleOnGestureListener{ 
+
+//        // Detect a single-click and call my own handler.
+//        @Override 
+//        public boolean onSingleTapUp(MotionEvent e) {
+//            ListView lv = getListView();
+//            int pos = lv.pointToPosition((int)e.getX(), (int)e.getY());
+//            return false;
+//        }
+
+        @Override 
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) { 
+            if (Math.abs(e1.getY() - e2.getY()) > REL_SWIPE_MAX_OFF_PATH) 
+                return false; 
+            if(e1.getX() - e2.getX() > REL_SWIPE_MIN_DISTANCE && 
+                Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) { 
+                onRTLFling(); 
+            }  else if (e2.getX() - e1.getX() > REL_SWIPE_MIN_DISTANCE && 
+                Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) { 
+                onLTRFling(); 
+            } 
+            return false; 
+        } 
+
+        private void onLTRFling() {
+            Toast.makeText(getApplicationContext(), "Left-to-right fling", Toast.LENGTH_SHORT).show();
+        }
+
+        private void onRTLFling() {
+            Toast.makeText(getApplicationContext(), "Right-to-left fling", Toast.LENGTH_SHORT).show();
+        }
+    }
 }
 
