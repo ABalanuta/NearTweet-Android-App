@@ -32,6 +32,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -60,16 +61,16 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	private String provider;// location stuff
 	private static SharedPreferences mSharedPreferences;
-    private int REL_SWIPE_MIN_DISTANCE; 
-    private int REL_SWIPE_MAX_OFF_PATH;
-    private int REL_SWIPE_THRESHOLD_VELOCITY;
+	private int REL_SWIPE_MIN_DISTANCE; 
+	private int REL_SWIPE_MAX_OFF_PATH;
+	private int REL_SWIPE_THRESHOLD_VELOCITY;
 
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	ConnectionHandlerTask connectionHandlerTask = null;
 	private LocationManager locationManager = null;
 
-	
+
 
 	// Connection to Service Vriables
 	public boolean mBound = false;
@@ -115,44 +116,44 @@ public class MainActivity extends ListActivity implements LocationListener{
 			System.out.println("Provider " + provider + " has been selected.");
 			onLocationChanged(location);
 		} else {
-			Toast.makeText(getApplicationContext(), "Localizacao nao disponivel", Toast.LENGTH_LONG).show();
+			//Toast.makeText(getApplicationContext(), "Localizacao nao disponivel", Toast.LENGTH_SHORT).show();
 		}
 
 		/*
 		 * Defining swipe gestures sensetivity & detection
 		 */ 
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        REL_SWIPE_MIN_DISTANCE = (int)(120.0f * dm.densityDpi / 160.0f + 0.5); 
-        REL_SWIPE_MAX_OFF_PATH = (int)(250.0f * dm.densityDpi / 160.0f + 0.5);
-        REL_SWIPE_THRESHOLD_VELOCITY = (int)(200.0f * dm.densityDpi / 160.0f + 0.5);
-        
-        @SuppressWarnings("deprecation")
+		DisplayMetrics dm = getResources().getDisplayMetrics();
+		REL_SWIPE_MIN_DISTANCE = (int)(120.0f * dm.densityDpi / 160.0f + 0.5); 
+		REL_SWIPE_MAX_OFF_PATH = (int)(250.0f * dm.densityDpi / 160.0f + 0.5);
+		REL_SWIPE_THRESHOLD_VELOCITY = (int)(200.0f * dm.densityDpi / 160.0f + 0.5);
+
+		@SuppressWarnings("deprecation")
 		final GestureDetector gestureDetector = new GestureDetector(new MyGestureDetector());
-        View.OnTouchListener gestureListener = new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event); 
-            }};
-        ListView lv = getListView();
-        lv.setOnTouchListener(gestureListener);
+		View.OnTouchListener gestureListener = new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				return gestureDetector.onTouchEvent(event); 
+			}};
+			ListView lv = getListView();
+			lv.setOnTouchListener(gestureListener);
 
-		
-		if (isNetworkAvailable()){
-			mProgressBar.setVisibility(View.VISIBLE);
-			// Inicia thread que actualiza as messagens
-			//connectionHandlerTask = new ConnectionHandlerTask();
-			//connectionHandlerTask.execute();
-			
 
-			/**
-			 * offline dummies
-			 */
-			Tweet tweetGenerator = new Tweet();
-			mTweetsArray = tweetGenerator.generateTweets();
-			handleServerResponse();
-		}  
-		else{
-			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
-		}
+			if (isNetworkAvailable()){
+				mProgressBar.setVisibility(View.VISIBLE);
+				// Inicia thread que actualiza as messagens
+				connectionHandlerTask = new ConnectionHandlerTask();
+				connectionHandlerTask.execute();
+
+
+				/**
+				 * offline dummies
+				 */
+				//Tweet tweetGenerator = new Tweet();
+				//mTweetsArray = tweetGenerator.generateTweets();
+				//handleServerResponse();
+			}  
+			else{
+				Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
+			}
 	}
 
 
@@ -169,7 +170,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		 * Get login
 		 */
 		mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
-		 if (!mSharedPreferences.contains("username")){
+		if (!mSharedPreferences.contains("username")){
 
 			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
 			startActivityForResult(i, REQUEST_CODE);		
@@ -195,18 +196,18 @@ public class MainActivity extends ListActivity implements LocationListener{
 	@Override
 	protected void onStop() {
 		Log.e("ServiceP", "Stoping Main Activity");
-		super.onPause();
-		// Another activity is taking focus (this activity is about to be "paused").
+		super.onStop();
+		// Another activity is taking focus (this activity is about to be "Stoped").
 	}
 
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Main Activity");
 		//unbinding from the Service
-		//		if(mBound){ unbindService(mConnection); }
-		//		connectionHandlerTask.stop();
-		//		connectionHandlerTask.cancel(true);
-		//		mTweetsArray.removeAll(mTweetsArray);
+		if(mBound){ unbindService(mConnection); }
+		connectionHandlerTask.stop();
+		connectionHandlerTask.cancel(true);
+		mTweetsArray.removeAll(mTweetsArray);
 		super.onDestroy();
 	}
 
@@ -272,7 +273,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			Intent newTweetPoolIntent = new Intent(this,NewTweetPoolActivity.class);
 			startActivity(newTweetPoolIntent);
 			return true;
-			
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -386,7 +387,13 @@ public class MainActivity extends ListActivity implements LocationListener{
 					publishProgress("Connected");
 					break;
 				}
-				else{ try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); } }
+				else{
+					try { 
+						Thread.sleep(250);
+					} catch (InterruptedException e) {
+						e.printStackTrace(); 
+					}
+				}
 			}
 
 			boolean loadedOld = false;
@@ -499,33 +506,33 @@ public class MainActivity extends ListActivity implements LocationListener{
 				Toast.LENGTH_SHORT).show();
 
 	}
-	
+
 	/*
 	 * Gestures to mark tweets as spam
 	 */
-    class MyGestureDetector extends SimpleOnGestureListener{ 
+	class MyGestureDetector extends SimpleOnGestureListener{ 
 
-        @Override 
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) { 
-            if (Math.abs(e1.getY() - e2.getY()) > REL_SWIPE_MAX_OFF_PATH) 
-                return false; 
-            if(e1.getX() - e2.getX() > REL_SWIPE_MIN_DISTANCE && 
-                Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) { 
-                onRTLFling(); 
-            }  else if (e2.getX() - e1.getX() > REL_SWIPE_MIN_DISTANCE && 
-                Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) { 
-                onLTRFling(); 
-            } 
-            return false; 
-        } 
+		@Override 
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) { 
+			if (Math.abs(e1.getY() - e2.getY()) > REL_SWIPE_MAX_OFF_PATH) 
+				return false; 
+			if(e1.getX() - e2.getX() > REL_SWIPE_MIN_DISTANCE && 
+					Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) { 
+				onRTLFling(); 
+			}  else if (e2.getX() - e1.getX() > REL_SWIPE_MIN_DISTANCE && 
+					Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) { 
+				onLTRFling(); 
+			} 
+			return false; 
+		} 
 
-        private void onLTRFling() {
-            Toast.makeText(getApplicationContext(), "Left-to-right fling", Toast.LENGTH_SHORT).show();
-        }
+		private void onLTRFling() {
+			Toast.makeText(getApplicationContext(), "Left-to-right fling", Toast.LENGTH_SHORT).show();
+		}
 
-        private void onRTLFling() {
-            Toast.makeText(getApplicationContext(), "Right-to-left fling", Toast.LENGTH_SHORT).show();
-        }
-    }
+		private void onRTLFling() {
+			Toast.makeText(getApplicationContext(), "Right-to-left fling", Toast.LENGTH_SHORT).show();
+		}
+	}
 }
 

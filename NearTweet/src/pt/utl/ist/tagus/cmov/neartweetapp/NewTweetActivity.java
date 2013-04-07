@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.BounceInterpolator;
@@ -90,6 +91,12 @@ public class NewTweetActivity extends Activity{
 
 		mUsername = getIntent().getExtras().getString("username");
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
+		
+		// Conect with the service
+		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		
+		
 		btnPicture.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -109,17 +116,17 @@ public class NewTweetActivity extends Activity{
 					@Override
 					public void onClick(View view) {
 
-
-						service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-						bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+						
 						
 
 						if(mBound && mService.isConnected()){
 							mService.sendTweet(new TweetDTO(mUsername, mSendTextBox.getText().toString()));
 							mSendTextBox.setText(null);
-							Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
+							Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
+							t.setGravity(Gravity.CENTER, 0, 0);
+							t.show();
 						}else{
-							Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_LONG).show();
+							Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show();
 						}
 					}
 				} );
