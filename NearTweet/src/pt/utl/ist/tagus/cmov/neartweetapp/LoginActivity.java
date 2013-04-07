@@ -1,6 +1,7 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import android.provider.Settings.Secure;
 import pt.utl.ist.tagus.cmov.neartweet.R.id;
 import pt.utl.ist.tagus.cmov.neartweet.R.layout;
 import pt.utl.ist.tagus.cmov.neartweet.R.menu;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -94,9 +96,13 @@ public class LoginActivity extends Activity {
 	  
 	  //put username on shared preferences
 		//get shared preferences
+	  final String android_id = Secure.getString(getApplicationContext().getContentResolver(),
+              Secure.ANDROID_ID);
 	  SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
 	  Editor e = mSharedPreferences.edit();
 	  e.putString("username", mUsername);
+	  e.putString("deviceid", android_id);
+	  Toast.makeText(getApplicationContext(), android_id, Toast.LENGTH_LONG).show();
 	  e.putBoolean("loggedIn", true);
 	  e.commit();
 	  

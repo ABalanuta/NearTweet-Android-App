@@ -1,0 +1,80 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".NewTweetPoolActivity" >
+
+    <TextView
+        android:id="@+id/textViewPergunta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="18dp"
+        android:text="@string/add_question"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/editTextPergunta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textViewPergunta"
+        android:layout_marginTop="21dp"
+        android:ems="10" />
+
+    <TextView
+        android:id="@+id/textViewResponsesPoll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/editTextPergunta"
+        android:layout_below="@+id/editTextPergunta"
+        android:layout_marginTop="30dp"
+        android:text="@string/add_option_response"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <EditText
+        android:id="@+id/editTextResposta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textViewResponsesPoll"
+        android:layout_below="@+id/textViewResponsesPoll"
+        android:layout_marginTop="26dp"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/buttonAddNewOptionPool"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textViewResponsesPoll"
+        android:drawableTop="@drawable/content_new" />
+
+    <ListView
+        android:id="@+id/listViewResponses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonSendNowPool"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/buttonAddNewOptionPool" >
+
+    </ListView>
+
+    <Button
+        android:id="@+id/buttonSendNowPool"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:drawableTop="@drawable/social_send_now" />
+
+</RelativeLayout>
