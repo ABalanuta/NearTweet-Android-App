@@ -107,6 +107,7 @@ public class MainActivity extends ListActivity {
 			// Inicia thread que actualiza as messagens
 			//connectionHandlerTask = new ConnectionHandlerTask();
 			//connectionHandlerTask.execute();
+			
 
 		}  
 		else{
