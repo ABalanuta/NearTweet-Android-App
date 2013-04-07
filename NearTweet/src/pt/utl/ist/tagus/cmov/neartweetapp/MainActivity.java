@@ -142,7 +142,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 		/**
 		 * Get login
 		 */
-		//if(mUsername == null){
 		mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
 		 if (!mSharedPreferences.contains("username")){
 
