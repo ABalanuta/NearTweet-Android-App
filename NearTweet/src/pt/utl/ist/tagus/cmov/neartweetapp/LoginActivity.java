@@ -10,6 +10,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,7 +30,6 @@ import android.widget.TextView;
 public class LoginActivity extends Activity {
 
 
-
 	// Values for email and password at the time of the login attempt.
 	private String mUsername = null;
 
@@ -42,7 +43,7 @@ public class LoginActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-
+		
 		// Set up the login form.
 		mUsernameView = (EditText) findViewById(R.id.username);
 		
@@ -90,6 +91,15 @@ public class LoginActivity extends Activity {
 	  data.putExtra("username", mUsername);
 	  // Activity finished ok, return the data
 	  setResult(RESULT_OK, data);
+	  
+	  //put username on shared preferences
+		//get shared preferences
+	  SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
+	  Editor e = mSharedPreferences.edit();
+	  e.putString("username", mUsername);
+	  e.putBoolean("loggedIn", true);
+	  e.commit();
+	  
 	  super.finish();
 	} 
 		
