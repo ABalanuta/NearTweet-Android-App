@@ -130,9 +130,7 @@ public class ConnectionHandler extends Thread{
 				this.isConnectedToServer = true;
 				Thread.sleep(250); // Time for the Channels to Connect
 				Thread.yield();	
-			} catch (InterruptedException e) {
-				//Never Happens
-			}
+			} catch (InterruptedException e) { /*Never Happens*/ }
 
 
 			if(!this.outc.isRunning()){
@@ -148,17 +146,11 @@ public class ConnectionHandler extends Thread{
 				this.isConnectedToServer = false;
 				return;
 			}
-
-
 		}
 
 	}
 
-	public interface OnObjectReceived {
-
-		public void InformArivval(BasicDTO dto);
-
-	}
+	public interface OnObjectReceived { public void informArrival(BasicDTO dto); }
 
 }
 
