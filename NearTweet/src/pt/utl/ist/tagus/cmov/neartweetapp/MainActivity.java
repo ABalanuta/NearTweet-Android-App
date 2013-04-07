@@ -16,6 +16,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,6 +26,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,7 +39,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends ListActivity {
+public class MainActivity extends ListActivity implements LocationListener{
 
 	public static final String TAG = MainActivity.class.getSimpleName();
 	public static ProgressBar mProgressBar;
@@ -49,12 +52,16 @@ public class MainActivity extends ListActivity {
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
+
+	private String provider;// location stuff
+	private static SharedPreferences mSharedPreferences;
+
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
 	ConnectionHandlerTask connectionHandlerTask = null;
-	private LocationManager locationManager;
+	private LocationManager locationManager = null;
 
-
+	
 
 	// Connection to Service Vriables
 	public boolean mBound = false;
@@ -75,33 +82,35 @@ public class MainActivity extends ListActivity {
 
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
-		
-//		/**
-//		 * Location stuff
-//		 */
-//		// Acquire a reference to the system Location Manager
-//		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-//
-//		// Define a listener that responds to location updates
-//		LocationListener locationListener = new LocationListener() {
-//		    public void onLocationChanged(Location location) {
-//		      // Called when a new location is found by the network location provider.
-//		      //makeUseOfNewLocation(location);
-//		    }
-//
-//		    public void onStatusChanged(String provider, int status, Bundle extras) {
-//		    	
-//		    }
-//
-//		    public void onProviderEnabled(String provider) {}
-//
-//		    public void onProviderDisabled(String provider) {}
-//		  };
-//
-//		// Register the listener with the Location Manager to receive location updates
-//		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-		
-		
+
+		/**
+		 * Location stuff
+		 */
+		// Acquire a reference to the system Location Manager
+		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		boolean enabled = locationManager
+				.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+		// Check if enabled and if not send user to the GSP settings
+		// Better solution would be to display a dialog and suggesting to 
+		// go to the settings
+		if (!enabled) {
+			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+			startActivity(intent);
+		} 
+		Criteria criteria = new Criteria();
+		provider = locationManager.getBestProvider(criteria, false);
+		Location location = locationManager.getLastKnownLocation(provider);
+
+		//Initialize the location fields
+		if (location != null) {
+			System.out.println("Provider " + provider + " has been selected.");
+			onLocationChanged(location);
+		} else {
+			Toast.makeText(getApplicationContext(), "Localizacao nao disponivel", Toast.LENGTH_LONG).show();
+		}
+
+
 		if (isNetworkAvailable()){
 			mProgressBar.setVisibility(View.VISIBLE);
 			// Inicia thread que actualiza as messagens
@@ -109,6 +118,12 @@ public class MainActivity extends ListActivity {
 			//connectionHandlerTask.execute();
 			
 
+			/**
+			 * offline dummies
+			 */
+			Tweet tweetGenerator = new Tweet();
+			mTweetsArray = tweetGenerator.generateTweets();
+			handleServerResponse();
 		}  
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
@@ -118,8 +133,19 @@ public class MainActivity extends ListActivity {
 
 	@Override
 	protected void onResume(){
-		//Check for Login
-		if(mUsername == null){
+		/**
+		 * Get location updates
+		 */
+		if (locationManager != null){
+			locationManager.requestLocationUpdates(provider, 0, 0, this);
+		}
+
+		/**
+		 * Get login
+		 */
+		mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
+		 if (!mSharedPreferences.contains("username")){
+
 			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
 			startActivityForResult(i, REQUEST_CODE);		
 		}
@@ -133,7 +159,12 @@ public class MainActivity extends ListActivity {
 	protected void onPause() {
 		Log.e("ServiceP", "Pausing Main Activity");
 		super.onPause();
-		// Another activity is taking focus (this activity is about to be "paused").
+		/*
+		 * Pause location updates
+		 */
+		if (locationManager != null){
+			locationManager.removeUpdates(this);
+		}
 	}
 
 	@Override
@@ -147,10 +178,10 @@ public class MainActivity extends ListActivity {
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Main Activity");
 		//unbinding from the Service
-		if(mBound){ unbindService(mConnection); }
-		connectionHandlerTask.stop();
-		connectionHandlerTask.cancel(true);
-		mTweetsArray.removeAll(mTweetsArray);
+		//		if(mBound){ unbindService(mConnection); }
+		//		connectionHandlerTask.stop();
+		//		connectionHandlerTask.cancel(true);
+		//		mTweetsArray.removeAll(mTweetsArray);
 		super.onDestroy();
 	}
 
@@ -202,21 +233,21 @@ public class MainActivity extends ListActivity {
 
 
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle item selection
-	    switch (item.getItemId()) {
-	        case R.id.new_tweet:
-	        	Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
-	        	//String gps_location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toString();
-	        	//Toast.makeText(getApplicationContext(), gps_location, Toast.LENGTH_LONG).show();
-	        	//newTweetIntent.putExtra("gps_location",);
-	        	newTweetIntent.putExtra("username", mUsername);
-	        	startActivity(newTweetIntent);
-	            return true;
-	        default:
-	            return super.onOptionsItemSelected(item);
-	    }
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.new_tweet:
+			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
+			//String gps_location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toString();
+			//Toast.makeText(getApplicationContext(), gps_location, Toast.LENGTH_LONG).show();
+			//newTweetIntent.putExtra("gps_location",);
+			newTweetIntent.putExtra("username", mUsername);
+			startActivity(newTweetIntent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
-	
+
 	private boolean isNetworkAvailable() {
 		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = manager.getActiveNetworkInfo();
@@ -270,7 +301,7 @@ public class MainActivity extends ListActivity {
 	//Não Mexer
 	/** Defines callbacks for service binding, passed to bindService() */
 	public ServiceConnection mConnection = new ServiceConnection() {
-		
+
 
 		@Override
 		public void onServiceConnected(ComponentName className,
@@ -293,8 +324,8 @@ public class MainActivity extends ListActivity {
 	//		AsyncTasks
 	//
 	//
-	
-	
+
+
 	class ConnectionHandlerTask extends AsyncTask<String,Object,String> {
 
 		protected final String KEY_TEXT = "texto";
@@ -410,6 +441,33 @@ public class MainActivity extends ListActivity {
 				handleServerResponse();
 			}
 		}
+	}
+	@Override
+	public void onLocationChanged(Location location) {
+		int lat = (int) (location.getLatitude());
+		int lng = (int) (location.getLongitude());
+		Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
+	}
+
+
+	@Override
+	public void onProviderDisabled(String arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onProviderEnabled(String arg0) {
+		Toast.makeText(this, "Enabled new provider " + provider,
+				Toast.LENGTH_SHORT).show();
+
+	}
+
+	@Override
+	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+		Toast.makeText(this, "Disabled provider " + provider,
+				Toast.LENGTH_SHORT).show();
+
 	}
 }
 
