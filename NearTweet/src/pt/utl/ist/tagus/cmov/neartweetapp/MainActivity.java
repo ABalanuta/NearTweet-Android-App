@@ -208,6 +208,7 @@ public class MainActivity extends ListActivity {
 	        	//String gps_location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toString();
 	        	//Toast.makeText(getApplicationContext(), gps_location, Toast.LENGTH_LONG).show();
 	        	//newTweetIntent.putExtra("gps_location",);
+	        	newTweetIntent.putExtra("username", mUsername);
 	        	startActivity(newTweetIntent);
 	            return true;
 	        default:

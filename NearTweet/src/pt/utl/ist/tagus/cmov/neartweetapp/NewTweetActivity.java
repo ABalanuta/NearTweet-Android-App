@@ -88,6 +88,7 @@ public class NewTweetActivity extends Activity{
 		btnPicture = (Button) findViewById(R.id.cameraButton);
 		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);
 
+		mUsername = getIntent().getExtras().getString("username");
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 		btnPicture.setOnClickListener(new OnClickListener() {
 
@@ -111,7 +112,7 @@ public class NewTweetActivity extends Activity{
 
 						service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 						bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-						//mUsername = getIntent().getExtras().getString("username");
+						
 
 						if(mBound && mService.isConnected()){
 							mService.sendTweet(new TweetDTO(mUsername, mSendTextBox.getText().toString()));
