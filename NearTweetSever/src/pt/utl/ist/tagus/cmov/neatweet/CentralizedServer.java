@@ -122,7 +122,6 @@ class SwitchingHandler extends Thread{
 			else{
 				try {
 					Thread.sleep(250);
-					System.out.print(".");
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

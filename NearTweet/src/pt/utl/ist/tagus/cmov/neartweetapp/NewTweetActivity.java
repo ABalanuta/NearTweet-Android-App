@@ -50,7 +50,7 @@ public class NewTweetActivity extends Activity{
 	private final int CAMERA_PICTURE = 1;
 	private final int GALLERY_PICTURE = 2;
 	private static final String gpsLocation = null;
-
+	Bitmap bitmap = null;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
@@ -88,11 +88,12 @@ public class NewTweetActivity extends Activity{
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 		btnPicture = (Button) findViewById(R.id.cameraButton);
 		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);
-
+		
+		
 		mUsername = getIntent().getExtras().getString("username");
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 		
-		// Conect with the service
+		// Conect with the Service
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 		
@@ -107,7 +108,6 @@ public class NewTweetActivity extends Activity{
 
 		//Bundle bundle = getIntent().getExtras();
 		//String gpsLocation = bundle.getString("gps_location");
-
 		//Toast.makeText(getApplicationContext(), gpsLocation, Toast.LENGTH_LONG).show();
 
 		mSendButton.setOnClickListener(
@@ -116,11 +116,16 @@ public class NewTweetActivity extends Activity{
 					@Override
 					public void onClick(View view) {
 
-						
-						
-
 						if(mBound && mService.isConnected()){
-							mService.sendTweet(new TweetDTO(mUsername, mSendTextBox.getText().toString()));
+							
+							TweetDTO tweet = new TweetDTO(mUsername, mSendTextBox.getText().toString());
+							
+							if(bitmap != null){
+								
+							}
+							
+							
+							mService.sendTweet(tweet);
 							mSendTextBox.setText(null);
 							Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
 							t.setGravity(Gravity.CENTER, 0, 0);
@@ -158,9 +163,9 @@ public class NewTweetActivity extends Activity{
 				// Link to the image
 				final String imageFilePath = cursor.getString(0);
 				File photos = new File(imageFilePath);
-				Bitmap b = decodeFile(photos);
-				b = Bitmap.createScaledBitmap(b, 150, 150, true);
-				imgChoosen.setImageBitmap(b);
+				bitmap = decodeFile(photos);
+				bitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, true);
+				imgChoosen.setImageBitmap(bitmap);
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				cursor.close();
 			}
@@ -172,7 +177,8 @@ public class NewTweetActivity extends Activity{
 		else if (requestCode == CAMERA_PICTURE) {
 			if (data.getExtras() != null) {
 				// here is the image from camera
-				Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+				bitmap = (Bitmap) data.getExtras().get("data");
+				bitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, true);
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				imgChoosen.setImageBitmap(bitmap);
 			}

@@ -12,10 +12,12 @@ import android.R.bool;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.provider.Settings.Secure;
 import android.util.Log;
 
 public class ConnectionHandlerService extends Service {
@@ -24,7 +26,7 @@ public class ConnectionHandlerService extends Service {
 	private final IBinder mBinder = new LocalBinder();
 	private ArrayList<BasicDTO> oldTweetsBuff = new ArrayList<BasicDTO>();
 	private int Clients = 0;
-	private String macAddr = null;
+	private String deviceID = null;
 	private long tweetID = 0;
 
 
@@ -34,24 +36,19 @@ public class ConnectionHandlerService extends Service {
 
 		this.mConectionHandler = new ConnectionHandler();
 		mConectionHandler.start();
-
-		// Gets MAC Adress
-		WifiManager wifiMan = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-		WifiInfo wifiInf = wifiMan.getConnectionInfo();
-		macAddr = wifiInf.getMacAddress();
 		
-		// if Emulator gives null
-		if(macAddr == null){
-			Random r = new Random();
-			macAddr = "BogusMac:" + r.nextDouble();
+		deviceID = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
+		if(deviceID == null){
+			deviceID = "BogusID"+(new Random()).nextLong();
 		}
+		
 		while(!this.isConnected()){
 			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
 		}
 		
-		mConectionHandler.send(new IdentityDTO(macAddr));
+		mConectionHandler.send(new IdentityDTO(deviceID));
 		
-		Log.e("ServiceP", "Mac is " + macAddr);
+		Log.e("ServiceP", "MyDeviceID is " + deviceID);
 		Log.e("ServiceP", "TCP Service Created");
 
 	}
@@ -128,7 +125,7 @@ public class ConnectionHandlerService extends Service {
 	public void sendTweet(TweetDTO tweet){
 
 		if(mConectionHandler != null){
-			tweet.setSrcMacAddr(this.macAddr);
+			tweet.setDeviceID(deviceID);
 			tweet.setTweetID(this.tweetID);
 			mConectionHandler.send(tweet);
 		}
@@ -137,7 +134,7 @@ public class ConnectionHandlerService extends Service {
 	public void sendResponseTweet(TweetResponseDTO tweet){
 
 		if(mConectionHandler != null){
-			tweet.setSrcMacAddr(this.macAddr);
+			tweet.setSrcDeviceID(deviceID);
 			mConectionHandler.send(tweet);
 		}
 	}

@@ -457,7 +457,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 				TweetDTO t = (TweetDTO) dto;		
 
 				// get tweets from server
-				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),t.getSrcMacAddr()));
+				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),t.getDeviceID()));
 				ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
 
 				for (Tweet tweet : mTweetsArray){

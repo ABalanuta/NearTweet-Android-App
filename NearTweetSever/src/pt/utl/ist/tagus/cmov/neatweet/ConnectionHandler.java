@@ -22,7 +22,7 @@ public class ConnectionHandler extends Thread{
 	private ArrayList<BasicDTO> objects = null;
 	private ArrayList<ConnectionHandler> connections = null;
 	private ArrayList<BasicDTO> sentObjects = null;
-	protected String channelMac = null;
+	protected String channelDeviceID = null;
 
 	public ConnectionHandler(Socket sock, ArrayList<BasicDTO> objects, ArrayList<ConnectionHandler> connections,
 			ArrayList<BasicDTO> sentObjects) {
@@ -34,7 +34,7 @@ public class ConnectionHandler extends Thread{
 
 	public void send(Object oo){
 		// Out Channel mabe not started yet
-		if((this.running && !outc.isRunning()) || channelMac != null){
+		if((this.running && !outc.isRunning()) || channelDeviceID != null){
 			int x = 30;
 
 			while(this.running && !outc.isRunning() && x > 0){
@@ -47,7 +47,7 @@ public class ConnectionHandler extends Thread{
 		}
 		/* Se a resposta for Private e o Dest não corresponder, não enviamos */
 		if(oo instanceof TweetResponseDTO){
-			if(((TweetResponseDTO) oo).getDstMacAddr() != channelMac && ((TweetResponseDTO) oo).isPrivate()){
+			if(((TweetResponseDTO) oo).getDestDeviceID() != channelDeviceID && ((TweetResponseDTO) oo).isPrivate()){
 				return;
 			}	
 		}
@@ -143,8 +143,8 @@ public class ConnectionHandler extends Thread{
 					if(oo != null){ 
 
 						if(oo instanceof IdentityDTO){
-							channelMac = ((IdentityDTO) oo).getSourceMac();
-							System.out.println("Receive identity: " + channelMac);
+							channelDeviceID = ((IdentityDTO) oo).getSourceMac();
+							System.out.println("Receive identity: " + channelDeviceID);
 						}
 
 						synchronized (objects) { objects.add((BasicDTO) oo); 

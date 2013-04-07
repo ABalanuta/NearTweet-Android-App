@@ -119,6 +119,10 @@ public class TweetDetailsActivity extends Activity {
 
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
+		
+		// Bind to Service
+		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 		/*
 		 * Adding dummy content to the comments
@@ -143,12 +147,11 @@ public class TweetDetailsActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				
-				service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-				bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 				
 				if(mBound && mService.isConnected()){
 					
-					//mService.sendResponseTweet(new TweetResponseDTO("Reposta", textBox.getText().toString(), 
+					TweetResponseDTO r = new TweetResponseDTO("Resp", textBox.getText().toString(), "", 0, false); 
+					mService.sendResponseTweet(r);
 					Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
 				}else{
 					Toast.makeText(getApplicationContext(), "Server Error", Toast.LENGTH_LONG).show();
