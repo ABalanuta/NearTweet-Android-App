@@ -55,6 +55,7 @@ public class NewTweetActivity extends Activity{
 	public boolean mBound = false;
 	private Intent service;
 	private ConnectionHandlerService mService;
+	private Bitmap bitmap;
 
 	private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -151,9 +152,9 @@ public class NewTweetActivity extends Activity{
 				// Link to the image
 				final String imageFilePath = cursor.getString(0);
 				File photos = new File(imageFilePath);
-				Bitmap b = decodeFile(photos);
-				b = Bitmap.createScaledBitmap(b, 150, 150, true);
-				imgChoosen.setImageBitmap(b);
+				bitmap = decodeFile(photos);
+				bitmap = Bitmap.createScaledBitmap(bitmap, 300, 300, true);
+				imgChoosen.setImageBitmap(bitmap);
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				cursor.close();
 			}
@@ -165,7 +166,7 @@ public class NewTweetActivity extends Activity{
 		else if (requestCode == CAMERA_PICTURE) {
 			if (data.getExtras() != null) {
 				// here is the image from camera
-				Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+				bitmap = (Bitmap) data.getExtras().get("data");
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				imgChoosen.setImageBitmap(bitmap);
 			}

@@ -2,11 +2,15 @@ package pt.utl.ist.tagus.cmov.neartweetapp;
 
 import java.util.ArrayList;
 
+import android.graphics.Bitmap;
+
 public class Tweet {
 	String mText;
 	String mUsername;
 	String mMacAddress;
 	String mTweetId;
+	Bitmap mImage = null;
+	String[] mCoordinates = new String[2] ;
 	
 	public Tweet(){
 	}
@@ -35,7 +39,15 @@ public class Tweet {
 	public String getMacAddress() {
 		return mMacAddress;
 	}
+	public boolean hasImage(){
+		if (mImage==null) return false;
+		else return true;
+	}
 
+	public boolean hasCoordenates(){
+		if (mCoordinates[0] ==null || mCoordinates[1]==null)return true;
+		else return false;
+	}
 
 	public String getText() {
 		return mText;

@@ -109,8 +109,6 @@ public class LoginActivity extends Activity {
 	  super.finish();
 	} 
 		
-
-
 	/**
 	 * Shows the progress UI and hides the login form.
 	 */

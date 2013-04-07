@@ -32,12 +32,17 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
@@ -320,10 +325,11 @@ public class MainActivity extends ListActivity implements LocationListener{
 				tweets.add(tweetInterface);
 			}
 
-			String[] keys = {KEY_TEXT,KEY_TWEETER };
-			int[] ids = {android.R.id.text1, android.R.id.text2};
-			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
-					android.R.layout.simple_list_item_2, keys, ids);
+			TweetAdapter adapter = new TweetAdapter(mTweetsArray,this);
+//			String[] keys = {KEY_TEXT,KEY_TWEETER };
+//			int[] ids = {android.R.id.text1, android.R.id.text2};
+//			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
+//					android.R.layout.simple_list_item_2, keys, ids);
 			setListAdapter(adapter);
 		}
 	}
@@ -527,5 +533,74 @@ public class MainActivity extends ListActivity implements LocationListener{
             Toast.makeText(getApplicationContext(), "Right-to-left fling", Toast.LENGTH_SHORT).show();
         }
     }
+    /**
+     * Custom adapter to display pretty tweets
+     */
+    private class TweetAdapter extends BaseAdapter {
+
+    	private ArrayList<Tweet> mTweets = new ArrayList<Tweet>();
+    	private Context mContext;
+
+    	
+    	public TweetAdapter(ArrayList<Tweet> tweets, Context context) {
+    		mTweets = tweets;
+    		mContext = context;
+    		
+    	}
+    	
+    	
+		@Override
+		public int getCount() {
+			return mTweets.size();
+		}
+
+		@Override
+		public Object getItem(int position) {	
+			return mTweets.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			LinearLayout itemLayout;
+			
+			Tweet tweet = mTweets.get(position);
+			
+			itemLayout= (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.custom_tweet, parent, false);
+			
+			TextView tweetText = (TextView) itemLayout.findViewById(R.id.tweet);
+			TextView tweetUsername = (TextView) itemLayout.findViewById(R.id.username);
+			ImageView pollImg = (ImageView) itemLayout.findViewById(R.id.imagePool);
+			ImageView gpsImg = (ImageView) itemLayout.findViewById(R.id.imageGps);
+			ImageView imgImg = (ImageView) itemLayout.findViewById(R.id.imageImage);
+			
+			gpsImg.setVisibility(ImageView.INVISIBLE);
+			pollImg.setVisibility(ImageView.INVISIBLE);
+			imgImg.setVisibility(ImageView.INVISIBLE);
+			tweetText.setText(tweet.getText());
+			tweetUsername.setText("@" + tweet.getUsername());
+			
+			
+			
+			if(tweet instanceof TweetPoll){
+				pollImg.setVisibility(ImageView.VISIBLE);
+			}
+			else{
+				if (tweet.hasCoordenates()){
+					gpsImg.setVisibility(ImageView.VISIBLE);
+				}
+				if (tweet.hasImage()){
+					imgImg.setVisibility(ImageView.VISIBLE);
+				}
+			}
+			return itemLayout;
+		}
+		
+    	
+    	}
 }
 
