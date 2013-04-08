@@ -1,5 +1,12 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
@@ -15,6 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -24,6 +33,8 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -148,7 +159,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 				// Inicia thread que actualiza as messagens
 				connectionHandlerTask = new ConnectionHandlerTask();
 				connectionHandlerTask.execute();
-				
+
 				/**
 				 * offline dummies
 				 */
@@ -159,8 +170,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 			else{
 				Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 			}
-			
-			
+
+
 	}
 
 
@@ -228,6 +239,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		details.putExtra("tweet_uid", tweet.getUsername());
 		details.putExtra("tweet_deviceID", tweet.getDeviceID());
 		details.putExtra("username", tweet.getUsername());
+		Toast.makeText(getApplicationContext(), tweet.getTweetId() + " " +tweet.getText()+" "+ tweet.getUsername(), Toast.LENGTH_LONG).show();
 		startActivity(details);
 	}
 
@@ -420,7 +432,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 							e.printStackTrace();
 						}
 					}
-					
+
 				}else{
 					try {
 						Thread.sleep(250);
@@ -452,9 +464,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 
 	}
-	
+
 	public void onProgressUpdateAux(){
-		
+
 		// Parte Grafica
 		ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
 
@@ -475,8 +487,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 		setListAdapter(adapter);
 		handleServerResponse();
 	}
-	
-	
+
+
 
 
 	@Override
@@ -581,6 +593,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			ImageView pollImg = (ImageView) itemLayout.findViewById(R.id.imagePool);
 			ImageView gpsImg = (ImageView) itemLayout.findViewById(R.id.imageGps);
 			ImageView imgImg = (ImageView) itemLayout.findViewById(R.id.imageImage);
+			ImageView userImg = (ImageView) itemLayout.findViewById(R.id.imageViewUserPicTweet);
 
 			gpsImg.setVisibility(ImageView.INVISIBLE);
 			pollImg.setVisibility(ImageView.INVISIBLE);
@@ -596,15 +609,59 @@ public class MainActivity extends ListActivity implements LocationListener{
 			//			else{
 			if (tweet.hasCoordenates()){
 				gpsImg.setVisibility(ImageView.VISIBLE);
+
+				/**
+				 * Lets You access internet on the interface thread
+				 */
+				if (android.os.Build.VERSION.SDK_INT > 9) {
+					StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+					StrictMode.setThreadPolicy(policy);
+				}
+
+				SharedPreferences mSharedPreferences0 = getApplicationContext().getSharedPreferences("MyPref",0);
+				SharedPreferences mSharedPreferences1 = getApplicationContext().getSharedPreferences("MyPref",1);
+
+				if (mSharedPreferences0.contains("imgurl") && mSharedPreferences1.contains("username")){
+					String url = mSharedPreferences0.getString("imgurl", "");
+					String username = mSharedPreferences1.getString("username", "");
+
+					if(tweet.getUsername()!=null){
+						Log.v("tweet username", tweet.getUsername());
+					}
+					if (username!=null){
+						Log.v("username", username);
+					}
+					if (tweet.getUsername()!=null && username!=null){
+						if (tweet.getUsername().equals(username)){
+							URL newurl;
+							try {
+								newurl = new URL(url);
+								Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
+								userImg.setImageBitmap(mIcon_val);
+							} catch (MalformedURLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} 
+						}
+					}
+				}
+
+
+				//			if(tweet instanceof TweetPoll){
+				//				pollImg.setVisibility(ImageView.VISIBLE);
+				//			}
+
+				if (tweet.hasImage()){
+					imgImg.setVisibility(ImageView.VISIBLE);
+				}
+				//}
+
 			}
-			if (tweet.hasImage()){
-				imgImg.setVisibility(ImageView.VISIBLE);
-			}
-			//}
 			return itemLayout;
+
 		}
-
-
 	}
 }
-
