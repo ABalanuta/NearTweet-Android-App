@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -87,9 +88,12 @@ public class NewTweetActivity extends Activity{
 
 		swtchGps = (Switch) findViewById(R.id.switchGps);
 
-		lat = getIntent().getExtras().getString("gps_location_lat");
-		lng = getIntent().getExtras().getString("gps_location_lng");
-		mUsername = getIntent().getExtras().getString("username");
+		Bundle bundle = getIntent().getExtras();
+		lat = bundle.getString("gps_location_lat");
+		lng = bundle.getString("gps_location_lng");
+		SharedPreferences mSharedPreferences1 = getApplicationContext().getSharedPreferences("MyPref",1);
+		mUsername = mSharedPreferences1.getString("username", "");
+		Toast.makeText(getApplicationContext(), mUsername + lat +lng, Toast.LENGTH_LONG).show();
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 
 		// Conect with the Service

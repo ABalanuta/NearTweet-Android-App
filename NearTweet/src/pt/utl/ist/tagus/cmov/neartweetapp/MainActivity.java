@@ -3,7 +3,10 @@ package pt.utl.ist.tagus.cmov.neartweetapp;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -36,6 +39,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -241,6 +245,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		details.putExtra("tweet_id", tweet.getId());
 		details.putExtra("tweet_text", tweet.getText());
 		details.putExtra("tweet_uid", tweet.getUsername());
+		Toast.makeText(getApplicationContext(), tweet.getId() + " " +tweet.getText()+" "+ tweet.getUsername(), Toast.LENGTH_LONG).show();
 		startActivity(details);
 	}
 
@@ -610,6 +615,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			ImageView pollImg = (ImageView) itemLayout.findViewById(R.id.imagePool);
 			ImageView gpsImg = (ImageView) itemLayout.findViewById(R.id.imageGps);
 			ImageView imgImg = (ImageView) itemLayout.findViewById(R.id.imageImage);
+			ImageView userImg = (ImageView) itemLayout.findViewById(R.id.imageViewUserPicTweet);
 
 			gpsImg.setVisibility(ImageView.INVISIBLE);
 			pollImg.setVisibility(ImageView.INVISIBLE);
@@ -617,7 +623,45 @@ public class MainActivity extends ListActivity implements LocationListener{
 			tweetText.setText(tweet.getText());
 			tweetUsername.setText("@" + tweet.getUsername());
 
-
+			/**
+			 * Lets You access internet on the interface thread
+			 */
+			if (android.os.Build.VERSION.SDK_INT > 9) {
+				StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+				StrictMode.setThreadPolicy(policy);
+			}
+			
+			SharedPreferences mSharedPreferences0 = getApplicationContext().getSharedPreferences("MyPref",0);
+			SharedPreferences mSharedPreferences1 = getApplicationContext().getSharedPreferences("MyPref",1);
+			
+			if (mSharedPreferences0.contains("imgurl") && mSharedPreferences1.contains("username")){
+				String url = mSharedPreferences0.getString("imgurl", "");
+				String username = mSharedPreferences1.getString("username", "");
+				
+				if(tweet.getUsername()!=null){
+				Log.v("tweet username", tweet.getUsername());
+				}
+				if (username!=null){
+				Log.v("username", username);
+				}
+				if (tweet.getUsername()!=null && username!=null){
+				if (tweet.getUsername().equals(username)){
+					URL newurl;
+					try {
+						newurl = new URL(url);
+						Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
+						userImg.setImageBitmap(mIcon_val);
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+				}
+			}
+				}
+			
 
 			if(tweet instanceof TweetPoll){
 				pollImg.setVisibility(ImageView.VISIBLE);

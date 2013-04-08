@@ -5,10 +5,7 @@ import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
-import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
-import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
-
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -30,9 +27,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.StrictMode;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -102,6 +99,7 @@ public class TweetDetailsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_tweet_details);
+		
 
 		mSharedPreferences = getApplicationContext().getSharedPreferences(
 				"MyPref", 0);
@@ -115,6 +113,7 @@ public class TweetDetailsActivity extends Activity {
 
 		Bundle bundle = getIntent().getExtras();
 		String tweet_uid = bundle.getString("tweet_uid");
+		
 		tweet_text = bundle.getString("tweet_text");
 
 		txtTweet.setText(tweet_text);
@@ -123,22 +122,26 @@ public class TweetDetailsActivity extends Activity {
 		// Bind to Service
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		if (android.os.Build.VERSION.SDK_INT > 9) {
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+			StrictMode.setThreadPolicy(policy);
+		}
 
 		/*
 		 * Adding dummy content to the comments
 		 */
-//		ArrayList<HashMap<String,String>> comments = 
-//				new ArrayList<HashMap<String,String>>();
-//		HashMap<String,String> commentInterface = new HashMap<String,String>();
-//		commentInterface.put("Comment","ola");
-//		commentInterface.put("UserName","Balanuta");
-//		comments.add(commentInterface);
-//
-//		String[] keys = {"Comment", "UserName"};
-//		int[] ids = {android.R.id.text1,android.R.id.text2};
-//		SimpleAdapter mAdapter = new SimpleAdapter(this, comments,
-//				android.R.layout.simple_list_item_2, keys, ids);
-//		lstVwComments.setAdapter(mAdapter);
+		ArrayList<HashMap<String,String>> comments = 
+				new ArrayList<HashMap<String,String>>();
+		HashMap<String,String> commentInterface = new HashMap<String,String>();
+		commentInterface.put("Comment","ola");
+		commentInterface.put("UserName","Balanuta");
+		comments.add(commentInterface);
+
+		String[] keys = {"Comment", "UserName"};
+		int[] ids = {android.R.id.text1,android.R.id.text2};
+		SimpleAdapter mAdapter = new SimpleAdapter(this, comments,
+				android.R.layout.simple_list_item_2, keys, ids);
+		lstVwComments.setAdapter(mAdapter);
 
 
 		// Send Reply
@@ -160,16 +163,6 @@ public class TweetDetailsActivity extends Activity {
 			}
 		});
 
-		// Login to Twitter
-		btnShareTwitter.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-
-				//login to twitter and post stuff
-				loginToTwitter();
-			}
-		});
 
 		/**
 		 * Verifies if user is already logedin to twitter
@@ -205,6 +198,16 @@ public class TweetDetailsActivity extends Activity {
 					long userID = accessToken.getUserId();
 					User user = twitter.showUser(userID);
 					String username = user.getName();
+					try {
+						String url = user.getProfileImageURL();
+						e.putString("imgurl", url);
+						Toast.makeText(getApplicationContext(), "has url: " + url, Toast.LENGTH_LONG).show();
+						Log.v("URL",url);
+						e.commit();
+						
+					} catch (IllegalStateException ex) {
+						ex.printStackTrace();
+					}
 
 					Toast.makeText(getApplicationContext(), username, Toast.LENGTH_LONG).show();
 
@@ -230,6 +233,7 @@ public class TweetDetailsActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.tweet_details, menu);
+
 		return true;
 	}
 
@@ -255,11 +259,28 @@ public class TweetDetailsActivity extends Activity {
 			} catch (TwitterException e) {
 				e.printStackTrace();
 			}
+
 		}
 		else{
 			Toast.makeText(getApplicationContext(),
 					"Already Logged into twitter", Toast.LENGTH_LONG).show();
 			new updateTwitterStatus().execute(tweet_text);
+		}
+	}
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.share_twitter:
+			//login to twitter and post stuff
+			loginToTwitter();
+			return true;
+		case R.id.send_response:
+			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
+			startActivity(newCommentIntent);
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
 		}
 	}
 
@@ -308,6 +329,7 @@ public class TweetDetailsActivity extends Activity {
 
 				// Update status
 				twitter4j.Status response = twitter.updateStatus(status);
+
 
 				Log.d("Status", "> " + response.getText());
 			} catch (TwitterException e) {
