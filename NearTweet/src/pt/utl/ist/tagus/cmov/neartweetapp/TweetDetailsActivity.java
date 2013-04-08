@@ -1,16 +1,13 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
-import pt.utl.ist.tagus.cmov.neartweet.R.id;
-import pt.utl.ist.tagus.cmov.neartweet.R.layout;
-import pt.utl.ist.tagus.cmov.neartweet.R.menu;
+import pt.utl.ist.tagus.cmov.neartweetapp.aux.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
-import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
-import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 
 import twitter4j.Twitter;
@@ -39,6 +36,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -76,7 +74,7 @@ public class TweetDetailsActivity extends Activity {
 
 	private static SharedPreferences mSharedPreferences;
 
-
+	private ResponseUpdaterTask rut = null;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
@@ -100,15 +98,20 @@ public class TweetDetailsActivity extends Activity {
 	};
 
 
-	
-	
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+
+		// Conect with the Service
+		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_tweet_details);
 
-		mSharedPreferences = getApplicationContext().getSharedPreferences(
-				"MyPref", 0);
+		mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref", 0);
 
 		txtTweet = (TextView) findViewById(R.id.tweet_text);
 		txtUserName = (TextView) findViewById(R.id.user_name);
@@ -118,31 +121,19 @@ public class TweetDetailsActivity extends Activity {
 		lstVwComments = (ListView) findViewById(R.id.listViewComments);
 
 		Bundle bundle = getIntent().getExtras();
-		String tweet_uid = bundle.getString("tweet_uid");
+		final String tweet_uid = bundle.getString("tweet_uid");
+		final String tweet_deviceID = bundle.getString("tweet_deviceID");
+		final long tweet_ID = bundle.getLong("tweet_id");
+		
 		tweet_text = bundle.getString("tweet_text");
 
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
-		
-		// Bind to Service
-		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
-		/*
-		 * Adding dummy content to the comments
-		 */
-//		ArrayList<HashMap<String,String>> comments = 
-//				new ArrayList<HashMap<String,String>>();
-//		HashMap<String,String> commentInterface = new HashMap<String,String>();
-//		commentInterface.put("Comment","ola");
-//		commentInterface.put("UserName","Balanuta");
-//		comments.add(commentInterface);
-//
-//		String[] keys = {"Comment", "UserName"};
-//		int[] ids = {android.R.id.text1,android.R.id.text2};
-//		SimpleAdapter mAdapter = new SimpleAdapter(this, comments,
-//				android.R.layout.simple_list_item_2, keys, ids);
-//		lstVwComments.setAdapter(mAdapter);
+		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+
+
+
 
 
 		// Send Reply
@@ -150,13 +141,18 @@ public class TweetDetailsActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				
-				
+
+
 				if(mBound && mService.isConnected()){
-					
-					TweetResponseDTO r = new TweetResponseDTO("Resp", textBox.getText().toString(), "", 0, false); 
+
+					TweetResponseDTO r = new TweetResponseDTO(tweet_uid, textBox.getText().toString(),
+							tweet_deviceID, tweet_ID, false);
 					mService.sendResponseTweet(r);
 					Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
+
+
+
+
 				}else{
 					Toast.makeText(getApplicationContext(), "Server Error", Toast.LENGTH_LONG).show();
 				}
@@ -171,7 +167,7 @@ public class TweetDetailsActivity extends Activity {
 			public void onClick(View v) {
 
 				//login to twitter and post stuff
-				loginToTwitter();
+				//				loginToTwitter();
 			}
 		});
 
@@ -233,12 +229,15 @@ public class TweetDetailsActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Details Activity");
+
+		rut.kill();
+		//rut.cancel(true);
 		//unbinding from the Service
-		if(mBound){ unbindService(mConnection); }
+		if(mBound){ unbindService(mConnection);}
 		super.onDestroy();
 	}
-	
-	
+
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -282,6 +281,10 @@ public class TweetDetailsActivity extends Activity {
 		return mSharedPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
 	}
 
+
+
+
+
 	/**
 	 * Function to update status
 	 * */
@@ -304,6 +307,7 @@ public class TweetDetailsActivity extends Activity {
 		 * getting Places JSON
 		 * */
 		protected String doInBackground(String... args) {
+
 			Log.d("Tweet Text", "> " + args[0]);
 			String status = args[0];
 			try {
@@ -348,4 +352,93 @@ public class TweetDetailsActivity extends Activity {
 		}
 
 	}
+
+
+	public class ResponseUpdaterTask extends AsyncTask<Void,Void,Void> { 
+
+		private boolean running = false;
+		ArrayList<HashMap<String,String>> comments = new ArrayList<HashMap<String,String>>();
+		Bundle bundle = getIntent().getExtras();
+		long tweetID = bundle.getLong("tweet_id");
+		String srcDeviceID = bundle.getString("tweet_deviceID");
+		HashMap<String,String> commentInterface = new HashMap<String,String>();
+
+		String[] keys = {"Comment", "UserName"};
+		int[] ids = {android.R.id.text1,android.R.id.text2};
+		SimpleAdapter mAdapter = new SimpleAdapter(getApplicationContext(), comments, android.R.layout.simple_list_item_2, keys, ids);
+//		ArrayAdapter<String> adapter  = new ArrayAdapter<String>(this,
+//	            android.R.layout.simple_list_item_1,
+//	            respostas);
+
+
+		public void kill(){
+			running = false;
+		}
+
+
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			
+			lstVwComments.setAdapter(mAdapter);
+			Log.e("ServiceP", "progress Update");
+			
+			
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+
+			//lstVwComments.setAdapter(mAdapter);
+			
+			Log.e("ServiceP", "doInBackground Update");
+
+			running = true;
+
+			
+			// Transformar num assync
+			while((mService == null || !mService.isConnected()) && running){
+				try {
+					Thread.sleep(250);
+					Log.e("ServiceP", "Waiting for the Channal");
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			
+
+			while(running){
+
+				Log.e("ServiceP", "NIOOP");
+
+				for(Tweet t : mService.getAllTweets()){
+					if(t.getDeviceID().equals(srcDeviceID)){
+						if(t.getTweetId() == tweetID){
+							Log.e("ServiceP", "found");
+							for(TweetResponseDTO dto : t.getResponses()){
+								commentInterface.put("Comment",dto.getResponse());
+								commentInterface.put("UserName",dto.getNickName());
+								
+								comments.add(commentInterface);
+								Log.e("ServiceP", "->" + comments.get(0).toString());
+								//Toast.makeText(getApplicationContext(), comments.get(0).toString(), Toast.LENGTH_LONG);
+							}
+							publishProgress();
+							break;
+						}
+					}
+				}
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+			return null;
+
+		}
+	}
+
 }

@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -50,14 +51,14 @@ public class NewTweetActivity extends Activity{
 	private final int GALLERY_PICTURE = 2;
 	private static final String gpsLocation = null;
 	private Bitmap bitmap = null;
-
+	String lat;
+	String lng;
+	
+	
 	// Connection to Service Variables
 	public boolean mBound = false;
 	private Intent service;
 	private ConnectionHandlerService mService;
-
-	String lat;
-	String lng;
 
 	private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -96,6 +97,9 @@ public class NewTweetActivity extends Activity{
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
+		
+		
+		
 
 		btnPicture.setOnClickListener(new OnClickListener() {
 

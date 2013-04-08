@@ -1,21 +1,13 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Executor;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.aux.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
-import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
-import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
-import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
-import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ComponentName;
@@ -23,9 +15,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -34,15 +23,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -52,7 +38,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -84,12 +69,11 @@ public class MainActivity extends ListActivity implements LocationListener{
 	public static int lat;
 	public static int lng;
 
-	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
-	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
+	Executor executor = null;
 	ConnectionHandlerTask connectionHandlerTask = null;
 	private LocationManager locationManager = null;
 
-	public Bitmap globalTeste = null;
+	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 
 
 	// Connection to Service Vriables
@@ -164,8 +148,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 				// Inicia thread que actualiza as messagens
 				connectionHandlerTask = new ConnectionHandlerTask();
 				connectionHandlerTask.execute();
-
-
+				
 				/**
 				 * offline dummies
 				 */
@@ -176,6 +159,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 			else{
 				Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 			}
+			
+			
 	}
 
 
@@ -241,6 +226,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 		details.putExtra("tweet_id", tweet.getTweetId());
 		details.putExtra("tweet_text", tweet.getText());
 		details.putExtra("tweet_uid", tweet.getUsername());
+		details.putExtra("tweet_deviceID", tweet.getDeviceID());
+		details.putExtra("username", tweet.getUsername());
 		startActivity(details);
 	}
 
@@ -419,37 +406,24 @@ public class MainActivity extends ListActivity implements LocationListener{
 				}
 			}
 
-			boolean loadedOld = false;
 
-			Log.e("ServiceP", "Loop Started");
 			while(running){
 				if(mService != null){
-					ArrayList<BasicDTO> objects;
-					if(!loadedOld){
-						objects  = mService.receveOldTweets();
-						for(BasicDTO oo : objects){
-							publishProgress(oo);
-						}
-						loadedOld = true;
-
-					}else if(mService.hasTweets()){
+					if(mService.hasUpdates()){
 						Log.e("ServiceP", "Loop Receve");
-						objects = mService.receveNewTweets();
-						for(BasicDTO oo : objects){
-							publishProgress(oo);
-						}
+						mTweetsArray = mService.getAllTweets();
+						publishProgress("Reload_Screen");
 					}else{
 						try {
 							Thread.sleep(250);
-
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
+					
 				}else{
 					try {
 						Thread.sleep(250);
-
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -461,87 +435,49 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		@Override
 		protected void onProgressUpdate(Object... values) {
+
 			if(values[0] instanceof String){
 				String updadeCommand = (String)values[0];
+
 				if(updadeCommand.equals("Connected")){
 					MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
 					Toast.makeText(getApplicationContext(), "Connected ", Toast.LENGTH_LONG).show();
 					return;
 				}
-			}else if(values[0] instanceof BasicDTO){
-				onProgressUpdateAux((BasicDTO)values[0]);
+				else if(updadeCommand.equals("Reload_Screen")){
+					onProgressUpdateAux();
+				}
 			}
 		}
 
 
-		protected void onProgressUpdateAux(BasicDTO dto){
+	}
+	
+	public void onProgressUpdateAux(){
+		
+		// Parte Grafica
+		ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
 
-			if(dto.getType().equals(TypeofDTO.TWEET_DTO)){
+		for (Tweet tr : mTweetsArray){
+			String text = tr.getText();
+			String username = tr.getUsername();
 
-				TweetDTO t = (TweetDTO) dto;		
-
-				Tweet tweet = new Tweet(t.getTweet(), t.getNickName(), t.getDeviceID(),t.getTweetID());
-
-				
-				if(t.getUserPhoto() != null){
-					tweet.setUserImage(decodeImage(t.getUserPhoto()));
-				}				
-
-				if(t.getPhoto() != null){
-					tweet.setImage(decodeImage(t.getPhoto()));
-				}
-
-				if(t.hasCoordenates()){
-					tweet.setCoordinates(t.getCoordenates());
-				}
-
-				mTweetsArray.add(tweet);
-
-
-				// Parte Grafica
-				ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
-
-				for (Tweet tr : mTweetsArray){
-					String text = tr.getText();
-					String username = tr.getUsername();
-
-					HashMap<String,String> tweetInterface = new HashMap<String,String>();
-					tweetInterface.put(KEY_TEXT,text);
-					tweetInterface.put(KEY_TWEETER,username);
-					tweets.add(tweetInterface);
-				}
-
-				String[] keys = {KEY_TEXT,KEY_TWEETER };
-				int[] ids = {android.R.id.text1, android.R.id.text2};
-				SimpleAdapter adapter = new SimpleAdapter(getApplicationContext(), tweets,
-						android.R.layout.simple_list_item_2, keys, ids);
-				setListAdapter(adapter);
-				handleServerResponse();
-			}
-
-			// IF response Adds it to the Tweet Object
-			else if( dto.getType().equals(TypeofDTO.TWEET_RESP_DTO)){
-
-				TweetResponseDTO response = (TweetResponseDTO) dto;
-
-				for(Tweet t : mTweetsArray){
-					if(response.getDestDeviceID().equals(t.getDeviceID())){
-						if(response.getDesTweetID() == t.getTweetId()){
-							t.addResponse(response);
-							return;
-						}
-					}
-				}
-				Log.e("ServiceP", "There is no Such Tweet");				
-			}
-
+			HashMap<String,String> tweetInterface = new HashMap<String,String>();
+			tweetInterface.put(KEY_TEXT,text);
+			tweetInterface.put(KEY_TWEETER,username);
+			tweets.add(tweetInterface);
 		}
-	}
 
-	public Bitmap decodeImage(byte[] b){
-		InputStream is = new ByteArrayInputStream(b);
-		return BitmapFactory.decodeStream(is);
+		String[] keys = {KEY_TEXT,KEY_TWEETER };
+		int[] ids = {android.R.id.text1, android.R.id.text2};
+		SimpleAdapter adapter = new SimpleAdapter(getApplicationContext(), tweets,
+				android.R.layout.simple_list_item_2, keys, ids);
+		setListAdapter(adapter);
+		handleServerResponse();
 	}
+	
+	
+
 
 	@Override
 	public void onLocationChanged(Location location) {
@@ -570,6 +506,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 				Toast.LENGTH_SHORT).show();
 
 	}
+
+
 
 	/*
 	 * Gestures to mark tweets as spam
