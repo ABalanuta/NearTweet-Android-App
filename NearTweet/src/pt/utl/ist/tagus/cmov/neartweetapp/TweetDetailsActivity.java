@@ -148,7 +148,7 @@ public class TweetDetailsActivity extends Activity {
 					TweetResponseDTO r = new TweetResponseDTO(tweet_uid, textBox.getText().toString(),
 							tweet_deviceID, tweet_ID, false);
 					mService.sendResponseTweet(r);
-					Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), " SENT ", Toast.LENGTH_SHORT).show();
 				}else{
 					Toast.makeText(getApplicationContext(), "Server Error", Toast.LENGTH_LONG).show();
 				}
