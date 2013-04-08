@@ -30,6 +30,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 public class NewTweetActivity extends Activity{
@@ -39,6 +40,7 @@ public class NewTweetActivity extends Activity{
 	public static EditText mSendTextBox;
 	private String mUsername = null;
 
+	public static Switch swtchGps;
 	public static Button btnPicture;
 	public static ImageView imgChoosen;
 	private Intent pictureActionIntent = null;
@@ -47,12 +49,15 @@ public class NewTweetActivity extends Activity{
 	private final int CAMERA_PICTURE = 1;
 	private final int GALLERY_PICTURE = 2;
 	private static final String gpsLocation = null;
-	Bitmap bitmap = null;
+	private Bitmap bitmap = null;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
 	private Intent service;
 	private ConnectionHandlerService mService;
+
+	String lat;
+	String lng;
 
 	private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -70,12 +75,6 @@ public class NewTweetActivity extends Activity{
 		}
 	};
 
-
-
-
-
-
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -84,17 +83,20 @@ public class NewTweetActivity extends Activity{
 		mSendButton = (Button) findViewById(R.id.sendButton);
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 		btnPicture = (Button) findViewById(R.id.cameraButton);
-		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);
-		
-		
+		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);	
+
+		swtchGps = (Switch) findViewById(R.id.switchGps);
+
+		lat = getIntent().getExtras().getString("gps_location_lat");
+		lng = getIntent().getExtras().getString("gps_location_lng");
 		mUsername = getIntent().getExtras().getString("username");
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
-		
+
 		// Conect with the Service
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-		
-		
+
+
 		btnPicture.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -119,20 +121,29 @@ public class NewTweetActivity extends Activity{
 							t.show();
 							return;
 						}
-						
-						
-						
+
+
+
 						if(mBound && mService.isConnected()){
-							
+
 							TweetDTO tweet = new TweetDTO(mUsername, mSendTextBox.getText().toString());
-							
+
 							if(bitmap != null){
 								ByteArrayOutputStream stream = new ByteArrayOutputStream();
-							    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-							    byte[] byteArray = stream.toByteArray();
+								bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+								byte[] byteArray = stream.toByteArray();
 								tweet.setPhoto(byteArray);
 							}
-							
+
+							if (swtchGps.isChecked()){
+
+								// inserir gps
+
+							}
+
+
+
+
 							mService.sendTweet(tweet);
 							mSendTextBox.setText(null);
 							Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
@@ -142,6 +153,7 @@ public class NewTweetActivity extends Activity{
 						}else{
 							Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show();
 						}
+
 					}
 				} );
 	}
