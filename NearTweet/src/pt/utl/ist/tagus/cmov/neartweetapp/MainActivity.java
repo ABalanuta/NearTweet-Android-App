@@ -68,6 +68,8 @@ public class MainActivity extends ListActivity implements LocationListener{
     private int REL_SWIPE_MIN_DISTANCE; 
     private int REL_SWIPE_MAX_OFF_PATH;
     private int REL_SWIPE_THRESHOLD_VELOCITY;
+    public static int lat;
+    public static int lng;
 
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
@@ -95,6 +97,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		setContentView(R.layout.activity_main);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
+		lat = 0;
+		lng = 0;
 
 		/**
 		 * Location stuff
@@ -267,9 +271,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 		switch (item.getItemId()) {
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
-			//String gps_location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toString();
-			//Toast.makeText(getApplicationContext(), gps_location, Toast.LENGTH_LONG).show();
-			//newTweetIntent.putExtra("gps_location",);
+
+			newTweetIntent.putExtra("gps_location_lng",""+lng);
+			newTweetIntent.putExtra("gps_location_lat",""+lat);
 			newTweetIntent.putExtra("username", mUsername);
 			startActivity(newTweetIntent);
 			return true;
@@ -480,8 +484,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 	}
 	@Override
 	public void onLocationChanged(Location location) {
-		int lat = (int) (location.getLatitude());
-		int lng = (int) (location.getLongitude());
+		lat = (int) (location.getLatitude());
+		lng = (int) (location.getLongitude());
 		Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
 	}
 

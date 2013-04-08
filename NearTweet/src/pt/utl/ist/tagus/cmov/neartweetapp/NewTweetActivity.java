@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-
-import pt.utl.ist.tagus.cmov.neartweetapp.MainActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
@@ -21,17 +19,16 @@ import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.BounceInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 public class NewTweetActivity extends Activity{
@@ -41,6 +38,7 @@ public class NewTweetActivity extends Activity{
 	public static EditText mSendTextBox;
 	private String mUsername = null;
 
+	public static Switch swtchGps;
 	public static Button btnPicture;
 	public static ImageView imgChoosen;
 	private Intent pictureActionIntent = null;
@@ -56,6 +54,8 @@ public class NewTweetActivity extends Activity{
 	private Intent service;
 	private ConnectionHandlerService mService;
 	private Bitmap bitmap;
+	String lat;
+	String lng;
 
 	private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -73,12 +73,6 @@ public class NewTweetActivity extends Activity{
 		}
 	};
 
-
-
-
-
-
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -88,7 +82,10 @@ public class NewTweetActivity extends Activity{
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 		btnPicture = (Button) findViewById(R.id.cameraButton);
 		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);
-
+		swtchGps = (Switch) findViewById(R.id.switchGps);
+		
+		lat = getIntent().getExtras().getString("gps_location_lat");
+		lng = getIntent().getExtras().getString("gps_location_lng");
 		mUsername = getIntent().getExtras().getString("username");
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 		btnPicture.setOnClickListener(new OnClickListener() {
@@ -109,19 +106,38 @@ public class NewTweetActivity extends Activity{
 
 					@Override
 					public void onClick(View view) {
-
-
-						service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-						bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 						
+						if (swtchGps.isChecked()){
+							//TODO adicionar tweet com campos lng e lat sao strings
+							service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+							bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+							
 
-						if(mBound && mService.isConnected()){
-							mService.sendTweet(new TweetDTO(mUsername, mSendTextBox.getText().toString()));
-							mSendTextBox.setText(null);
-							Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
-						}else{
-							Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_LONG).show();
+							if(mBound && mService.isConnected()){
+								mService.sendTweet(new TweetDTO(mUsername, mSendTextBox.getText().toString()));
+								mSendTextBox.setText(null);
+								Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
+							}else{
+								Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_LONG).show();
+							}
+							
 						}
+						else{
+
+							service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+							bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+							
+
+							if(mBound && mService.isConnected()){
+								mService.sendTweet(new TweetDTO(mUsername, mSendTextBox.getText().toString()));
+								mSendTextBox.setText(null);
+								Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
+							}else{
+								Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_LONG).show();
+							}
+							
+						}
+
 					}
 				} );
 	}
