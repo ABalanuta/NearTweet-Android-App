@@ -20,12 +20,16 @@ public class Tweet {
 		mUsername = uId;
 		mMacAddress = macAddress;
 		mTweetId = id;
+		mCoordinates[0]=null;
+		mCoordinates[1]=null;
 	}
 	
 	public Tweet(String texto, String uId, String macAddress){
 		mText = texto;
 		mUsername = uId;
 		mMacAddress = macAddress;
+		mCoordinates[0]=null;
+		mCoordinates[1]=null;
 	}
 
 	public String getUsername() {
@@ -45,8 +49,8 @@ public class Tweet {
 	}
 
 	public boolean hasCoordenates(){
-		if (mCoordinates[0] ==null || mCoordinates[1]==null)return true;
-		else return false;
+		if (mCoordinates[0] ==null || mCoordinates[1]==null)return false;
+		else return true;
 	}
 
 	public String getText() {
