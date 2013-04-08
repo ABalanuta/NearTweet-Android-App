@@ -116,20 +116,29 @@ public class NewTweetActivity extends Activity{
 					@Override
 					public void onClick(View view) {
 
+						if(mSendTextBox.getText().length() == 0){
+							Toast t = Toast.makeText(getApplicationContext(), "Insert Text", Toast.LENGTH_SHORT);
+							t.setGravity(Gravity.CENTER, 0, 0);
+							t.show();
+							return;
+						}
+						
+						
+						
 						if(mBound && mService.isConnected()){
 							
 							TweetDTO tweet = new TweetDTO(mUsername, mSendTextBox.getText().toString());
 							
 							if(bitmap != null){
-								
+								tweet.setPhoto(bitmap);
 							}
-							
 							
 							mService.sendTweet(tweet);
 							mSendTextBox.setText(null);
 							Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
 							t.setGravity(Gravity.CENTER, 0, 0);
 							t.show();
+							finish();
 						}else{
 							Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show();
 						}

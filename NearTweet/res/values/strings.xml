@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">NearTweet V0.02</string>
+    <string name="app_name">NearTweet V0.99</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="share">Partilha no Twitter</string>

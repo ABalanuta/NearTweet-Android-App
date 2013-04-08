@@ -85,6 +85,27 @@ public class ConnectionHandlerService extends Service {
 	@Override
 	public void onDestroy() {
 
+		
+		// Mais Eficiente
+//		Log.e("ServiceP", "Waiting for Clients for 60s ");
+//		
+//		int x = 60;
+//		
+//		while(x > 0){
+//			
+//			if(Clients > 0){
+//				Log.e("ServiceP", "Client Entered, Destroy Aborted");
+//			}
+//			
+//			try {
+//				Thread.sleep(1000);
+//				x--;
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+		
+		
+		
 		Log.e("ServiceP", "TCP Service Destroy");
 
 		this.mConectionHandler.close();
@@ -153,4 +174,12 @@ public class ConnectionHandlerService extends Service {
 
 		return mConectionHandler.isConnected();
 	}
+	
+	class WaitingToDie extends Thread{
+		@Override
+		public void run() {
+			
+		}
+	}
+	
 }
