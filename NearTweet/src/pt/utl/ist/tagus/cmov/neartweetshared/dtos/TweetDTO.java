@@ -13,6 +13,8 @@ public class TweetDTO extends BasicDTO{
 	private String srcDeviceID = null;
 	private long tweetID = -1;
 	private byte[] photo = null;
+	private byte[] userPhoto = null;
+	private String[] mCoordinates = new String[2];
 	
 	public TweetDTO(String nickName, String tweet) {
 		super(TypeofDTO.TWEET_DTO);
@@ -20,7 +22,35 @@ public class TweetDTO extends BasicDTO{
 		this.nickName = nickName;
 	}
 
+	public String[] getCoordenates(){
+		return mCoordinates;
+	}
 	
+	public String getLAT() {
+		return mCoordinates[0];
+	}
+	public String getLNG() {
+		return mCoordinates[1];
+	}
+	
+	public void setLAT(String lat) {
+		mCoordinates[0] = lat;
+	}
+	
+	public void setLNG(String lng) {
+		mCoordinates[0] = lng;
+	}
+
+	public byte[] getUserPhoto() {
+		return userPhoto;
+	}
+
+
+	public void setUserPhoto(byte[] userPhoto) {
+		this.userPhoto = userPhoto;
+	}
+
+
 	public void setPhoto(byte[] b){
 		this.photo = b;
 	}
@@ -57,4 +87,9 @@ public class TweetDTO extends BasicDTO{
 		return this.nickName;
 	}
 
+	public boolean hasCoordenates(){
+		if (mCoordinates[0] == null || mCoordinates[1]==null)return false;
+		else return true;
+	}
+	
 }

@@ -142,7 +142,7 @@ public class ConnectionHandlerService extends Service {
 
 		if(mConectionHandler != null){
 			tweet.setDeviceID(deviceID);
-			tweet.setTweetID(this.tweetID);
+			tweet.setTweetID(this.tweetID++);
 			mConectionHandler.send(tweet);
 		}
 	}

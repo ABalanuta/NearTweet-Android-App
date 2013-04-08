@@ -168,7 +168,6 @@ public class NewTweetActivity extends Activity{
 		if(mBound){
 			unbindService(mConnection);
 		}
-
 		super.onDestroy();
 	}
 

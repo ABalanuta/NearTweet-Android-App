@@ -1,17 +1,18 @@
-package pt.utl.ist.tagus.cmov.neartweet;
+package pt.utl.ist.tagus.cmov.neartweetapp;
 
 import java.util.ArrayList;
 
-import pt.utl.ist.tagus.cmov.neartweetapp.LoginActivity;
-import pt.utl.ist.tagus.cmov.neartweetapp.MainActivity;
-import pt.utl.ist.tagus.cmov.neartweetapp.Tweet;
-import pt.utl.ist.tagus.cmov.neartweetapp.TweetPoll;
+import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweet.R.id;
+import pt.utl.ist.tagus.cmov.neartweet.R.layout;
+import pt.utl.ist.tagus.cmov.neartweet.R.menu;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -80,11 +81,14 @@ public class NewTweetPoolActivity extends Activity {
 				SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
 				mSharedPreferences.getString("username", username);
 				mSharedPreferences.getString("deviceid",deviceid);
-				TweetPoll mTweetPool = new TweetPoll(edtTxtPergunta.getText().toString(), username, deviceid);
+				
+				//TODO
+				//TweetPoll mTweetPool = new TweetPoll(edtTxtPergunta.getText().toString(), username, deviceid);
 				
 				for (String answer : respostas){
-					mTweetPool.addAnswer(answer);
+				//	mTweetPool.addAnswer(answer);
 				}
+				
 				//TODO send tweetPool to server
 				Toast.makeText(getApplicationContext(), "hade enviar par um servidor", Toast.LENGTH_LONG).show();
 				startActivity(new Intent(getApplicationContext(), MainActivity.class));
@@ -93,7 +97,7 @@ public class NewTweetPoolActivity extends Activity {
 		
 		
 	}
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

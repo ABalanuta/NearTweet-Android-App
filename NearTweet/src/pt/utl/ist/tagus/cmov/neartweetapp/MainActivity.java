@@ -7,13 +7,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import pt.utl.ist.tagus.cmov.neartweet.NewTweetPoolActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
-import pt.utl.ist.tagus.cmov.neartweet.TweetDetailsActivity;
+import pt.utl.ist.tagus.cmov.neartweetapp.aux.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -78,11 +78,11 @@ public class MainActivity extends ListActivity implements LocationListener{
 	private String provider;// location stuff
 	private static SharedPreferences mSharedPreferences;
 
-    private int REL_SWIPE_MIN_DISTANCE; 
-    private int REL_SWIPE_MAX_OFF_PATH;
-    private int REL_SWIPE_THRESHOLD_VELOCITY;
-    public static int lat;
-    public static int lng;
+	private int REL_SWIPE_MIN_DISTANCE; 
+	private int REL_SWIPE_MAX_OFF_PATH;
+	private int REL_SWIPE_THRESHOLD_VELOCITY;
+	public static int lat;
+	public static int lng;
 
 	public static ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	ArrayList<HashMap<String,String>> tweets = new ArrayList<HashMap<String,String>>();
@@ -91,7 +91,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	public Bitmap globalTeste = null;
 
-	
+
 	// Connection to Service Vriables
 	public boolean mBound = false;
 	private Intent service;
@@ -238,7 +238,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
 		Intent details = new Intent(this,TweetDetailsActivity.class);
-		details.putExtra("tweet_id", tweet.getId());
+		details.putExtra("tweet_id", tweet.getTweetId());
 		details.putExtra("tweet_text", tweet.getText());
 		details.putExtra("tweet_uid", tweet.getUsername());
 		startActivity(details);
@@ -457,7 +457,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			}
 			return "";
 		}
-		
+
 
 		@Override
 		protected void onProgressUpdate(Object... values) {
@@ -477,18 +477,28 @@ public class MainActivity extends ListActivity implements LocationListener{
 		protected void onProgressUpdateAux(BasicDTO dto){
 
 			if(dto.getType().equals(TypeofDTO.TWEET_DTO)){
+
 				TweetDTO t = (TweetDTO) dto;		
 
-				Tweet tweet = new Tweet(t.getTweet(),t.getNickName(),t.getDeviceID());
+				Tweet tweet = new Tweet(t.getTweet(), t.getNickName(), t.getDeviceID(),t.getTweetID());
+
 				
+				if(t.getUserPhoto() != null){
+					tweet.setUserImage(decodeImage(t.getUserPhoto()));
+				}				
+
 				if(t.getPhoto() != null){
-					InputStream is = new ByteArrayInputStream(t.getPhoto());
-					Bitmap bmp = BitmapFactory.decodeStream(is);
-					tweet.setImage(bmp);
+					tweet.setImage(decodeImage(t.getPhoto()));
 				}
 
-				// get tweets from server
+				if(t.hasCoordenates()){
+					tweet.setCoordinates(t.getCoordenates());
+				}
+
 				mTweetsArray.add(tweet);
+
+
+				// Parte Grafica
 				ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
 
 				for (Tweet tr : mTweetsArray){
@@ -508,8 +518,31 @@ public class MainActivity extends ListActivity implements LocationListener{
 				setListAdapter(adapter);
 				handleServerResponse();
 			}
+
+			// IF response Adds it to the Tweet Object
+			else if( dto.getType().equals(TypeofDTO.TWEET_RESP_DTO)){
+
+				TweetResponseDTO response = (TweetResponseDTO) dto;
+
+				for(Tweet t : mTweetsArray){
+					if(response.getDestDeviceID().equals(t.getDeviceID())){
+						if(response.getDesTweetID() == t.getTweetId()){
+							t.addResponse(response);
+							return;
+						}
+					}
+				}
+				Log.e("ServiceP", "There is no Such Tweet");				
+			}
+
 		}
 	}
+
+	public Bitmap decodeImage(byte[] b){
+		InputStream is = new ByteArrayInputStream(b);
+		return BitmapFactory.decodeStream(is);
+	}
+
 	@Override
 	public void onLocationChanged(Location location) {
 		lat = (int) (location.getLatitude());
@@ -618,18 +651,18 @@ public class MainActivity extends ListActivity implements LocationListener{
 			tweetUsername.setText("@" + tweet.getUsername());
 
 
-
-			if(tweet instanceof TweetPoll){
-				pollImg.setVisibility(ImageView.VISIBLE);
+			// todo
+			//			if(tweet instanceof TweetPoll){
+			//				pollImg.setVisibility(ImageView.VISIBLE);
+			//			}
+			//			else{
+			if (tweet.hasCoordenates()){
+				gpsImg.setVisibility(ImageView.VISIBLE);
 			}
-			else{
-				if (tweet.hasCoordenates()){
-					gpsImg.setVisibility(ImageView.VISIBLE);
-				}
-				if (tweet.hasImage()){
-					imgImg.setVisibility(ImageView.VISIBLE);
-				}
+			if (tweet.hasImage()){
+				imgImg.setVisibility(ImageView.VISIBLE);
 			}
+			//}
 			return itemLayout;
 		}
 

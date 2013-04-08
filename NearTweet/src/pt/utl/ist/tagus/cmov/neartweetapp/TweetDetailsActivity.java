@@ -1,8 +1,12 @@
-package pt.utl.ist.tagus.cmov.neartweet;
+package pt.utl.ist.tagus.cmov.neartweetapp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweet.R.id;
+import pt.utl.ist.tagus.cmov.neartweet.R.layout;
+import pt.utl.ist.tagus.cmov.neartweet.R.menu;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
@@ -226,6 +230,15 @@ public class TweetDetailsActivity extends Activity {
 
 	}
 
+	@Override
+	protected void onDestroy() {
+		Log.e("ServiceP", "Killing Details Activity");
+		//unbinding from the Service
+		if(mBound){ unbindService(mConnection); }
+		super.onDestroy();
+	}
+	
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
