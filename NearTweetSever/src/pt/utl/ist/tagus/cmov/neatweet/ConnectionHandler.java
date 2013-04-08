@@ -143,7 +143,7 @@ public class ConnectionHandler extends Thread{
 					if(oo != null){ 
 
 						if(oo instanceof IdentityDTO){
-							channelDeviceID = ((IdentityDTO) oo).getSourceMac();
+							channelDeviceID = ((IdentityDTO) oo).getSourceDeviceID();
 							System.out.println("Receive identity: " + channelDeviceID);
 						}
 

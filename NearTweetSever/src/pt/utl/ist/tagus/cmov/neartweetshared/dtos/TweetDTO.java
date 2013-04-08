@@ -1,5 +1,7 @@
 package pt.utl.ist.tagus.cmov.neartweetshared.dtos;
 
+import javax.swing.ImageIcon;
+
 public class TweetDTO extends BasicDTO{
 
 	/**
@@ -10,7 +12,7 @@ public class TweetDTO extends BasicDTO{
 	private String tweet = null;
 	private String srcDeviceID = null;
 	private long tweetID = -1;
-	private Object photo = null;
+	private byte[] photo = null;
 	
 	public TweetDTO(String nickName, String tweet) {
 		super(TypeofDTO.TWEET_DTO);
@@ -19,11 +21,11 @@ public class TweetDTO extends BasicDTO{
 	}
 
 	
-	public void setPhoto(Object b){
+	public void setPhoto(byte[] b){
 		this.photo = b;
 	}
 	
-	public Object getPhoto(){
+	public byte[] getPhoto(){
 		return this.photo;
 	}
 	

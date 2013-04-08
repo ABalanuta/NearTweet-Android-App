@@ -1,11 +1,10 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-
-import pt.utl.ist.tagus.cmov.neartweetapp.MainActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
@@ -21,7 +20,6 @@ import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -29,7 +27,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.BounceInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -130,7 +127,10 @@ public class NewTweetActivity extends Activity{
 							TweetDTO tweet = new TweetDTO(mUsername, mSendTextBox.getText().toString());
 							
 							if(bitmap != null){
-								tweet.setPhoto(bitmap);
+								ByteArrayOutputStream stream = new ByteArrayOutputStream();
+							    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+							    byte[] byteArray = stream.toByteArray();
+								tweet.setPhoto(byteArray);
 							}
 							
 							mService.sendTweet(tweet);

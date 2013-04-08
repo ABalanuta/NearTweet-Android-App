@@ -36,6 +36,14 @@ public class Tweet {
 		return mUsername;
 	}
 
+	public Bitmap getImage() {
+		return mImage;
+	}
+
+	public void setImage(Bitmap mImage) {
+		this.mImage = mImage;
+	}
+
 	public String getId(){
 		return mTweetId;
 	}

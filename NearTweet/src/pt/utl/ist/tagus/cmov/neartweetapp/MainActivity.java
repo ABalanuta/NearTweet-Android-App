@@ -1,5 +1,9 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -11,6 +15,7 @@ import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.Lo
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ComponentName;
@@ -18,6 +23,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -26,7 +34,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -42,6 +52,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -75,8 +86,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 	ConnectionHandlerTask connectionHandlerTask = null;
 	private LocationManager locationManager = null;
 
+	public Bitmap globalTeste = null;
 
-
+	
 	// Connection to Service Vriables
 	public boolean mBound = false;
 	private Intent service;
@@ -327,10 +339,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 			}
 
 			TweetAdapter adapter = new TweetAdapter(mTweetsArray,this);
-//			String[] keys = {KEY_TEXT,KEY_TWEETER };
-//			int[] ids = {android.R.id.text1, android.R.id.text2};
-//			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
-//					android.R.layout.simple_list_item_2, keys, ids);
+			//			String[] keys = {KEY_TEXT,KEY_TWEETER };
+			//			int[] ids = {android.R.id.text1, android.R.id.text2};
+			//			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
+			//					android.R.layout.simple_list_item_2, keys, ids);
 			setListAdapter(adapter);
 		}
 	}
@@ -440,7 +452,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			}
 			return "";
 		}
-
+		
 
 		@Override
 		protected void onProgressUpdate(Object... values) {
@@ -462,13 +474,21 @@ public class MainActivity extends ListActivity implements LocationListener{
 			if(dto.getType().equals(TypeofDTO.TWEET_DTO)){
 				TweetDTO t = (TweetDTO) dto;		
 
+				Tweet tweet = new Tweet(t.getTweet(),t.getNickName(),t.getDeviceID());
+				
+				if(t.getPhoto() != null){
+					InputStream is = new ByteArrayInputStream(t.getPhoto());
+					Bitmap bmp = BitmapFactory.decodeStream(is);
+					tweet.setImage(bmp);
+				}
+
 				// get tweets from server
-				mTweetsArray.add(new Tweet(t.getTweet(),t.getNickName(),t.getDeviceID()));
+				mTweetsArray.add(tweet);
 				ArrayList<HashMap<String,String>> tweets =  new ArrayList<HashMap<String,String>>();
 
-				for (Tweet tweet : mTweetsArray){
-					String text = tweet.getText();
-					String username = tweet.getUsername();
+				for (Tweet tr : mTweetsArray){
+					String text = tr.getText();
+					String username = tr.getUsername();
 
 					HashMap<String,String> tweetInterface = new HashMap<String,String>();
 					tweetInterface.put(KEY_TEXT,text);
@@ -537,26 +557,26 @@ public class MainActivity extends ListActivity implements LocationListener{
 		}
 
 
-        private void onRTLFling() {
-            Toast.makeText(getApplicationContext(), "Right-to-left fling", Toast.LENGTH_SHORT).show();
-        }
-    }
-    /**
-     * Custom adapter to display pretty tweets
-     */
-    private class TweetAdapter extends BaseAdapter {
+		private void onRTLFling() {
+			Toast.makeText(getApplicationContext(), "Right-to-left fling", Toast.LENGTH_SHORT).show();
+		}
+	}
+	/**
+	 * Custom adapter to display pretty tweets
+	 */
+	private class TweetAdapter extends BaseAdapter {
 
-    	private ArrayList<Tweet> mTweets = new ArrayList<Tweet>();
-    	private Context mContext;
+		private ArrayList<Tweet> mTweets = new ArrayList<Tweet>();
+		private Context mContext;
 
-    	
-    	public TweetAdapter(ArrayList<Tweet> tweets, Context context) {
-    		mTweets = tweets;
-    		mContext = context;
-    		
-    	}
-    	
-    	
+
+		public TweetAdapter(ArrayList<Tweet> tweets, Context context) {
+			mTweets = tweets;
+			mContext = context;
+
+		}
+
+
 		@Override
 		public int getCount() {
 			return mTweets.size();
@@ -575,25 +595,25 @@ public class MainActivity extends ListActivity implements LocationListener{
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			LinearLayout itemLayout;
-			
+
 			Tweet tweet = mTweets.get(position);
-			
+
 			itemLayout= (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.custom_tweet, parent, false);
-			
+
 			TextView tweetText = (TextView) itemLayout.findViewById(R.id.tweet);
 			TextView tweetUsername = (TextView) itemLayout.findViewById(R.id.username);
 			ImageView pollImg = (ImageView) itemLayout.findViewById(R.id.imagePool);
 			ImageView gpsImg = (ImageView) itemLayout.findViewById(R.id.imageGps);
 			ImageView imgImg = (ImageView) itemLayout.findViewById(R.id.imageImage);
-			
+
 			gpsImg.setVisibility(ImageView.INVISIBLE);
 			pollImg.setVisibility(ImageView.INVISIBLE);
 			imgImg.setVisibility(ImageView.INVISIBLE);
 			tweetText.setText(tweet.getText());
 			tweetUsername.setText("@" + tweet.getUsername());
-			
-			
-			
+
+
+
 			if(tweet instanceof TweetPoll){
 				pollImg.setVisibility(ImageView.VISIBLE);
 			}
@@ -607,8 +627,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 			}
 			return itemLayout;
 		}
-		
-    	
-    	}
+
+
+	}
 }
 

@@ -42,6 +42,5 @@
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:src="@android:drawable/ic_menu_gallery" />
-        
 </LinearLayout>
 </LinearLayout>
