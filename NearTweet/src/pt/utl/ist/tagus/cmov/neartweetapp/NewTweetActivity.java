@@ -174,6 +174,7 @@ public class NewTweetActivity extends Activity{
 				File photos = new File(imageFilePath);
 				bitmap = decodeFile(photos);
 				bitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, true);
+
 				imgChoosen.setImageBitmap(bitmap);
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				cursor.close();
@@ -188,6 +189,7 @@ public class NewTweetActivity extends Activity{
 				// here is the image from camera
 				bitmap = (Bitmap) data.getExtras().get("data");
 				bitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, true);
+
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				imgChoosen.setImageBitmap(bitmap);
 			}
