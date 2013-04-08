@@ -1,6 +1,6 @@
 package pt.utl.ist.tagus.cmov.neartweetshared.dtos;
 
-import javax.swing.ImageIcon;
+
 
 public class TweetDTO extends BasicDTO{
 
