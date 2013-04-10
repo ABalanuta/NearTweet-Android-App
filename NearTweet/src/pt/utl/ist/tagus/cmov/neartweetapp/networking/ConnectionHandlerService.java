@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import pt.utl.ist.tagus.cmov.neartweetapp.aux.Tweet;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.IdentityDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
