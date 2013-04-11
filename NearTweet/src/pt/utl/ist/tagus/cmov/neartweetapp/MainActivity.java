@@ -1,5 +1,6 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+import com.agimind.widget.SlideHolder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,6 +67,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 	private String mUsername = null;
 	private int REQUEST_CODE = 42424242; //Used for Login
 
+	private SlideHolder mSlideHolder;
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
 
@@ -106,6 +108,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 		Log.e("ServiceP", "Created Main Activity");
 
 		setContentView(R.layout.activity_main);
+		
+		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 		lat = 0;
 		lng = 0;
