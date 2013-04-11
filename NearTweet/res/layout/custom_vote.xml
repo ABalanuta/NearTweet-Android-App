@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="2dip"
+    android:paddingTop="2dip" >
+
+        <TextView
+            android:id="@+id/textViewOption"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Esta a chuber chorissas no tagus"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#000000"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/textViewVoters"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Balanuta"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#000000"
+            android:textSize="9sp"
+            android:textStyle="italic" />
+
+</LinearLayout>
