@@ -18,9 +18,12 @@ public class Tweet {
 	String[] mCoordinates = new String[2];
 	
 	
+	public Tweet() {
+	}
+	
+	
 	public Tweet(String mText, String mUsername, String mDeviceID,
 			long mTweetId) {
-		super();
 		this.mText = mText;
 		this.mUsername = mUsername;
 		this.mDeviceID = mDeviceID;
@@ -28,9 +31,7 @@ public class Tweet {
 	}
 	
 	public void addResponse(TweetResponseDTO resp){
-		
 		this.mResponses.add(resp);
-		
 	}
 	
 	public String getText() {

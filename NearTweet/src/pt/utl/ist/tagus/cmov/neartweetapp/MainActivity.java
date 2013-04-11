@@ -13,6 +13,7 @@ import java.util.concurrent.Executor;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import android.app.AlertDialog;
@@ -117,9 +118,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 		boolean enabled = locationManager
 				.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-		// Check if enabled and if not send user to the GSP settings
-		// Better solution would be to display a dialog and suggesting to 
-		// go to the settings
 		if (!enabled) {
 			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			startActivity(intent);
@@ -128,12 +126,11 @@ public class MainActivity extends ListActivity implements LocationListener{
 		provider = locationManager.getBestProvider(criteria, false);
 		Location location = locationManager.getLastKnownLocation(provider);
 
-		//Initialize the location fields
 		if (location != null) {
 			System.out.println("Provider " + provider + " has been selected.");
 			onLocationChanged(location);
 		} else {
-			//Toast.makeText(getApplicationContext(), "Localizacao nao disponivel", Toast.LENGTH_SHORT).show();
+
 		}
 
 		/*
@@ -157,15 +154,15 @@ public class MainActivity extends ListActivity implements LocationListener{
 			if (isNetworkAvailable()){
 				mProgressBar.setVisibility(View.VISIBLE);
 				// Inicia thread que actualiza as messagens
-				connectionHandlerTask = new ConnectionHandlerTask();
-				connectionHandlerTask.execute();
+				//connectionHandlerTask = new ConnectionHandlerTask();
+				//connectionHandlerTask.execute();
 
 				/**
-				 * offline dummies
+				 * offline dummies: NAO APAGAR
 				 */
-				//Tweet tweetGenerator = new Tweet();
-				//mTweetsArray = tweetGenerator.generateTweets();
-				//handleServerResponse();
+				Tweet tweetGenerator = new Tweet();
+				mTweetsArray = tweetGenerator.generateTweets();
+				handleServerResponse();
 			}  
 			else{
 				Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
@@ -233,14 +230,19 @@ public class MainActivity extends ListActivity implements LocationListener{
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
-		Intent details = new Intent(this,TweetDetailsActivity.class);
-		details.putExtra("tweet_id", tweet.getTweetId());
-		details.putExtra("tweet_text", tweet.getText());
-		details.putExtra("tweet_uid", tweet.getUsername());
-		details.putExtra("tweet_deviceID", tweet.getDeviceID());
-		details.putExtra("username", tweet.getUsername());
-		Toast.makeText(getApplicationContext(), tweet.getTweetId() + " " +tweet.getText()+" "+ tweet.getUsername(), Toast.LENGTH_LONG).show();
-		startActivity(details);
+		if(tweet instanceof TweetPoll){
+			Toast.makeText(getApplicationContext(), "Devia Abrir uma Poll", Toast.LENGTH_LONG).show();
+		}
+		else{
+			Intent details = new Intent(this,TweetDetailsActivity.class);
+			details.putExtra("tweet_id", tweet.getTweetId());
+			details.putExtra("tweet_text", tweet.getText());
+			details.putExtra("tweet_uid", tweet.getUsername());
+			details.putExtra("tweet_deviceID", tweet.getDeviceID());
+			details.putExtra("username", tweet.getUsername());
+			Toast.makeText(getApplicationContext(), tweet.getTweetId() + " " +tweet.getText()+" "+ tweet.getUsername(), Toast.LENGTH_LONG).show();
+			startActivity(details);
+		}
 	}
 
 	@Override
@@ -343,10 +345,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 			}
 
 			TweetAdapter adapter = new TweetAdapter(mTweetsArray,this);
-			//			String[] keys = {KEY_TEXT,KEY_TWEETER };
-			//			int[] ids = {android.R.id.text1, android.R.id.text2};
-			//			SimpleAdapter adapter = new SimpleAdapter(this, tweets,
-			//					android.R.layout.simple_list_item_2, keys, ids);
 			setListAdapter(adapter);
 		}
 	}
@@ -601,67 +599,60 @@ public class MainActivity extends ListActivity implements LocationListener{
 			tweetText.setText(tweet.getText());
 			tweetUsername.setText("@" + tweet.getUsername());
 
+			/**
+			 * Lets You access internet on the interface thread
+			 */
+			if (android.os.Build.VERSION.SDK_INT > 9) {
+				StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+				StrictMode.setThreadPolicy(policy);
+			}
 
-			// todo
-			//			if(tweet instanceof TweetPoll){
-			//				pollImg.setVisibility(ImageView.VISIBLE);
-			//			}
-			//			else{
-			if (tweet.hasCoordenates()){
-				gpsImg.setVisibility(ImageView.VISIBLE);
+			SharedPreferences mSharedPreferences0 = getApplicationContext().getSharedPreferences("MyPref",0);
+			SharedPreferences mSharedPreferences1 = getApplicationContext().getSharedPreferences("MyPref",1);
 
-				/**
-				 * Lets You access internet on the interface thread
-				 */
-				if (android.os.Build.VERSION.SDK_INT > 9) {
-					StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-					StrictMode.setThreadPolicy(policy);
+			if (mSharedPreferences0.contains("imgurl") && mSharedPreferences1.contains("username")){
+				String url = mSharedPreferences0.getString("imgurl", "");
+				String username = mSharedPreferences1.getString("username", "");
+
+				if(tweet.getUsername()!=null){
+					Log.v("tweet username", tweet.getUsername());
 				}
-
-				SharedPreferences mSharedPreferences0 = getApplicationContext().getSharedPreferences("MyPref",0);
-				SharedPreferences mSharedPreferences1 = getApplicationContext().getSharedPreferences("MyPref",1);
-
-				if (mSharedPreferences0.contains("imgurl") && mSharedPreferences1.contains("username")){
-					String url = mSharedPreferences0.getString("imgurl", "");
-					String username = mSharedPreferences1.getString("username", "");
-
-					if(tweet.getUsername()!=null){
-						Log.v("tweet username", tweet.getUsername());
-					}
-					if (username!=null){
-						Log.v("username", username);
-					}
-					if (tweet.getUsername()!=null && username!=null){
-						if (tweet.getUsername().equals(username)){
-							URL newurl;
-							try {
-								newurl = new URL(url);
-								Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
-								userImg.setImageBitmap(mIcon_val);
-							} catch (MalformedURLException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} 
+				if (username!=null){
+					Log.v("username", username);
+				}
+				if (tweet.getUsername()!=null && username!=null){
+					if (tweet.getUsername().equals(username)){
+						URL newurl;
+						try {
+							newurl = new URL(url);
+							Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream());
+							userImg.setImageBitmap(mIcon_val);
+						} catch (MalformedURLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
 				}
+			}
 
 
-				//			if(tweet instanceof TweetPoll){
-				//				pollImg.setVisibility(ImageView.VISIBLE);
-				//			}
-
+			if(tweet instanceof TweetPoll){
+				pollImg.setVisibility(ImageView.VISIBLE);
+			}
+			else{
+				if (tweet.hasCoordenates()){
+					gpsImg.setVisibility(ImageView.VISIBLE);
+				}
 				if (tweet.hasImage()){
 					imgImg.setVisibility(ImageView.VISIBLE);
 				}
-				//}
-
 			}
 			return itemLayout;
-
 		}
+
+
 	}
 }
