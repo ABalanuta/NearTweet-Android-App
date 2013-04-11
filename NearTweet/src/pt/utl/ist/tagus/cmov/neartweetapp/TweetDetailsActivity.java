@@ -49,6 +49,8 @@ public class TweetDetailsActivity extends Activity {
 	public static EditText textBox;
 	public static Button btnSendReply;
 	public static ListView lstVwComments;
+	public static TextView txtLat;
+	public static TextView txtLong;
 	ProgressDialog pDialog;
 	private String TWITTER_CONSUMER_KEY = "20o4JfRtmLAQ9v1HpwwHKw";
 	private String TWITTER_CONSUMER_SECRET = "pmLgr4ozXj2Dw8HBk3sqHykuOwAf0mDrjed4fzlkc";
@@ -99,14 +101,21 @@ public class TweetDetailsActivity extends Activity {
 		textBox = (EditText) findViewById(R.id.editText1);
 		btnSendReply = (Button) findViewById(R.id.send_reply);
 		lstVwComments = (ListView) findViewById(R.id.listViewComments);
+		txtLat = (TextView) findViewById(R.id.textViewCoordinateLat);
+		txtLong = (TextView) findViewById(R.id.textViewCoordinateLong);
 
 		Bundle bundle = getIntent().getExtras();
 		final String tweet_uid = bundle.getString("tweet_uid");
+		String location_lng = bundle.getString("gps_location_lng");
+		String location_lat = bundle.getString("gps_location_lat");
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
 
 		tweet_text = bundle.getString("tweet_text");
-
+		if (location_lat!=null || location_lng!=null){
+			txtLat.setText("Lat: " +  location_lat);
+			txtLong.setText("Long: " + location_lng);
+		}
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
 

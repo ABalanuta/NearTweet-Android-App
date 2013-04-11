@@ -17,5 +17,7 @@
     <string name="add_question">Pergunta:</string>
     <string name="add_option_response">Opcoes de resposta:</string>
     <string name="title_activity_new_comment">NewComment</string>
+    <string name="latitude">Lat: </string>
+    <string name="longitude">Long: </string>
 
 </resources>

@@ -55,27 +55,10 @@ public class NewTweetActivity extends Activity{
 	String lat;
 	String lng;
 	
-	
 	// Connection to Service Variables
 	public boolean mBound = false;
 	private Intent service;
 	private ConnectionHandlerService mService;
-
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className,
-				IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			mBound = true;
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			mBound = false;
-		}
-	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +69,6 @@ public class NewTweetActivity extends Activity{
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 		btnPicture = (Button) findViewById(R.id.cameraButton);
 		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);	
-
 		swtchGps = (Switch) findViewById(R.id.switchGps);
 
 		Bundle bundle = getIntent().getExtras();
@@ -98,12 +80,8 @@ public class NewTweetActivity extends Activity{
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 
 		// Conect with the Service
-		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-
-		
-		
-		
+		//OFFLINE service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		//OFFLINE bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 		btnPicture.setOnClickListener(new OnClickListener() {
 
@@ -149,9 +127,6 @@ public class NewTweetActivity extends Activity{
 
 							}
 
-
-
-
 							mService.sendTweet(tweet);
 							mSendTextBox.setText(null);
 							Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
@@ -179,6 +154,21 @@ public class NewTweetActivity extends Activity{
 		super.onDestroy();
 	}
 
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className,
+				IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			mBound = true;
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			mBound = false;
+		}
+	};
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {  
 		super.onActivityResult(requestCode, resultCode, data);

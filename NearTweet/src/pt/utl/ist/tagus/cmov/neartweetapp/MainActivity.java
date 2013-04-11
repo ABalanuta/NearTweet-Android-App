@@ -240,7 +240,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
 			details.putExtra("username", tweet.getUsername());
-			Toast.makeText(getApplicationContext(), tweet.getTweetId() + " " +tweet.getText()+" "+ tweet.getUsername(), Toast.LENGTH_LONG).show();
+			if (tweet.hasCoordenates()){
+				details.putExtra("gps_location_lng", "" + tweet.getLNG());
+				details.putExtra("gps_location_lat", "" + tweet.getLNG());
+				details.putExtra("username", tweet.getUsername());
+			}
+			//Toast.makeText(getApplicationContext(), tweet.getLNG() + " " +tweet.getLNG(), Toast.LENGTH_LONG).show();
 			startActivity(details);
 		}
 	}

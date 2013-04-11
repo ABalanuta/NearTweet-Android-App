@@ -78,4 +78,32 @@
         </LinearLayout>
     </ScrollView>
 
+    <ImageView
+        android:id="@+id/imageViewTweetImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView3"
+        android:layout_alignLeft="@+id/listViewComments"
+        android:layout_marginBottom="32dp"
+        android:src="@android:drawable/ic_menu_gallery" />
+
+    <TextView
+        android:id="@+id/textViewCoordinateLat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageViewTweetImage"
+        android:layout_toRightOf="@+id/editText1"
+        android:text="@string/latitude"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/textViewCoordinateLong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textViewCoordinateLat"
+        android:layout_alignBottom="@+id/textViewCoordinateLat"
+        android:layout_centerHorizontal="true"
+        android:text="@string/longitude"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
 </RelativeLayout>
