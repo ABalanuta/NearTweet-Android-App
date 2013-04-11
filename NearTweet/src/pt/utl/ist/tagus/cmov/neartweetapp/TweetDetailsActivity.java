@@ -4,12 +4,12 @@ package pt.utl.ist.tagus.cmov.neartweetapp;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import pt.utl.ist.tagus.cmov.neartweet.NewCommentActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
-
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -21,7 +21,6 @@ import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -31,12 +30,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.StrictMode;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -104,8 +102,8 @@ public class TweetDetailsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 
 		// Conect with the Service
-		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		//service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		//bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 
 		super.onCreate(savedInstanceState);
@@ -124,13 +122,13 @@ public class TweetDetailsActivity extends Activity {
 		final String tweet_uid = bundle.getString("tweet_uid");
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
-		
+
 		tweet_text = bundle.getString("tweet_text");
 
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
 
-		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		//rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 
 
 
@@ -156,16 +154,16 @@ public class TweetDetailsActivity extends Activity {
 			}
 		});
 
-//		// Login to Twitter
-//		btnShareTwitter.setOnClickListener(new OnClickListener() {
-//
-//			@Override
-//			public void onClick(View v) {
-//
-//				//login to twitter and post stuff
-//				//				loginToTwitter();
-//			}
-//		});
+		//		// Login to Twitter
+		//		btnShareTwitter.setOnClickListener(new OnClickListener() {
+		//
+		//			@Override
+		//			public void onClick(View v) {
+		//
+		//				//login to twitter and post stuff
+		//				//				loginToTwitter();
+		//			}
+		//		});
 
 		/**
 		 * Verifies if user is already logedin to twitter
@@ -221,13 +219,29 @@ public class TweetDetailsActivity extends Activity {
 		}
 
 	}
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.share_twitter:
+			//login to twitter and post stuff
+			loginToTwitter();
+			return true;
+		case R.id.send_response:
+			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
+			startActivity(newCommentIntent);
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Details Activity");
 
-		rut.kill();
-		//rut.cancel(true);
+		//OFFLINE rut.kill();
+		//OFFLINE rut.cancel(true);
 		//unbinding from the Service
 		if(mBound){ unbindService(mConnection);}
 		super.onDestroy();
@@ -276,10 +290,6 @@ public class TweetDetailsActivity extends Activity {
 		// return twitter login status from Shared Preferences
 		return mSharedPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
 	}
-
-
-
-
 
 	/**
 	 * Function to update status
@@ -342,7 +352,6 @@ public class TweetDetailsActivity extends Activity {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					btnShareTwitter.setVisibility(Button.GONE);
 				}
 			});
 		}
@@ -362,9 +371,9 @@ public class TweetDetailsActivity extends Activity {
 		String[] keys = {"Comment", "UserName"};
 		int[] ids = {android.R.id.text1,android.R.id.text2};
 		SimpleAdapter mAdapter = new SimpleAdapter(getApplicationContext(), comments, android.R.layout.simple_list_item_2, keys, ids);
-//		ArrayAdapter<String> adapter  = new ArrayAdapter<String>(this,
-//	            android.R.layout.simple_list_item_1,
-//	            respostas);
+		//		ArrayAdapter<String> adapter  = new ArrayAdapter<String>(this,
+		//	            android.R.layout.simple_list_item_1,
+		//	            respostas);
 
 
 		public void kill(){
@@ -377,20 +386,20 @@ public class TweetDetailsActivity extends Activity {
 			mAdapter = new SimpleAdapter(getApplicationContext(), comments, android.R.layout.simple_list_item_2, keys, ids);
 			lstVwComments.setAdapter(mAdapter);
 			Log.e("ServiceP", "progress Update");
-			
-			
+
+
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
 
 			//lstVwComments.setAdapter(mAdapter);
-			
+
 			Log.e("ServiceP", "doInBackground Update");
 
 			running = true;
 
-			
+
 			// Transformar num assync
 			while((mService == null || !mService.isConnected()) && running){
 				try {
@@ -400,7 +409,7 @@ public class TweetDetailsActivity extends Activity {
 					e.printStackTrace();
 				}
 			}
-			
+
 
 			while(running){
 
@@ -413,7 +422,7 @@ public class TweetDetailsActivity extends Activity {
 							for(TweetResponseDTO dto : t.getResponses()){
 								commentInterface.put("Comment",dto.getResponse());
 								commentInterface.put("UserName",dto.getNickName());
-								
+
 								comments.add(commentInterface);
 								Log.e("ServiceP", "->" + comments.get(0).toString());
 								//Toast.makeText(getApplicationContext(), comments.get(0).toString(), Toast.LENGTH_LONG);
@@ -423,14 +432,14 @@ public class TweetDetailsActivity extends Activity {
 						}
 					}
 				}
-				
+
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 			return null;
 

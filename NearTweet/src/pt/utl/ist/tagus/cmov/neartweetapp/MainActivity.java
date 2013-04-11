@@ -154,8 +154,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 			if (isNetworkAvailable()){
 				mProgressBar.setVisibility(View.VISIBLE);
 				// Inicia thread que actualiza as messagens
-				//connectionHandlerTask = new ConnectionHandlerTask();
-				//connectionHandlerTask.execute();
+				//OFFLINE connectionHandlerTask = new ConnectionHandlerTask();
+				//OFFLINE connectionHandlerTask.execute();
 
 				/**
 				 * offline dummies: NAO APAGAR

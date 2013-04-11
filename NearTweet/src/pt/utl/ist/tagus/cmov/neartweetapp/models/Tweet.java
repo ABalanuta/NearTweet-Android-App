@@ -126,9 +126,9 @@ public class Tweet {
 		tweet_with_coordinates.setCoordinates(mDummyCoordinates);
 		
 		ArrayList<Tweet> tweets = new ArrayList<Tweet>();
-		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", 1));
-		tweets.add(new Tweet("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836",2));
-		tweets.add(new TweetPoll("texto do tweet 1, bla bla bla bla bla bla bla bla bla", "Balanuta", "ABCCDEF121836", (long) 4));
+		tweets.add(new Tweet("belo dia", "golfadas", "ABCCDEF121836", 1));
+		tweets.add(new Tweet("eu apago cenas", "Balanuta", "ABCCDEF121836",2));
+		tweets.add(new TweetPoll("pum ptum ptum pa", "David", "ABCCDEF121836", (long) 4));
 		tweets.add(tweet_with_coordinates);
 		return tweets;
 }
