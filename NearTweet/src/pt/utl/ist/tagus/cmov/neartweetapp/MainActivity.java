@@ -231,7 +231,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
 		if(tweet instanceof TweetPoll){
-			Toast.makeText(getApplicationContext(), "Devia Abrir uma Poll", Toast.LENGTH_LONG).show();
+			Intent details = new Intent(this,TweetDetailsPoolActivity.class);
+			details.putExtra("tweet_uid", tweet.getUsername());
+			details.putExtra("tweet_text", tweet.getText());
+			startActivity(details);
 		}
 		else{
 			Intent details = new Intent(this,TweetDetailsActivity.class);

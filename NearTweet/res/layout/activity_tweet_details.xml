@@ -15,7 +15,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="15dp"
-        android:text=""
+        android:text="@string/tweet_text_dummy"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/tweet_text"
         android:layout_below="@+id/tweet_text"
-        android:text=""
+        android:text="@string/tweet_user_dummy"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText

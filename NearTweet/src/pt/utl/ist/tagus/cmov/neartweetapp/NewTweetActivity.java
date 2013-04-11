@@ -54,7 +54,7 @@ public class NewTweetActivity extends Activity{
 	private Bitmap bitmap = null;
 	String lat;
 	String lng;
-	
+
 	// Connection to Service Variables
 	public boolean mBound = false;
 	private Intent service;
@@ -108,8 +108,6 @@ public class NewTweetActivity extends Activity{
 							return;
 						}
 
-
-
 						if(mBound && mService.isConnected()){
 
 							TweetDTO tweet = new TweetDTO(mUsername, mSendTextBox.getText().toString());
@@ -122,9 +120,7 @@ public class NewTweetActivity extends Activity{
 							}
 
 							if (swtchGps.isChecked()){
-
 								// inserir gps
-
 							}
 
 							mService.sendTweet(tweet);
@@ -140,7 +136,6 @@ public class NewTweetActivity extends Activity{
 					}
 				} );
 	}
-
 
 
 	@Override

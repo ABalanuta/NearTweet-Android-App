@@ -66,6 +66,10 @@
             android:name="pt.utl.ist.tagus.cmov.neartweet.NewCommentActivity"
             android:label="@string/title_activity_new_comment" >
         </activity>
+        <activity
+            android:name="pt.utl.ist.tagus.cmov.neartweetapp.TweetDetailsPoolActivity"
+            android:label="@string/title_activity_tweet_details_pool" >
+        </activity>
     </application>
 
 </manifest>

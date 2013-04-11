@@ -7,6 +7,7 @@ import java.util.HashMap;
 import pt.utl.ist.tagus.cmov.neartweet.NewCommentActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
@@ -110,8 +111,8 @@ public class TweetDetailsActivity extends Activity {
 		String location_lat = bundle.getString("gps_location_lat");
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
-
 		tweet_text = bundle.getString("tweet_text");
+		
 		if (location_lat!=null || location_lng!=null){
 			txtLat.setText("Lat: " +  location_lat);
 			txtLong.setText("Long: " + location_lng);
@@ -364,11 +365,9 @@ public class TweetDetailsActivity extends Activity {
 		String[] keys = {"Comment", "UserName"};
 		int[] ids = {android.R.id.text1,android.R.id.text2};
 		SimpleAdapter mAdapter = new SimpleAdapter(getApplicationContext(), comments, android.R.layout.simple_list_item_2, keys, ids);
-		//		ArrayAdapter<String> adapter  = new ArrayAdapter<String>(this,
-		//	            android.R.layout.simple_list_item_1,
-		//	            respostas);
 
-
+		TweetPoll dummyComments = new TweetPoll();
+		
 		public void kill(){
 			running = false;
 		}
