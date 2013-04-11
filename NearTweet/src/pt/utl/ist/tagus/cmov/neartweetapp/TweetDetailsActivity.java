@@ -79,31 +79,13 @@ public class TweetDetailsActivity extends Activity {
 	private Intent service;
 	private ConnectionHandlerService mService;
 
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className,
-				IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			mBound = true;
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			mBound = false;
-		}
-	};
-
-
-
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
 		// Conect with the Service
-		//service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		//bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		//OFFLINE service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		//OFFLINE bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 
 		super.onCreate(savedInstanceState);
@@ -128,11 +110,7 @@ public class TweetDetailsActivity extends Activity {
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
 
-		//rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
-
-
-
-
+		//OFFLINE rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 
 		// Send Reply
 		btnSendReply.setOnClickListener(new OnClickListener() {
@@ -153,17 +131,6 @@ public class TweetDetailsActivity extends Activity {
 
 			}
 		});
-
-		//		// Login to Twitter
-		//		btnShareTwitter.setOnClickListener(new OnClickListener() {
-		//
-		//			@Override
-		//			public void onClick(View v) {
-		//
-		//				//login to twitter and post stuff
-		//				//				loginToTwitter();
-		//			}
-		//		});
 
 		/**
 		 * Verifies if user is already logedin to twitter
@@ -218,22 +185,6 @@ public class TweetDetailsActivity extends Activity {
 			StrictMode.setThreadPolicy(policy);
 		}
 
-	}
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.share_twitter:
-			//login to twitter and post stuff
-			loginToTwitter();
-			return true;
-		case R.id.send_response:
-			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
-			startActivity(newCommentIntent);
-			return true;
-
-		default:
-			return super.onOptionsItemSelected(item);
-		}
 	}
 
 	@Override
@@ -290,6 +241,39 @@ public class TweetDetailsActivity extends Activity {
 		// return twitter login status from Shared Preferences
 		return mSharedPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
 	}
+	
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.share_twitter:
+			//login to twitter and post stuff
+			loginToTwitter();
+			return true;
+		case R.id.send_response:
+			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
+			startActivity(newCommentIntent);
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className,
+				IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			mBound = true;
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			mBound = false;
+		}
+	};
 
 	/**
 	 * Function to update status
