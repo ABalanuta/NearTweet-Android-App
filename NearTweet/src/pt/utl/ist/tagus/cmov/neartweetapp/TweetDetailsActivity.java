@@ -93,6 +93,7 @@ public class TweetDetailsActivity extends Activity {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_tweet_details);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 
 		mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref", 0);
 
@@ -263,6 +264,14 @@ public class TweetDetailsActivity extends Activity {
 			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
 			startActivity(newCommentIntent);
 			return true;
+		case android.R.id.home:
+            Intent parentActivityIntent = new Intent(this, MainActivity.class);
+            parentActivityIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(parentActivityIntent);
+            finish();
+            return true;
 
 		default:
 			return super.onOptionsItemSelected(item);

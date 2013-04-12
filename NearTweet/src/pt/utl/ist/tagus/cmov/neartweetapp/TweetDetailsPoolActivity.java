@@ -3,12 +3,15 @@ package pt.utl.ist.tagus.cmov.neartweetapp;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import pt.utl.ist.tagus.cmov.neartweet.NewCommentActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -26,6 +29,7 @@ public class TweetDetailsPoolActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_tweet_details_pool);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		txtTweet = (TextView) findViewById(R.id.tweet_text_pool);
 		txtUserName = (TextView) findViewById(R.id.user_name_pool);
@@ -108,6 +112,23 @@ public class TweetDetailsPoolActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.tweet_details_pool, menu);
 		return true;
+	}
+	
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case android.R.id.home:
+            Intent parentActivityIntent = new Intent(this, MainActivity.class);
+            parentActivityIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(parentActivityIntent);
+            finish();
+            return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 }

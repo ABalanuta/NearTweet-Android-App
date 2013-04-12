@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -37,6 +38,7 @@ public class NewTweetPoolActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_new_tweet_pool);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		btnSendPoll = (Button) findViewById(R.id.buttonSendNowPool); 
 		btnAddItemPoll = (Button) findViewById(R.id.buttonAddNewOptionPool);
@@ -103,6 +105,23 @@ public class NewTweetPoolActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case android.R.id.home:
+            Intent parentActivityIntent = new Intent(this, MainActivity.class);
+            parentActivityIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(parentActivityIntent);
+            finish();
+            return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 

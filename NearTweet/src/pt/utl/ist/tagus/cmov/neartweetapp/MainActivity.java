@@ -108,7 +108,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 		Log.e("ServiceP", "Created Main Activity");
 
 		setContentView(R.layout.activity_main);
-		
+		getActionBar().setHomeButtonEnabled(true);
+
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 		lat = 0;
@@ -145,32 +146,22 @@ public class MainActivity extends ListActivity implements LocationListener{
 		REL_SWIPE_MAX_OFF_PATH = (int)(250.0f * dm.densityDpi / 160.0f + 0.5);
 		REL_SWIPE_THRESHOLD_VELOCITY = (int)(200.0f * dm.densityDpi / 160.0f + 0.5);
 
-		@SuppressWarnings("deprecation")
-		final GestureDetector gestureDetector = new GestureDetector(new MyGestureDetector());
-		View.OnTouchListener gestureListener = new View.OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				return gestureDetector.onTouchEvent(event); 
-			}};
-			ListView lv = getListView();
-			lv.setOnTouchListener(gestureListener);
+		if (isNetworkAvailable()){
+			mProgressBar.setVisibility(View.VISIBLE);
+			// Inicia thread que actualiza as messagens
+			//OFFLINE connectionHandlerTask = new ConnectionHandlerTask();
+			//OFFLINE connectionHandlerTask.execute();
 
-
-			if (isNetworkAvailable()){
-				mProgressBar.setVisibility(View.VISIBLE);
-				// Inicia thread que actualiza as messagens
-				//OFFLINE connectionHandlerTask = new ConnectionHandlerTask();
-				//OFFLINE connectionHandlerTask.execute();
-
-				/**
-				 * offline dummies: NAO APAGAR
-				 */
-				Tweet tweetGenerator = new Tweet();
-				mTweetsArray = tweetGenerator.generateTweets();
-				handleServerResponse();
-			}  
-			else{
-				Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
-			}
+			/**
+			 * offline dummies: NAO APAGAR
+			 */
+			Tweet tweetGenerator = new Tweet();
+			mTweetsArray = tweetGenerator.generateTweets();
+			handleServerResponse();
+		}
+		else{
+			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
+		}
 
 
 	}
@@ -222,10 +213,14 @@ public class MainActivity extends ListActivity implements LocationListener{
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Main Activity");
+		
 		//unbinding from the Service
-		if(mBound){ unbindService(mConnection); }
-		connectionHandlerTask.stop();
-		connectionHandlerTask.cancel(true);
+		// NOTA: nao remover if, utilizado para se destruir a aplica‹o caso variaveis estejam a null
+		if (mConnection != null && connectionHandlerTask!=null){
+			if(mBound){ unbindService(mConnection); }
+			connectionHandlerTask.stop();
+			connectionHandlerTask.cancel(true);
+			}
 		mTweetsArray.removeAll(mTweetsArray);
 		super.onDestroy();
 	}
@@ -264,6 +259,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		return true;
 	}
 
+	
 
 	/***************************************************************************************
 	 * 
@@ -296,6 +292,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
+		case android.R.id.home:
+			mSlideHolder.toggle();
+			return true;
+			
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
 
@@ -529,36 +529,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	}
 
-
-
-	/*
-	 * Gestures to mark tweets as spam
-	 */
-	class MyGestureDetector extends SimpleOnGestureListener{ 
-
-		@Override 
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) { 
-			if (Math.abs(e1.getY() - e2.getY()) > REL_SWIPE_MAX_OFF_PATH) 
-				return false; 
-			if(e1.getX() - e2.getX() > REL_SWIPE_MIN_DISTANCE && 
-					Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) { 
-				onRTLFling(); 
-			}  else if (e2.getX() - e1.getX() > REL_SWIPE_MIN_DISTANCE && 
-					Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) { 
-				onLTRFling(); 
-			} 
-			return false; 
-		} 
-
-		private void onLTRFling() {
-			Toast.makeText(getApplicationContext(), "Left-to-right fling", Toast.LENGTH_SHORT).show();
-		}
-
-
-		private void onRTLFling() {
-			Toast.makeText(getApplicationContext(), "Right-to-left fling", Toast.LENGTH_SHORT).show();
-		}
-	}
 	/**
 	 * Custom adapter to display pretty tweets
 	 */

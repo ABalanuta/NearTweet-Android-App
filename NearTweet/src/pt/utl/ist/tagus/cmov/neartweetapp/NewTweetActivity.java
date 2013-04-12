@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -64,7 +65,9 @@ public class NewTweetActivity extends Activity{
 	protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.activity_new_tweet);
+		
 		mSendButton = (Button) findViewById(R.id.sendButton);
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 		btnPicture = (Button) findViewById(R.id.cameraButton);
@@ -164,6 +167,23 @@ public class NewTweetActivity extends Activity{
 			mBound = false;
 		}
 	};
+	
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case android.R.id.home:
+            Intent parentActivityIntent = new Intent(this, MainActivity.class);
+            parentActivityIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(parentActivityIntent);
+            finish();
+            return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {  
 		super.onActivityResult(requestCode, resultCode, data);
