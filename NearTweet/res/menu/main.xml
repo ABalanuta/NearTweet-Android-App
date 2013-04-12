@@ -10,7 +10,5 @@
           android:icon="@drawable/carlos_martins"
           android:title="@string/hello_world"
           android:showAsAction="ifRoom"/>
-    
-
-
+  
 </menu>

@@ -13,6 +13,7 @@ import java.net.URLConnection;
 
 import org.apache.http.util.ByteArrayBuffer;
 
+
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -61,7 +62,7 @@ public class NewCommentActivity extends Activity {
 			} 
 
 
-		}			
+		}		
 		}
 
 

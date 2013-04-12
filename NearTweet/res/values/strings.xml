@@ -23,5 +23,6 @@
     <string name="latitude">Lat: </string>
     <string name="longitude">Long: </string>
     <string name="title_activity_tweet_details_pool">TweetDetailsPool</string>
+    <string name="spam">spam </string>
 
 </resources>
