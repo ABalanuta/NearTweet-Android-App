@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:id="@+id/mark_as_spam"
+          android:icon="@drawable/spam"
+          android:title="@string/spam"
+          android:showAsAction="ifRoom|withText"/>
+  
+    <item android:id="@+id/share_twitter"
+          android:icon="@drawable/twitter"
+          android:title="@string/share"
+          android:showAsAction="ifRoom|withText"/>
+</menu>
