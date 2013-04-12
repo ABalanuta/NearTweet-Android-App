@@ -6,20 +6,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
 import org.apache.http.util.ByteArrayBuffer;
 
-
+import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.User;
+import twitter4j.auth.AccessToken;
+import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.Menu;
 import android.widget.ImageView;
@@ -38,19 +41,39 @@ public class NewCommentActivity extends Activity {
 		
 		personImage.setVisibility(ImageView.VISIBLE);
 		
-		SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",0);
-		Toast.makeText(getApplicationContext(),String.valueOf( mSharedPreferences.contains("imgurl")), Toast.LENGTH_LONG).show();
+		CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
+		
+		if (android.os.Build.VERSION.SDK_INT > 9) {
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+			StrictMode.setThreadPolicy(policy);
+		}
 		
 		
-		if (mSharedPreferences.contains("imgurl")){
 			String url = new String();
-			url = mSharedPreferences.getString("imgurl", "");
-			Toast.makeText(getApplicationContext(), "has url: " + url, Toast.LENGTH_LONG).show();
-			Log.v("URL",url);
+			url = myPreferences.getProfileImgUrl();
+			ConfigurationBuilder builder = new ConfigurationBuilder();
+			builder.setOAuthConsumerKey(myPreferences.getTwitOautTkn());
+			builder.setOAuthConsumerSecret(myPreferences.getTwitOautScrt());
+			
+			AccessToken accessToken = new AccessToken(myPreferences.getTwitOautTkn(), myPreferences.getTwitOautScrt());
+			Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);;
+			User user;
+			String image_url = new String();
+			
+			try {
+				user = twitter.showUser(twitter.getId());
+				image_url = user.getProfileImageURL();
+			} catch (IllegalStateException e1) {
+				e1.printStackTrace();
+			} catch (TwitterException e1) {
+				e1.printStackTrace();
+			}
+			Toast.makeText(getApplicationContext(), "has url: " + image_url, Toast.LENGTH_LONG).show();
+			Log.v("URL",image_url);
 			
 			URL newurl;
 			try {
-				newurl = new URL(url);
+				newurl = new URL(image_url);
 				Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
 				personImage.setImageBitmap(mIcon_val);
 			} catch (MalformedURLException e) {
@@ -63,7 +86,7 @@ public class NewCommentActivity extends Activity {
 
 
 		}		
-		}
+		
 
 
 	@Override

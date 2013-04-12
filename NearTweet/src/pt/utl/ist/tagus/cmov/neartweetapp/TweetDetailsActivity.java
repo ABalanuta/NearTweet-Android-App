@@ -332,7 +332,7 @@ public class TweetDetailsActivity extends Activity {
 				String access_token = myPreferences.getTwitOautTkn();
 				// Access Token Secret
 				//String access_token_secret = mSharedPreferences.getString(PREF_KEY_OAUTH_SECRET, "");
-				String access_token_secret = myPreferences.getTwitOautScrt();
+				String access_token_secret = myPreferences.getTwitOautScrt();	
 				
 				AccessToken accessToken = new AccessToken(access_token, access_token_secret);
 				Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);
