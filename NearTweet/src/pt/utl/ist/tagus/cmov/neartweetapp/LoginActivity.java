@@ -6,6 +6,7 @@ import pt.utl.ist.tagus.cmov.neartweet.R.id;
 import pt.utl.ist.tagus.cmov.neartweet.R.layout;
 import pt.utl.ist.tagus.cmov.neartweet.R.menu;
 import pt.utl.ist.tagus.cmov.neartweet.R.string;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -96,16 +97,17 @@ public class LoginActivity extends Activity {
 	  
 	  //put username on shared preferences
 		//get shared preferences
-	  final String android_id = Secure.getString(getApplicationContext().getContentResolver(),
-              Secure.ANDROID_ID);
-	  SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
-	  Editor e = mSharedPreferences.edit();
-	  e.putString("username", mUsername);
-	  e.putString("deviceid", android_id);
-	  Toast.makeText(getApplicationContext(), android_id, Toast.LENGTH_LONG).show();
-	  e.putBoolean("loggedIn", true);
-	  e.commit();
-	  
+//	  final String android_id = Secure.getString(getApplicationContext().getContentResolver(),
+//              Secure.ANDROID_ID);
+//	  SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
+//	  Editor e = mSharedPreferences.edit();
+//	  e.putString("username", mUsername);
+//	  e.putString("deviceid", android_id);
+//	  Toast.makeText(getApplicationContext(), android_id, Toast.LENGTH_LONG).show();
+//	  e.putBoolean("loggedIn", true);
+//	  e.commit();
+	  CmovPreferences myPrefs = new CmovPreferences(getApplicationContext());
+	  myPrefs.setUsernam(mUsername);
 	  super.finish();
 	} 
 		

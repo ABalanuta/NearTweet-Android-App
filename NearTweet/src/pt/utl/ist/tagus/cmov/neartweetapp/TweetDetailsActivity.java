@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.NewCommentActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
@@ -73,7 +74,7 @@ public class TweetDetailsActivity extends Activity {
 	private static Twitter twitter;
 	private static RequestToken requestToken;
 
-	private static SharedPreferences mSharedPreferences;
+	private CmovPreferences myPreferences;
 
 	private ResponseUpdaterTask rut = null;
 
@@ -95,7 +96,7 @@ public class TweetDetailsActivity extends Activity {
 		setContentView(R.layout.activity_tweet_details);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 
-		mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref", 0);
+		myPreferences = new CmovPreferences(getApplicationContext());
 
 		txtTweet = (TextView) findViewById(R.id.tweet_text);
 		txtUserName = (TextView) findViewById(R.id.user_name);
@@ -159,16 +160,18 @@ public class TweetDetailsActivity extends Activity {
 							requestToken, verifier);
 
 					// Shared Preferences
-					Editor e = mSharedPreferences.edit();
+				//	Editor e = mSharedPreferences.edit();
 
 					// After getting access token, access token secret
 					// store them in application preferences
-					e.putString(PREF_KEY_OAUTH_TOKEN, accessToken.getToken());
-					e.putString(PREF_KEY_OAUTH_SECRET,
-							accessToken.getTokenSecret());
+					myPreferences.setTwitOautScrt(accessToken.getTokenSecret());
+					myPreferences.setTwitOautTkn(accessToken.getToken());
+					//e.putString(PREF_KEY_OAUTH_TOKEN, accessToken.getToken());
+//					e.putString(PREF_KEY_OAUTH_SECRET,
+//							accessToken.getTokenSecret());
 					// Store login status - true
-					e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
-					e.commit(); // save changes
+//					e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
+//					e.commit(); // save changes
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 
@@ -250,7 +253,7 @@ public class TweetDetailsActivity extends Activity {
 	// *
 	private boolean isTwitterLoggedInAlready() {
 		// return twitter login status from Shared Preferences
-		return mSharedPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
+		return myPreferences.isUserTwittLoggin();
 	}
 	
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -325,10 +328,12 @@ public class TweetDetailsActivity extends Activity {
 				builder.setOAuthConsumerSecret(TWITTER_CONSUMER_SECRET);
 
 				// Access Token
-				String access_token = mSharedPreferences.getString(PREF_KEY_OAUTH_TOKEN, "");
+				//String access_token = mSharedPreferences.getString(PREF_KEY_OAUTH_TOKEN, "");
+				String access_token = myPreferences.getTwitOautTkn();
 				// Access Token Secret
-				String access_token_secret = mSharedPreferences.getString(PREF_KEY_OAUTH_SECRET, "");
-
+				//String access_token_secret = mSharedPreferences.getString(PREF_KEY_OAUTH_SECRET, "");
+				String access_token_secret = myPreferences.getTwitOautScrt();
+				
 				AccessToken accessToken = new AccessToken(access_token, access_token_secret);
 				Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);
 

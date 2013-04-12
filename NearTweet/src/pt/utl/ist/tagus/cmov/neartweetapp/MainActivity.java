@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
@@ -62,6 +63,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	private String mUsername = null;
 	private int REQUEST_CODE = 42424242; //Used for Login
+	public CmovPreferences myPreferences;
 
 	private SlideHolder mSlideHolder;
 	public static Button mSendButton;
@@ -108,6 +110,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
+		myPreferences = new CmovPreferences(getApplicationContext());
 		
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -226,8 +229,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 		/**
 		 * Get login
 		 */
-		mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
-		if (!mSharedPreferences.contains("username")){
+		myPreferences = new CmovPreferences(getApplicationContext());
+		Toast.makeText(getApplicationContext(), String.valueOf((myPreferences.hasUserName())), Toast.LENGTH_LONG).show();
+		if (!myPreferences.hasUserName()){
 
 			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
 			startActivityForResult(i, REQUEST_CODE);		
@@ -636,12 +640,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 				StrictMode.setThreadPolicy(policy);
 			}
 
-			SharedPreferences mSharedPreferences0 = getApplicationContext().getSharedPreferences("MyPref",0);
-			SharedPreferences mSharedPreferences1 = getApplicationContext().getSharedPreferences("MyPref",1);
-
-			if (mSharedPreferences0.contains("imgurl") && mSharedPreferences1.contains("username")){
-				String url = mSharedPreferences0.getString("imgurl", "");
-				String username = mSharedPreferences1.getString("username", "");
+			
+			if (myPreferences.hasProfileImgUrl() && myPreferences.hasUserName()){
+				String url = myPreferences.getUsername();
+				String username = myPreferences.getProfileImgUrl();
 
 				if(tweet.getUsername()!=null){
 					Log.v("tweet username", tweet.getUsername());

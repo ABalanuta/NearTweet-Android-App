@@ -6,6 +6,7 @@ import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweet.R.id;
 import pt.utl.ist.tagus.cmov.neartweet.R.layout;
 import pt.utl.ist.tagus.cmov.neartweet.R.menu;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -78,11 +79,10 @@ public class NewTweetPoolActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				String username = null;
-				String deviceid = null;
-				SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref",1);
-				mSharedPreferences.getString("username", username);
-				mSharedPreferences.getString("deviceid",deviceid);
+
+				CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
+				String username = myPreferences.getUsername();
+				String deviceid = myPreferences.getDeviceId();
 				
 				//TODO
 				//TweetPoll mTweetPool = new TweetPoll(edtTxtPergunta.getText().toString(), username, deviceid);

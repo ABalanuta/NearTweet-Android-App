@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
@@ -13,16 +14,13 @@ import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -77,8 +75,8 @@ public class NewTweetActivity extends Activity{
 		Bundle bundle = getIntent().getExtras();
 		lat = bundle.getString("gps_location_lat");
 		lng = bundle.getString("gps_location_lng");
-		SharedPreferences mSharedPreferences1 = getApplicationContext().getSharedPreferences("MyPref",1);
-		mUsername = mSharedPreferences1.getString("username", "");
+		CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
+		mUsername = myPreferences.getUsername();
 		Toast.makeText(getApplicationContext(), mUsername + lat +lng, Toast.LENGTH_LONG).show();
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 
