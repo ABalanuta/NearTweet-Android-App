@@ -7,7 +7,7 @@
   
     
     <item android:id="@+id/new_tweet"
-          android:icon="@drawable/carlos_martins"
+          android:icon="@drawable/ic_action_mail_add"
           android:title="@string/hello_world"
           android:showAsAction="ifRoom"/>
   

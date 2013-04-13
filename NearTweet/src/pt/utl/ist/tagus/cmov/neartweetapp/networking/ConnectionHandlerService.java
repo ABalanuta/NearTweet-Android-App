@@ -238,11 +238,11 @@ public class ConnectionHandlerService extends Service {
 
 
 							if(t.getUserPhoto() != null){
-								tweet.setUserImage(decodeImage(t.getUserPhoto()));
+								tweet.setUserImage(t.getUserPhoto());
 							}				
 
 							if(t.getPhoto() != null){
-								tweet.setImage(decodeImage(t.getPhoto()));
+								tweet.setImage(t.getPhoto());
 							}
 
 							if(t.hasCoordenates()){
@@ -261,12 +261,8 @@ public class ConnectionHandlerService extends Service {
 							synchronized (mTweetsArray) {
 								for(Tweet t : mTweetsArray){
 									
-									Log.e("ServiceP", "->" + response.getDestDeviceID() + " froam " );
-									
 									if(response.getDestDeviceID().equals(t.getDeviceID())){
 										if(response.getDesTweetID() == t.getTweetId()){
-											Log.e("ServiceP", "ADDING Response Receved");
-											Log.e("ServiceP", "TO " + t.getDeviceID() + " at " + t.getResponses());
 											t.addResponse(response);
 											break;
 										}
@@ -274,6 +270,8 @@ public class ConnectionHandlerService extends Service {
 								}
 							}	
 
+						}
+						else if( dto.getType().equals(TypeofDTO.IDENTITY_DTO)){	
 						}
 						else{
 							Log.e("ServiceP", "There is no Such Type of Tweet : "  + dto.getType());	

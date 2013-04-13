@@ -1,16 +1,18 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import pt.utl.ist.tagus.cmov.neartweet.NewCommentActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
+import pt.utl.ist.tagus.cmov.neartweetapp.networking.Encoding;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -27,6 +29,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -39,6 +43,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -53,6 +58,8 @@ public class TweetDetailsActivity extends Activity {
 	public static ListView lstVwComments;
 	public static TextView txtLat;
 	public static TextView txtLong;
+	public static ImageView image;
+	public static ImageView userImage;
 	ProgressDialog pDialog;
 	private String TWITTER_CONSUMER_KEY = "20o4JfRtmLAQ9v1HpwwHKw";
 	private String TWITTER_CONSUMER_SECRET = "pmLgr4ozXj2Dw8HBk3sqHykuOwAf0mDrjed4fzlkc";
@@ -82,6 +89,8 @@ public class TweetDetailsActivity extends Activity {
 	public boolean mBound = false;
 	private Intent service;
 	private ConnectionHandlerService mService;
+	
+	private Tweet tweet;
 
 	
 	@Override
@@ -101,11 +110,13 @@ public class TweetDetailsActivity extends Activity {
 		txtTweet = (TextView) findViewById(R.id.tweet_text);
 		txtUserName = (TextView) findViewById(R.id.user_name);
 		btnShareTwitter = (Button) findViewById(R.id.share_twitter);
-		textBox = (EditText) findViewById(R.id.editText1);
-		btnSendReply = (Button) findViewById(R.id.send_reply);
+		//textBox = (EditText) findViewById(R.id.editText1);
+		//btnSendReply = (Button) findViewById(R.id.send_reply);
 		lstVwComments = (ListView) findViewById(R.id.listViewComments);
 		txtLat = (TextView) findViewById(R.id.textViewCoordinateLat);
 		txtLong = (TextView) findViewById(R.id.textViewCoordinateLong);
+		image = (ImageView) findViewById(R.id.imageViewTweetImage);
+		userImage = (ImageView) findViewById(R.id.imageViewUserPicTweet);
 
 		Bundle bundle = getIntent().getExtras();
 		final String tweet_uid = bundle.getString("tweet_uid");
@@ -114,6 +125,14 @@ public class TweetDetailsActivity extends Activity {
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
 		tweet_text = bundle.getString("tweet_text");
+		tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
+		
+		//Se Exitir Insere Imagem
+		if(bundle.getBoolean("tweet_hasImage")){
+			image.setImageBitmap(Encoding.decodeImage(bundle.getByteArray("tweet_image")));
+			image.setVisibility(View.VISIBLE);
+		}
+		
 		
 		if (location_lat!=null || location_lng!=null){
 			txtLat.setText("Lat: " +  location_lat);
@@ -122,27 +141,29 @@ public class TweetDetailsActivity extends Activity {
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
 
-		//OFFLINE rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		//OFFLINE 
+		//rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		//rut.execute();
 
-		// Send Reply
-		btnSendReply.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-
-
-				if(mBound && mService.isConnected()){
-
-					TweetResponseDTO r = new TweetResponseDTO(tweet_uid, textBox.getText().toString(),
-							tweet_deviceID, tweet_ID, false);
-					mService.sendResponseTweet(r);
-					Toast.makeText(getApplicationContext(), " SENT ", Toast.LENGTH_SHORT).show();
-				}else{
-					Toast.makeText(getApplicationContext(), "Server Error", Toast.LENGTH_LONG).show();
-				}
-
-			}
-		});
+//		// Send Reply
+//		btnSendReply.setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//
+//
+//				if(mBound && mService.isConnected()){
+//
+//					TweetResponseDTO r = new TweetResponseDTO(tweet_uid, textBox.getText().toString(),
+//							tweet_deviceID, tweet_ID, false);
+//					mService.sendResponseTweet(r);
+//					Toast.makeText(getApplicationContext(), " SENT ", Toast.LENGTH_SHORT).show();
+//				}else{
+//					Toast.makeText(getApplicationContext(), "Server Error", Toast.LENGTH_LONG).show();
+//				}
+//
+//			}
+//		});
 
 		/**
 		 * Verifies if user is already logedin to twitter
@@ -219,8 +240,8 @@ public class TweetDetailsActivity extends Activity {
 		getMenuInflater().inflate(R.menu.tweet_details, menu);
 		return true;
 	}
-
-
+	
+	
 	//    * Function to login twitter
 
 	private void loginToTwitter() {
@@ -263,10 +284,23 @@ public class TweetDetailsActivity extends Activity {
 			//login to twitter and post stuff
 			loginToTwitter();
 			return true;
+			
+		// private Comment
 		case R.id.send_response:
 			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
+			newCommentIntent.putExtra("tweet2", Encoding.encodeTweet(tweet));
+			newCommentIntent.putExtra("toAll", false);
 			startActivity(newCommentIntent);
 			return true;
+			
+		// public Comment
+		case R.id.send_response_all:
+			Intent newCommentIntent2 = new Intent(this,NewCommentActivity.class);
+			newCommentIntent2.putExtra("tweet2", Encoding.encodeTweet(tweet));
+			newCommentIntent2.putExtra("toAll", true);
+			startActivity(newCommentIntent2);
+			return true;
+			
 		case android.R.id.home:
             Intent parentActivityIntent = new Intent(this, MainActivity.class);
             parentActivityIntent.addFlags(
@@ -409,7 +443,7 @@ public class TweetDetailsActivity extends Activity {
 			// Transformar num assync
 			while((mService == null || !mService.isConnected()) && running){
 				try {
-					Thread.sleep(250);
+					Thread.sleep(2000);
 					Log.e("ServiceP", "Waiting for the Channal");
 				} catch (InterruptedException e) {
 					e.printStackTrace();

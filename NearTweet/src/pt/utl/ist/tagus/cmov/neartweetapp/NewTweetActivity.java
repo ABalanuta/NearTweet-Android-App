@@ -14,6 +14,7 @@ import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -81,8 +82,8 @@ public class NewTweetActivity extends Activity{
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 
 		// Conect with the Service
-		//OFFLINE service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		//OFFLINE bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 		btnPicture.setOnClickListener(new OnClickListener() {
 

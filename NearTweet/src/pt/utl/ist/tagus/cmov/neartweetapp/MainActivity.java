@@ -13,6 +13,7 @@ import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
+import pt.utl.ist.tagus.cmov.neartweetapp.networking.Encoding;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ComponentName;
@@ -199,15 +200,16 @@ public class MainActivity extends ListActivity implements LocationListener{
 		if (isNetworkAvailable()){
 			mProgressBar.setVisibility(View.VISIBLE);
 			// Inicia thread que actualiza as messagens
-			//OFFLINE connectionHandlerTask = new ConnectionHandlerTask();
-			//OFFLINE connectionHandlerTask.execute();
+			
+			connectionHandlerTask = new ConnectionHandlerTask();
+			connectionHandlerTask.execute();
 
 			/**
 			 * offline dummies: NAO APAGAR
 			 */
-			Tweet tweetGenerator = new Tweet();
-			mTweetsArray = tweetGenerator.generateTweets();
-			handleServerResponse();
+			//Tweet tweetGenerator = new Tweet();
+			//mTweetsArray = tweetGenerator.generateTweets();
+			//handleServerResponse();
 		}
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
@@ -230,7 +232,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		 * Get login
 		 */
 		myPreferences = new CmovPreferences(getApplicationContext());
-		Toast.makeText(getApplicationContext(), String.valueOf((myPreferences.hasUserName())), Toast.LENGTH_LONG).show();
+		//Toast.makeText(getApplicationContext(), String.valueOf((myPreferences.hasUserName())), Toast.LENGTH_LONG).show();
 		if (!myPreferences.hasUserName()){
 
 			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
@@ -266,7 +268,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		Log.e("ServiceP", "Killing Main Activity");
 		
 		//unbinding from the Service
-		// NOTA: nao remover if, utilizado para se destruir a aplicação caso variaveis estejam a null
+		// NOTA: nao remover if, utilizado para se destruir a aplicaÔøΩÔøΩo caso variaveis estejam a null
 		if (mConnection != null && connectionHandlerTask!=null){
 			if(mBound){ unbindService(mConnection); }
 			connectionHandlerTask.stop();
@@ -293,11 +295,21 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
 			details.putExtra("username", tweet.getUsername());
+			details.putExtra("tweet", Encoding.encodeTweet(tweet));
+			
 			if (tweet.hasCoordenates()){
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
 				details.putExtra("gps_location_lat", "" + tweet.getLNG());
 				details.putExtra("username", tweet.getUsername());
 			}
+			
+			if(tweet.hasImage()){
+				details.putExtra("tweet_hasImage", true);
+				details.putExtra("tweet_image", tweet.getImage());
+			}else{
+				details.putExtra("tweet_hasImage", false);
+			}
+			
 			//Toast.makeText(getApplicationContext(), tweet.getLNG() + " " +tweet.getLNG(), Toast.LENGTH_LONG).show();
 			startActivity(details);
 		}
@@ -514,7 +526,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 				if(updadeCommand.equals("Connected")){
 					MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
-					Toast.makeText(getApplicationContext(), "Connected ", Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), "Connected", Toast.LENGTH_LONG).show();
 					return;
 				}
 				else if(updadeCommand.equals("Reload_Screen")){

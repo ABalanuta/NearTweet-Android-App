@@ -24,5 +24,6 @@
     <string name="longitude">Long: </string>
     <string name="title_activity_tweet_details_pool">TweetDetailsPool</string>
     <string name="spam">spam </string>
-
+    <string name="iamegemTweet">iamegemTweet</string>
+	<string name="tweet_Location">At  </string>
 </resources>
