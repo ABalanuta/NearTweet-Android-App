@@ -25,6 +25,7 @@ import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -97,8 +98,8 @@ public class TweetDetailsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 
 		// Conect with the Service
-		//OFFLINE service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		//OFFLINE bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 
 		super.onCreate(savedInstanceState);
@@ -142,7 +143,7 @@ public class TweetDetailsActivity extends Activity {
 		txtUserName.setText("@ " + tweet_uid);
 
 		//OFFLINE 
-		//rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 		//rut.execute();
 
 //		// Send Reply
@@ -181,7 +182,7 @@ public class TweetDetailsActivity extends Activity {
 							requestToken, verifier);
 
 					// Shared Preferences
-				//	Editor e = mSharedPreferences.edit();
+					//	Editor e = mSharedPreferences.edit();
 
 					// After getting access token, access token secret
 					// store them in application preferences
@@ -451,7 +452,7 @@ public class TweetDetailsActivity extends Activity {
 			}
 
 
-			while(running){
+			//while(running){
 
 				Log.e("ServiceP", "NIOOP");
 
@@ -473,14 +474,14 @@ public class TweetDetailsActivity extends Activity {
 					}
 				}
 
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			}
+//				try {
+//					Thread.sleep(10000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//
+//			}
 			return null;
 
 		}

@@ -268,7 +268,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		Log.e("ServiceP", "Killing Main Activity");
 		
 		//unbinding from the Service
-		// NOTA: nao remover if, utilizado para se destruir a aplica��o caso variaveis estejam a null
+		// NOTA: nao remover if, utilizado para se destruir a aplicão caso variaveis estejam a null
 		if (mConnection != null && connectionHandlerTask!=null){
 			if(mBound){ unbindService(mConnection); }
 			connectionHandlerTask.stop();

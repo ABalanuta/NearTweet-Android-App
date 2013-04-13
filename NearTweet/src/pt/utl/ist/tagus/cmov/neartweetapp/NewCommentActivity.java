@@ -54,8 +54,8 @@ public class NewCommentActivity extends Activity {
 	TextView typeOfResponse;
 	Tweet tweet;
 	boolean toAll = false;
-	
-	
+
+
 	// Connection to Service Vriables
 	public boolean mBound = false;
 	private Intent service;
@@ -75,7 +75,7 @@ public class NewCommentActivity extends Activity {
 			mBound = false;
 		}
 	};
-	
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,18 +97,18 @@ public class NewCommentActivity extends Activity {
 		// Ligação com o serviço
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-		
-		
+
+
 		Bundle bundle = getIntent().getExtras();
 		tweet = Encoding.decodeTweet(bundle.getByteArray("tweet2"));
 		toAll = bundle.getBoolean("toAll");
-		
+
 		if(toAll){
 			typeOfResponse.setText("Public Response");
 		}else{
 			typeOfResponse.setText("Private Response");
 		}
-		
+
 		String url = new String();
 		url = myPreferences.getProfileImgUrl();
 		ConfigurationBuilder builder = new ConfigurationBuilder();
@@ -153,12 +153,12 @@ public class NewCommentActivity extends Activity {
 		getMenuInflater().inflate(R.menu.new_comment, menu);
 		return true;
 	}
-	
+
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.send_response:
-			
+
 			for(int x = 200; x > 0; x--){
 				if(mService != null && mService.isConnected()){
 					String text = responseText.getText().toString();
@@ -182,12 +182,23 @@ public class NewCommentActivity extends Activity {
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	
-	
-	
-	
-	
-	
+
+	@Override
+	protected void onDestroy() {
+		Log.e("ServiceP", "Killing New cOMMENT Activity");
+
+		//unbinding from the Service
+		// NOTA: nao remover if, utilizado para se destruir a aplicao caso variaveis estejam a null
+		if (mConnection != null){
+			unbindService(mConnection);
+		}
+		super.onDestroy();
+	}
+
+
+
+
+
 	public void DownloadFromUrl(String DownloadUrl, String fileName) {
 
 		try {

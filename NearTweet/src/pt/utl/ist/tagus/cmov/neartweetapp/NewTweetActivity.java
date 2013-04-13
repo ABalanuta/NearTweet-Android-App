@@ -196,7 +196,7 @@ public class NewTweetActivity extends Activity{
 				final String imageFilePath = cursor.getString(0);
 				File photos = new File(imageFilePath);
 				bitmap = decodeFile(photos);
-				bitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, true);
+				bitmap = Bitmap.createScaledBitmap(bitmap, 400, 250, true);
 
 				imgChoosen.setImageBitmap(bitmap);
 				imgChoosen.setVisibility(ImageView.VISIBLE);
@@ -211,7 +211,7 @@ public class NewTweetActivity extends Activity{
 			if (data.getExtras() != null) {
 				// here is the image from camera
 				bitmap = (Bitmap) data.getExtras().get("data");
-				bitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, true);
+				bitmap = Bitmap.createScaledBitmap(bitmap, 400, 250, true);
 
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				imgChoosen.setImageBitmap(bitmap);
