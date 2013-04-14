@@ -112,13 +112,14 @@ public class NewCommentActivity extends Activity {
 		url = myPreferences.getProfileImgUrl();
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(myPreferences.getTwitOautTkn());
-		builder.setOAuthConsumerSecret(myPreferences.getTwitOautScrt());
+		builder.setOAuthConsumerSecret(myPreferences.getTwitOautTkn());
 
 		AccessToken accessToken = new AccessToken(myPreferences.getTwitOautTkn(), myPreferences.getTwitOautScrt());
 		Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);;
 		User user;
 		String image_url = new String();
-		Toast.makeText(getApplicationContext(), "has url: " + image_url, Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(), "twitter token: " + myPreferences.getTwitOautTkn() +
+				" twitter secret: " + myPreferences.getTwitOautTkn(), Toast.LENGTH_LONG).show();
 		try {
 			user = twitter.showUser(twitter.getId());
 			image_url = user.getProfileImageURL();
