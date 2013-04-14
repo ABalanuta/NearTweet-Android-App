@@ -50,7 +50,7 @@ public class TweetPoll extends Tweet{
 		
 		String answ1 = "Hoje chover?";
 		String answ2 = "Hoje nao vai chover?";
-		String answ3 = "O David Ž lindo?";
+		String answ3 = "O David ï¿½ lindo?";
 		String voter_balanuta = "Balanuta";
 		String voter_tufa = "Tufa";
 		String voter_david = "David";
