@@ -16,9 +16,8 @@ public class TweetPoll extends Tweet{
 		super();
 	}
 	
-	public void addAnswer(String answer){
-		ArrayList<String> voters = new ArrayList<String>();
-		mAnswers.put(answer, voters);	
+	public void addOptions(String answer){
+		mAnswers.put(answer, new ArrayList<String>());	
 	}
 
 	public boolean addVote(String user,String answer){

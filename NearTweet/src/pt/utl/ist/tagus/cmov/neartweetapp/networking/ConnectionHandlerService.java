@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.IdentityDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollDTO;
@@ -157,6 +158,7 @@ public class ConnectionHandlerService extends Service {
 	public void sendPoll(PollDTO poll) {
 		if(mConectionHandler != null){
 			poll.setSrcDeviceID(deviceID);
+			poll.setTweetID(++this.tweetID);
 			mConectionHandler.send(poll);
 		}else{
 			Log.e("ServiceP", "Channel is Closed");
@@ -364,6 +366,18 @@ public class ConnectionHandlerService extends Service {
 								}	
 							}
 						}
+						
+						else if( dto.getType().equals(TypeofDTO.POLL_DTO)){
+							
+							PollDTO p = (PollDTO) dto;
+							
+							TweetPoll poll = new TweetPoll(p.getQuestion(), p.getNickName(), p.getSrcDeviceID(), p.getTweetID());
+							for(String s : p.getOptions()){
+								poll.addOptions(s);
+							}
+							addTweet(poll);
+						}
+						
 						else{
 							Log.e("ServiceP", "There is no Such Type of Tweet : "  + dto.getType());	
 						}
