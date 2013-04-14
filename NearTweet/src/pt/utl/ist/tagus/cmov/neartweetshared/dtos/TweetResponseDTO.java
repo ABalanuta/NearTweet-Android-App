@@ -59,4 +59,13 @@ public class TweetResponseDTO extends BasicDTO {
 		return this.nickName;
 	}
 
+	@Override
+	public String toString() {
+		return "TweetResponseDTO [nickName=" + nickName + ", resp=" + resp
+				+ ", srcDeviceID=" + srcDeviceID + ", destDeviceID="
+				+ destDeviceID + ", desTweetID=" + desTweetID + ", isPrivate="
+				+ isPrivate + "]";
+	}
+	
+
 }

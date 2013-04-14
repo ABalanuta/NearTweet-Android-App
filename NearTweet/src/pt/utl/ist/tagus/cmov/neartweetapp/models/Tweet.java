@@ -7,7 +7,7 @@ import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 
 import android.graphics.Bitmap;
 
-public class Tweet implements Serializable, Cloneable{
+public class Tweet implements Serializable{
 
 	/**
 	 * Defoult Version ID
@@ -22,9 +22,15 @@ public class Tweet implements Serializable, Cloneable{
 	byte[] mUserImage = null;
 	ArrayList<TweetResponseDTO> mResponses = new ArrayList<TweetResponseDTO>();
 	String[] mCoordinates = new String[2];
+	boolean newResponses = false;
 
 
 	public Tweet() {
+	}
+
+
+	public boolean hasNewResponses() {
+		return newResponses;
 	}
 
 
@@ -38,6 +44,7 @@ public class Tweet implements Serializable, Cloneable{
 
 	public void addResponse(TweetResponseDTO resp){
 		this.mResponses.add(resp);
+		this.newResponses = true;
 	}
 
 	public String getText() {
@@ -89,6 +96,7 @@ public class Tweet implements Serializable, Cloneable{
 	}
 
 	public ArrayList<TweetResponseDTO> getResponses() {
+		this.newResponses = false;
 		return mResponses;
 	}
 
@@ -144,9 +152,5 @@ public class Tweet implements Serializable, Cloneable{
 		tweets.add(tweet_with_coordinates);
 		return tweets;
 	}
-
-	 protected Object clone() throws CloneNotSupportedException {
-	        return super.clone();
-	    }
 	
 }

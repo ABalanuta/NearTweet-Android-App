@@ -31,7 +31,8 @@ public class ConnectionHandlerService extends Service {
 	private String deviceID = null;
 	private long tweetID = 0;
 	private ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
-	private boolean hasUpdates = false;
+	private boolean hasPostUpdates = false;
+	private boolean hasResponseUpdates = false;
 	private SearchingForTweets searcher = null;
 
 
@@ -159,14 +160,28 @@ public class ConnectionHandlerService extends Service {
 
 	public boolean hasUpdates(){
 		synchronized (mTweetsArray) {
-			return hasUpdates;
+			return hasPostUpdates;
 		}
+	}
+	public boolean hasResponseUpdates(String srcDeviceID, long tweetID2){
+		ArrayList<Tweet> work = null;
+		synchronized (mTweetsArray) {
+			work = (ArrayList<Tweet>) mTweetsArray.clone();
+		}
+		for(Tweet t : work){
+			if(t.getDeviceID().equals(srcDeviceID)){
+				if(t.getTweetId() == tweetID2){
+					return t.hasNewResponses();
+				}
+			}
+		}
+		return false;
 	}
 
 	private void addTweet(Tweet t){
 		synchronized (mTweetsArray) {
-			mTweetsArray.add(t);
-			this.hasUpdates = true;
+			mTweetsArray.add(t);		
+			this.hasPostUpdates = true;
 		}
 	}
 
@@ -179,9 +194,25 @@ public class ConnectionHandlerService extends Service {
 
 	public ArrayList<Tweet> getAllTweets() {
 		synchronized (mTweetsArray) {
-			this.hasUpdates = false;
+			this.hasPostUpdates = false;
 			return (ArrayList<Tweet>) mTweetsArray.clone();
 		}
+	}
+
+	public ArrayList<TweetResponseDTO> getAllResponses(String srcDeviceID, long tweetID2){
+
+		ArrayList<Tweet> work = null;
+		synchronized (mTweetsArray) {
+			work = (ArrayList<Tweet>) mTweetsArray.clone();
+		}
+		for(Tweet t : work){
+			if(t.getDeviceID().equals(srcDeviceID)){
+				if(t.getTweetId() == tweetID2){
+					return t.getResponses();
+				}
+			}
+		}
+		return null;
 	}
 
 	private ArrayList<BasicDTO> receveNewTweets(){		  
@@ -260,10 +291,11 @@ public class ConnectionHandlerService extends Service {
 							Log.e("ServiceP", "Response Receved");
 							synchronized (mTweetsArray) {
 								for(Tweet t : mTweetsArray){
-									
+
 									if(response.getDestDeviceID().equals(t.getDeviceID())){
 										if(response.getDesTweetID() == t.getTweetId()){
 											t.addResponse(response);
+											hasResponseUpdates = true;
 											break;
 										}
 									}
