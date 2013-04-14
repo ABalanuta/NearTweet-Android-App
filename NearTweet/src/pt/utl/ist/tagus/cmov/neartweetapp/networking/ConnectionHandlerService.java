@@ -10,6 +10,7 @@ import java.util.Random;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.IdentityDTO;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.SpammDetectorDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
@@ -135,6 +136,8 @@ public class ConnectionHandlerService extends Service {
 	public void reportSpammer(String destDeviceID, long tweetID){
 		if(mConectionHandler != null){
 			mConectionHandler.send(new SpammDetectorDTO(deviceID, destDeviceID, tweetID));
+		}else{
+			Log.e("ServiceP", "Channel is Closed");
 		}
 	}
 
@@ -145,14 +148,29 @@ public class ConnectionHandlerService extends Service {
 			tweet.setDeviceID(deviceID);
 			tweet.setTweetID(++this.tweetID);
 			mConectionHandler.send(tweet);
+		}else{
+			Log.e("ServiceP", "Channel is Closed");
 		}
 	}
 
+
+	public void sendPoll(PollDTO poll) {
+		if(mConectionHandler != null){
+			poll.setSrcDeviceID(deviceID);
+			mConectionHandler.send(poll);
+		}else{
+			Log.e("ServiceP", "Channel is Closed");
+		}
+	}
+	
+	
 	public void sendResponseTweet(TweetResponseDTO tweet){
 
 		if(mConectionHandler != null){
 			tweet.setSrcDeviceID(deviceID);
 			mConectionHandler.send(tweet);
+		}else{
+			Log.e("ServiceP", "Channel is Closed");
 		}
 	}
 
@@ -160,7 +178,6 @@ public class ConnectionHandlerService extends Service {
 		if(mConectionHandler == null){
 			return false;
 		}
-
 		return mConectionHandler.isConnected();
 	}
 
@@ -364,6 +381,7 @@ public class ConnectionHandlerService extends Service {
 			}
 		}
 	}
+
 
 }
 

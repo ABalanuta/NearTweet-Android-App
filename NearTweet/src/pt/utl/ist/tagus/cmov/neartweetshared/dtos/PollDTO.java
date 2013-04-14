@@ -1,5 +1,7 @@
 package pt.utl.ist.tagus.cmov.neartweetshared.dtos;
 
+import java.util.ArrayList;
+
 public class PollDTO extends BasicDTO {
 
 
@@ -8,39 +10,47 @@ public class PollDTO extends BasicDTO {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private String srcDeviceID;
-	private String destDeviceID;
-	private long tweetID;
-	private String option;
+	private String nickName = null;
+	private String question = null;
+	private String srcDeviceID = null;
+	private long tweetID = -1;
+	private ArrayList<String> options = null;
 
-	public PollDTO(String srcDeviceID, String destDeviceID, long tweetID, String option) {
+	public PollDTO(String nickName, String question, ArrayList<String> options) {
 		super(TypeofDTO.POLL_DTO);
-		this.srcDeviceID = srcDeviceID;
-		this.destDeviceID = destDeviceID;
-		this.tweetID = tweetID;
-		this.option = option;
-	}
-
-	
-	public String getOption() {
-		return option;
-	}
-
-	public void setOption(String option) {
-		this.option = option;
+		this.nickName = nickName;
+		this.question = question;
+		this.options = options;
 	}
 
 	public String getSrcDeviceID() {
 		return srcDeviceID;
 	}
 
-	public String getDestDeviceID() {
-		return destDeviceID;
+	public void setSrcDeviceID(String srcDeviceID) {
+		this.srcDeviceID = srcDeviceID;
 	}
 
 	public long getTweetID() {
 		return tweetID;
 	}
+
+	public void setTweetID(long tweetID) {
+		this.tweetID = tweetID;
+	}
+
+	public String getNickName() {
+		return nickName;
+	}
+
+	public String getQuestion() {
+		return question;
+	}
+
+	public ArrayList<String> getOptions() {
+		return options;
+	}
+	
 	
 	
 }

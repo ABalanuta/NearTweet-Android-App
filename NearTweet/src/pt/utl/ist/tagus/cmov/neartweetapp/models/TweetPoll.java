@@ -7,8 +7,8 @@ public class TweetPoll extends Tweet{
 
 	private HashMap<String,ArrayList<String>> mAnswers;
 
-	public TweetPoll(String texto, String uId, String macAddress,Long mTweetId){
-		super( texto, uId, macAddress,mTweetId);
+	public TweetPoll(String texto, String mUsername, String mDeviceID,Long mTweetId){
+		super( texto, mUsername, mDeviceID,mTweetId);
 		mAnswers = new HashMap<String,ArrayList<String>>();
 	}
 
