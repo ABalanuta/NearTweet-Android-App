@@ -80,8 +80,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 	private int REL_SWIPE_MIN_DISTANCE; 
 	private int REL_SWIPE_MAX_OFF_PATH;
 	private int REL_SWIPE_THRESHOLD_VELOCITY;
-	public static int lat;
-	public static int lng;
+	public static double lat;
+	public static double lng;
 
 	Executor executor = null;
 	ConnectionHandlerTask connectionHandlerTask = null;
@@ -223,8 +223,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 		 * USE PUT EXTRA */
 		
 		Intent map = new Intent(this,BasicMapActivity.class);
-		map.putExtra("gps_location_lat", "0");
-		map.putExtra("gps_location_lng", "0");
+		map.putExtra("gps_location_lat", Double.toString(lat));
+		map.putExtra("gps_location_lng", Double.toString(lng));
 		map.putExtra("tweet_text", "EU SOU UM TWEET");
 		startActivity(map);
 		
@@ -580,8 +580,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	@Override
 	public void onLocationChanged(Location location) {
-		lat = (int) (location.getLatitude());
-		lng = (int) (location.getLongitude());
+		lat = (double) (location.getLatitude());
+		lng = (double) (location.getLongitude());
 		Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
 	}
 
