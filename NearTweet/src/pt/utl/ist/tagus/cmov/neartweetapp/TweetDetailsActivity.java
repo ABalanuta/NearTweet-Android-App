@@ -309,9 +309,14 @@ public class TweetDetailsActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
+		
 		case R.id.share_twitter:
 			//login to twitter and post stuff
 			loginToTwitter();
+			return true;
+			
+			// Goes to google maps
+		case R.id.location_map:
 			return true;
 
 			// private Comment

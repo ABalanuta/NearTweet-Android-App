@@ -10,6 +10,10 @@
           android:title="@string/hello_world"
           android:showAsAction="ifRoom"/>
     
+    <item android:id="@+id/location_map"
+          android:icon="@drawable/location_maps"
+          android:title="@string/hello_world"
+          android:showAsAction="ifRoom"/>
     
     <item android:id="@+id/share_twitter"
           android:icon="@drawable/twitter"
