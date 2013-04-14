@@ -27,7 +27,7 @@ public class Tweet implements Serializable{
 	boolean newResponses = false;
 
 	// Ban
-	private final int NUMBER_OF_REPORTS_BEFORE_BAN = 1;
+	private final int NUMBER_OF_REPORTS_BEFORE_BAN = 2;
 	ArrayList<String> reporters = new ArrayList<String>();
 
 
