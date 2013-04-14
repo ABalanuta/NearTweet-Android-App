@@ -75,9 +75,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 	private String provider;// location stuff
 	private static SharedPreferences mSharedPreferences;
 
-	private int REL_SWIPE_MIN_DISTANCE; 
-	private int REL_SWIPE_MAX_OFF_PATH;
-	private int REL_SWIPE_THRESHOLD_VELOCITY;
 	public static int lat;
 	public static int lng;
 
@@ -188,13 +185,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		}
 
-		/*
-		 * Defining swipe gestures sensetivity & detection
-		 */ 
-		DisplayMetrics dm = getResources().getDisplayMetrics();
-		REL_SWIPE_MIN_DISTANCE = (int)(120.0f * dm.densityDpi / 160.0f + 0.5); 
-		REL_SWIPE_MAX_OFF_PATH = (int)(250.0f * dm.densityDpi / 160.0f + 0.5);
-		REL_SWIPE_THRESHOLD_VELOCITY = (int)(200.0f * dm.densityDpi / 160.0f + 0.5);
+
 
 		if (isNetworkAvailable()){
 			mProgressBar.setVisibility(View.VISIBLE);
