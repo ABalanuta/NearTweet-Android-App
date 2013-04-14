@@ -91,6 +91,7 @@ public class TweetDetailsActivity extends ListActivity {
 
 	public static  ListView listView;
 
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -120,7 +121,7 @@ public class TweetDetailsActivity extends ListActivity {
 		userImage = (ImageView) findViewById(R.id.imageViewUserPicTweet);
 
 		Bundle bundle = getIntent().getExtras();
-		final String tweet_uid = bundle.getString("tweet_uid");
+		String tweet_uid = bundle.getString("tweet_uid");
 		String location_lng = bundle.getString("gps_location_lng");
 		String location_lat = bundle.getString("gps_location_lat");
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
@@ -242,10 +243,15 @@ public class TweetDetailsActivity extends ListActivity {
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Details Activity");
 
-		//OFFLINE rut.kill();
-		//OFFLINE rut.cancel(true);
+		// Stops the assync thread gently the kills it 
+		rut.kill();
+		try {Thread.sleep(25);} catch (InterruptedException e) {}
+		rut.cancel(true);
+
+
 		//unbinding from the Service
 		if(mBound){ unbindService(mConnection);}
+		comments = new ArrayList<Comment>();
 		super.onDestroy();
 	}
 
@@ -306,7 +312,7 @@ public class TweetDetailsActivity extends ListActivity {
 		case R.id.send_response:
 			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
 			newCommentIntent.putExtra("tweet2", Encoding.encodeTweet(tweet));
-			newCommentIntent.putExtra("toAll", true);
+			newCommentIntent.putExtra("toAll", false);
 			startActivity(newCommentIntent);
 			return true;
 
@@ -314,7 +320,7 @@ public class TweetDetailsActivity extends ListActivity {
 		case R.id.send_response_all:
 			Intent newCommentIntent2 = new Intent(this,NewCommentActivity.class);
 			newCommentIntent2.putExtra("tweet2", Encoding.encodeTweet(tweet));
-			newCommentIntent2.putExtra("toAll", false);
+			newCommentIntent2.putExtra("toAll", true);
 			startActivity(newCommentIntent2);
 			return true;
 
@@ -486,7 +492,18 @@ public class TweetDetailsActivity extends ListActivity {
 				}
 			}
 
+			Log.e("ServiceP", "Details Activity Conected to Service");
 
+			// primeiro get Preencher
+			mComments = new ArrayList<Comment>();
+			for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
+				//Log.e("ServiceP", "MSG:"+ dto.toString());						
+				mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
+			}
+			publishProgress();
+
+
+			// verificar por updates
 			while(running){
 
 
@@ -503,6 +520,7 @@ public class TweetDetailsActivity extends ListActivity {
 
 				}else{
 					try {
+						Log.e("ServiceP", "Details Activity Sleep");
 						Thread.sleep(1500);
 					} catch (InterruptedException e) {
 						e.printStackTrace();

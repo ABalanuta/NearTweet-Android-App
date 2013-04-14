@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class ConnectionHandler extends Thread{
 
 	//private	final String serverIP = "10.0.2.2";
-	private	final String serverIP = "194.210.221.242";
+	private	final String serverIP = "194.210.221.66";
 	private	final int serverPort = 4444;
 	private Socket localSock = null;
 	private ObjectInputStream in = null;

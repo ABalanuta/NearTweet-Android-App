@@ -3,6 +3,7 @@ package pt.utl.ist.tagus.cmov.neartweetapp.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 
@@ -24,6 +25,32 @@ public class Tweet implements Serializable{
 	ArrayList<TweetResponseDTO> mResponses = new ArrayList<TweetResponseDTO>();
 	String[] mCoordinates = new String[2];
 	boolean newResponses = false;
+
+	// Ban
+	private final int NUMBER_OF_REPORTS_BEFORE_BAN = 1;
+	ArrayList<String> reporters = new ArrayList<String>();
+
+
+	//	Date limitDate;
+	//
+	//
+	//	public void removeBan() {
+	//		limitDate = null;
+	//		reporters = new ArrayList<String>();
+	//	}
+
+	public boolean isBanned(){
+		if(reporters.size() == NUMBER_OF_REPORTS_BEFORE_BAN){
+			return true;
+		}
+		return false;
+	}
+
+	public void addReporter(String reporter) {
+		if(!reporters.contains(reporter)){
+			reporters.add(reporter);
+		}
+	}
 
 
 	public Tweet() {
@@ -139,10 +166,10 @@ public class Tweet implements Serializable{
 		if (mCoordinates[0] ==null || mCoordinates[1]==null)return false;
 		else return true;
 	}
-	
-	
-	
-	
+
+
+
+
 	@Override
 	public String toString() {
 		return "Tweet [mText=" + mText + ", mUsername=" + mUsername
@@ -168,5 +195,5 @@ public class Tweet implements Serializable{
 		tweets.add(tweet_with_coordinates);
 		return tweets;
 	}
-	
+
 }
