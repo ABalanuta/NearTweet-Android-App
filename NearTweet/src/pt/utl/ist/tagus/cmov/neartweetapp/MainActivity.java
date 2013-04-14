@@ -201,26 +201,33 @@ public class MainActivity extends ListActivity implements LocationListener{
 		if (isNetworkAvailable()){
 			mProgressBar.setVisibility(View.VISIBLE);
 			// Inicia thread que actualiza as messagens
-			
+			/*
 			connectionHandlerTask = new ConnectionHandlerTask();
 			connectionHandlerTask.execute();
-
+			 */
 			/**
 			 * offline dummies: NAO APAGAR
 			 */
-			//Tweet tweetGenerator = new Tweet();
-			//mTweetsArray = tweetGenerator.generateTweets();
-			//handleServerResponse();
+			Tweet tweetGenerator = new Tweet();
+			mTweetsArray = tweetGenerator.generateTweets();
+			handleServerResponse();
 		}
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
 
 		
+		
+		
 		/* HOW TO CALL MAP
-		 * USE PUT EXTRA TO */
+		 * USE PUT EXTRA */
+		
 		Intent map = new Intent(this,BasicMapActivity.class);
+		map.putExtra("gps_location_lat", "0");
+		map.putExtra("gps_location_lng", "0");
+		map.putExtra("tweet_text", "EU SOU UM TWEET");
 		startActivity(map);
+		
 		
 
 	}
