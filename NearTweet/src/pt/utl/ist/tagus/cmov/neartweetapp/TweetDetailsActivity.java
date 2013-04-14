@@ -126,7 +126,11 @@ public class TweetDetailsActivity extends ListActivity {
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
 		tweet_text = bundle.getString("tweet_text");
-		tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
+		if(bundle.getByteArray("tweet") == null){
+			finish();
+		}else{
+			tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
+		}
 
 		// If Existes Insrt Image
 		if(bundle.getBoolean("tweet_hasImage")){
@@ -491,10 +495,10 @@ public class TweetDetailsActivity extends ListActivity {
 
 					mComments = new ArrayList<Comment>();
 					for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
-						Log.e("ServiceP", "MSG:"+ dto.toString());						
+						//Log.e("ServiceP", "MSG:"+ dto.toString());						
 						mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
 					}
-					
+
 					publishProgress();
 
 				}else{

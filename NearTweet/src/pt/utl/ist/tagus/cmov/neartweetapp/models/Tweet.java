@@ -2,6 +2,7 @@ package pt.utl.ist.tagus.cmov.neartweetapp.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 
@@ -138,6 +139,21 @@ public class Tweet implements Serializable{
 		if (mCoordinates[0] ==null || mCoordinates[1]==null)return false;
 		else return true;
 	}
+	
+	
+	
+	
+	@Override
+	public String toString() {
+		return "Tweet [mText=" + mText + ", mUsername=" + mUsername
+				+ ", mDeviceID=" + mDeviceID + ", mTweetId=" + mTweetId
+				+ ", mImage=" + "$$$" + ", mUserImage="
+				+ "$$$" + ", mResponses=" + mResponses
+				+ ", mCoordinates=" + Arrays.toString(mCoordinates)
+				+ ", newResponses=" + newResponses + "]";
+	}
+
+
 	public ArrayList<Tweet> generateTweets(){
 		String[] mDummyCoordinates = new String[2];
 		mDummyCoordinates[0]="0";

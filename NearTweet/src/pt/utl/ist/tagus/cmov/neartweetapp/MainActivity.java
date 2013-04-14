@@ -111,7 +111,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
-		mProgressBar.setVisibility(View.VISIBLE);
 		myPreferences = new CmovPreferences(getApplicationContext());
 
 		ListView listView = getListView();
@@ -466,7 +465,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 		protected String doInBackground(String... message) {
 
 			running = true;
-
+			mProgressBar.setVisibility(View.VISIBLE);
+			
 			Log.e("ServiceP", "ConnectionHandlerTask Created");
 			// Criar um serviço que estabelece a communicação com o server
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);

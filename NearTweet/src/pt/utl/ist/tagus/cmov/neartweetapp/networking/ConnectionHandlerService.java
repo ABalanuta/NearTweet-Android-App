@@ -21,7 +21,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.provider.Settings.Secure;
 import android.util.Log;
-import android.widget.SimpleAdapter;
 
 public class ConnectionHandlerService extends Service {
 
@@ -137,7 +136,7 @@ public class ConnectionHandlerService extends Service {
 
 		if(mConectionHandler != null){
 			tweet.setDeviceID(deviceID);
-			tweet.setTweetID(this.tweetID++);
+			tweet.setTweetID(++this.tweetID);
 			mConectionHandler.send(tweet);
 		}
 	}
@@ -208,6 +207,7 @@ public class ConnectionHandlerService extends Service {
 		for(Tweet t : work){
 			if(t.getDeviceID().equals(srcDeviceID)){
 				if(t.getTweetId() == tweetID2){
+					Log.e("ServiceP", "deatails for "+srcDeviceID+":"+tweetID2+" Are: "+t.toString());
 					return t.getResponses();
 				}
 			}
@@ -290,10 +290,13 @@ public class ConnectionHandlerService extends Service {
 
 							TweetResponseDTO response = (TweetResponseDTO) dto;
 
-							// Filter private Responses
-							if((response.isPrivate() && response.getDestDeviceID() != deviceID)){
-								continue;
-							}
+							Log.e("ServiceP", "#"+response.toString());
+							
+//							
+//							// Filter private Responses
+//							if((response.isPrivate() && response.getDestDeviceID() != deviceID)){
+//								continue;
+//							}
 
 
 							Log.e("ServiceP", "Response Receved");

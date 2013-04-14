@@ -100,7 +100,7 @@ public class TweetDTO extends BasicDTO{
 	public String toString() {
 		return "TweetDTO [nickName=" + nickName + ", tweet=" + tweet
 				+ ", srcDeviceID=" + srcDeviceID + ", tweetID=" + tweetID
-				+ ", photo=" + Arrays.toString(photo) + ", userPhoto="
+				+ ", photo=" + "$$$" + ", userPhoto="
 				+ Arrays.toString(userPhoto) + ", mCoordinates="
 				+ Arrays.toString(mCoordinates) + "]";
 	}
