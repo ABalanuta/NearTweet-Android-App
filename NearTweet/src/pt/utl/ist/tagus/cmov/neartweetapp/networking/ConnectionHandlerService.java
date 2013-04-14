@@ -28,7 +28,7 @@ public class ConnectionHandlerService extends Service {
 	private ConnectionHandler mConectionHandler = null;
 	private final IBinder mBinder = new LocalBinder();
 	private int Clients = 0;
-	private String deviceID = null;
+	public static String deviceID = null;
 	private long tweetID = 0;
 	private ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
 	private boolean hasPostUpdates = false;
@@ -261,6 +261,8 @@ public class ConnectionHandlerService extends Service {
 
 					for(BasicDTO dto : list){
 
+						Log.e("ServiceP", "R->> "+ dto.toString());
+
 						if(dto.getType().equals(TypeofDTO.TWEET_DTO)){
 
 							TweetDTO t = (TweetDTO) dto;		
@@ -287,6 +289,12 @@ public class ConnectionHandlerService extends Service {
 						else if( dto.getType().equals(TypeofDTO.TWEET_RESP_DTO) ){
 
 							TweetResponseDTO response = (TweetResponseDTO) dto;
+
+							// Filter private Responses
+							if((response.isPrivate() && response.getDestDeviceID() != deviceID)){
+								continue;
+							}
+
 
 							Log.e("ServiceP", "Response Receved");
 							synchronized (mTweetsArray) {

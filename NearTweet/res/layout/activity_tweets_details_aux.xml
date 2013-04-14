@@ -90,6 +90,6 @@
         android:maxWidth="200dp"
         android:scaleType="center"
         android:src="@android:drawable/ic_menu_gallery"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
 </LinearLayout>
