@@ -45,12 +45,6 @@ public class ConnectionHandler extends Thread{
 			}
 			x--;
 		}
-		/* Se a resposta for Private e o Dest não corresponder, não enviamos */
-		if(oo instanceof TweetResponseDTO){
-			if(((TweetResponseDTO) oo).getDestDeviceID() != channelDeviceID && ((TweetResponseDTO) oo).isPrivate()){
-				return;
-			}	
-		}
 		
 		synchronized (this) {
 			outc.send(oo);

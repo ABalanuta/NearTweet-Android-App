@@ -1,9 +1,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item android:id="@+id/send_response"
-          android:icon="@android:drawable/ic_menu_send"
+          android:icon="@drawable/social_reply"
           android:title="@string/hello_world"
           android:showAsAction="ifRoom"/>
+    
+    <item android:id="@+id/send_response_all"
+          android:icon="@drawable/social_reply_all"
+          android:title="@string/hello_world"
+          android:showAsAction="ifRoom"/>
+    
+<!--     <item android:id="@+id/location_map" -->
+<!--           android:icon="@drawable/location_maps" -->
+<!--           android:title="@string/hello_world" -->
+<!--           android:showAsAction="ifRoom"/> -->
     
     <item android:id="@+id/share_twitter"
           android:icon="@drawable/twitter"

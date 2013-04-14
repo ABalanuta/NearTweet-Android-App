@@ -14,6 +14,7 @@ import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -81,8 +82,8 @@ public class NewTweetActivity extends Activity{
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 
 		// Conect with the Service
-		//OFFLINE service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		//OFFLINE bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 		btnPicture.setOnClickListener(new OnClickListener() {
 
@@ -195,7 +196,7 @@ public class NewTweetActivity extends Activity{
 				final String imageFilePath = cursor.getString(0);
 				File photos = new File(imageFilePath);
 				bitmap = decodeFile(photos);
-				bitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, true);
+				bitmap = Bitmap.createScaledBitmap(bitmap, 400, 3, true);
 
 				imgChoosen.setImageBitmap(bitmap);
 				imgChoosen.setVisibility(ImageView.VISIBLE);
@@ -210,7 +211,7 @@ public class NewTweetActivity extends Activity{
 			if (data.getExtras() != null) {
 				// here is the image from camera
 				bitmap = (Bitmap) data.getExtras().get("data");
-				bitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, true);
+				bitmap = Bitmap.createScaledBitmap(bitmap, 400, 300, true);
 
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				imgChoosen.setImageBitmap(bitmap);

@@ -3,7 +3,6 @@ package pt.utl.ist.tagus.cmov.neartweetapp;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import pt.utl.ist.tagus.cmov.neartweet.NewCommentActivity;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import android.app.Activity;
@@ -66,7 +65,7 @@ public class TweetDetailsPoolActivity extends Activity {
 				//votaram de 1 a 3 pessoas
 				else{
 					if (voters_array.size() == 0){
-						voters="Sê o primeiro a votar!";
+						voters="SÔøΩ o primeiro a votar!";
 					}
 					else{
 						int n = 0;
@@ -79,7 +78,7 @@ public class TweetDetailsPoolActivity extends Activity {
 			}
 			//ninguem votou
 			else{
-				voters="Sê o primeiro a votar!";
+				voters="SÔøΩ o primeiro a votar!";
 			}
 			HashMap<String,String> vote_interface = new HashMap<String,String>();
 			Log.v("option", key);
