@@ -9,8 +9,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import javax.swing.text.LabelView;
-
 import org.apache.http.util.ByteArrayBuffer;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;

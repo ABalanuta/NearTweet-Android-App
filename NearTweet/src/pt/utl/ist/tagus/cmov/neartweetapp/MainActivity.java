@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
@@ -215,6 +216,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
 
+		
+		/* HOW TO CALL MAP
+		 * USE PUT EXTRA TO */
+		Intent map = new Intent(this,BasicMapActivity.class);
+		startActivity(map);
+		
 
 	}
 
