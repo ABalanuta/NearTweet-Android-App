@@ -13,6 +13,8 @@ public class CmovPreferences {
 	public final String PROFILE_IMG_URL = "PROFILE_IMG_URL";
 	public final String PREF_KEY_OAUTH_TOKEN = "PREF_KEY_OAUTH_TOKEN";
 	public final String PREF_KEY_OAUTH_SECRET = "PREF_KEY_OAUTH_SECRET";
+	public final String TWITTER_CONSUMER_KEY = "20o4JfRtmLAQ9v1HpwwHKw";
+	public final String TWITTER_CONSUMER_SECRET = "pmLgr4ozXj2Dw8HBk3sqHykuOwAf0mDrjed4fzlkc";
 	
 	public CmovPreferences(Context appContext){
 		mSharedPreferences = appContext.getSharedPreferences("MyPref",1);
@@ -63,6 +65,12 @@ public class CmovPreferences {
 	public String getTwitOautTkn(){
 		return mSharedPreferences.getString(PREF_KEY_OAUTH_TOKEN,"");
 		
+	}
+	public String getConsumerSecret(){
+		return TWITTER_CONSUMER_SECRET;
+	}
+	public String getConsumerKey(){
+		return TWITTER_CONSUMER_KEY;
 	}
 	
 	public boolean hasUserName(){

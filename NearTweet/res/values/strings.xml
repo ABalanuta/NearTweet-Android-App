@@ -27,4 +27,9 @@
     <string name="iamegemTweet">iamegemTweet</string>
 	<string name="tweet_Location">At  </string>
 	<string name="handle">Handle</string>
+	<string name="picture">Adicionar Foto</string>
+	<string name="send">Enviar</string>
+	<string name="toggle_gps_id">id</string>
+	<string name="toggle_gps">Partilhar Localização</string>
+	<string name="attach_url">Adiciar Foto Url</string>
 </resources>

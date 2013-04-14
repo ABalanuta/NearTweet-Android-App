@@ -111,8 +111,8 @@ public class NewCommentActivity extends Activity {
 		String url = new String();
 		url = myPreferences.getProfileImgUrl();
 		ConfigurationBuilder builder = new ConfigurationBuilder();
-		builder.setOAuthConsumerKey(myPreferences.getTwitOautTkn());
-		builder.setOAuthConsumerSecret(myPreferences.getTwitOautTkn());
+		builder.setOAuthConsumerKey(myPreferences.getConsumerKey());
+		builder.setOAuthConsumerSecret(myPreferences.getConsumerSecret());
 
 		AccessToken accessToken = new AccessToken(myPreferences.getTwitOautTkn(), myPreferences.getTwitOautScrt());
 		Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);;

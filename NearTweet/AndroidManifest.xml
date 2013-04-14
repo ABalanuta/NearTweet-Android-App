@@ -39,13 +39,9 @@
             android:label="@string/title_activity_tweet_details" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="t4jsample"
-                    android:scheme="oauth" />
+                <data android:scheme="oauth" android:host="t4jsample"/>
             </intent-filter>
         </activity>
 
