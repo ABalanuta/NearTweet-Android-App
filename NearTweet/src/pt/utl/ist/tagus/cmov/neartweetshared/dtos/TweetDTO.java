@@ -1,8 +1,12 @@
 package pt.utl.ist.tagus.cmov.neartweetshared.dtos;
 
+import java.util.Arrays;
+
 
 
 public class TweetDTO extends BasicDTO{
+
+	
 
 	/**
 	 * Default Serial Version
@@ -90,6 +94,15 @@ public class TweetDTO extends BasicDTO{
 	public boolean hasCoordenates(){
 		if (mCoordinates[0] == null || mCoordinates[1]==null)return false;
 		else return true;
+	}
+	
+	@Override
+	public String toString() {
+		return "TweetDTO [nickName=" + nickName + ", tweet=" + tweet
+				+ ", srcDeviceID=" + srcDeviceID + ", tweetID=" + tweetID
+				+ ", photo=" + "$$$" + ", userPhoto="
+				+ Arrays.toString(userPhoto) + ", mCoordinates="
+				+ Arrays.toString(mCoordinates) + "]";
 	}
 	
 }

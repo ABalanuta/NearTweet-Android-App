@@ -27,5 +27,5 @@
     <string name="iamegemTweet">iamegemTweet</string>
     <string name="tweet_Location">At  </string>
     <string name="basic_map">Basic Map</string>
-
+	<string name="handle">Handle</string>
 </resources>

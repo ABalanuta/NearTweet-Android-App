@@ -21,17 +21,17 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.provider.Settings.Secure;
 import android.util.Log;
-import android.widget.SimpleAdapter;
 
 public class ConnectionHandlerService extends Service {
 
 	private ConnectionHandler mConectionHandler = null;
 	private final IBinder mBinder = new LocalBinder();
 	private int Clients = 0;
-	private String deviceID = null;
+	public static String deviceID = null;
 	private long tweetID = 0;
 	private ArrayList<Tweet> mTweetsArray = new ArrayList<Tweet>();
-	private boolean hasUpdates = false;
+	private boolean hasPostUpdates = false;
+	private boolean hasResponseUpdates = false;
 	private SearchingForTweets searcher = null;
 
 
@@ -136,7 +136,7 @@ public class ConnectionHandlerService extends Service {
 
 		if(mConectionHandler != null){
 			tweet.setDeviceID(deviceID);
-			tweet.setTweetID(this.tweetID++);
+			tweet.setTweetID(++this.tweetID);
 			mConectionHandler.send(tweet);
 		}
 	}
@@ -159,14 +159,28 @@ public class ConnectionHandlerService extends Service {
 
 	public boolean hasUpdates(){
 		synchronized (mTweetsArray) {
-			return hasUpdates;
+			return hasPostUpdates;
 		}
+	}
+	public boolean hasResponseUpdates(String srcDeviceID, long tweetID2){
+		ArrayList<Tweet> work = null;
+		synchronized (mTweetsArray) {
+			work = (ArrayList<Tweet>) mTweetsArray.clone();
+		}
+		for(Tweet t : work){
+			if(t.getDeviceID().equals(srcDeviceID)){
+				if(t.getTweetId() == tweetID2){
+					return t.hasNewResponses();
+				}
+			}
+		}
+		return false;
 	}
 
 	private void addTweet(Tweet t){
 		synchronized (mTweetsArray) {
-			mTweetsArray.add(t);
-			this.hasUpdates = true;
+			mTweetsArray.add(t);		
+			this.hasPostUpdates = true;
 		}
 	}
 
@@ -179,9 +193,26 @@ public class ConnectionHandlerService extends Service {
 
 	public ArrayList<Tweet> getAllTweets() {
 		synchronized (mTweetsArray) {
-			this.hasUpdates = false;
+			this.hasPostUpdates = false;
 			return (ArrayList<Tweet>) mTweetsArray.clone();
 		}
+	}
+
+	public ArrayList<TweetResponseDTO> getAllResponses(String srcDeviceID, long tweetID2){
+
+		ArrayList<Tweet> work = null;
+		synchronized (mTweetsArray) {
+			work = (ArrayList<Tweet>) mTweetsArray.clone();
+		}
+		for(Tweet t : work){
+			if(t.getDeviceID().equals(srcDeviceID)){
+				if(t.getTweetId() == tweetID2){
+					Log.e("ServiceP", "deatails for "+srcDeviceID+":"+tweetID2+" Are: "+t.toString());
+					return t.getResponses();
+				}
+			}
+		}
+		return null;
 	}
 
 	private ArrayList<BasicDTO> receveNewTweets(){		  
@@ -230,6 +261,8 @@ public class ConnectionHandlerService extends Service {
 
 					for(BasicDTO dto : list){
 
+						Log.e("ServiceP", "R->> "+ dto.toString());
+
 						if(dto.getType().equals(TypeofDTO.TWEET_DTO)){
 
 							TweetDTO t = (TweetDTO) dto;		
@@ -257,13 +290,23 @@ public class ConnectionHandlerService extends Service {
 
 							TweetResponseDTO response = (TweetResponseDTO) dto;
 
+							Log.e("ServiceP", "#"+response.toString());
+							
+//							
+//							// Filter private Responses
+//							if((response.isPrivate() && response.getDestDeviceID() != deviceID)){
+//								continue;
+//							}
+
+
 							Log.e("ServiceP", "Response Receved");
 							synchronized (mTweetsArray) {
 								for(Tweet t : mTweetsArray){
-									
+
 									if(response.getDestDeviceID().equals(t.getDeviceID())){
 										if(response.getDesTweetID() == t.getTweetId()){
 											t.addResponse(response);
+											hasResponseUpdates = true;
 											break;
 										}
 									}

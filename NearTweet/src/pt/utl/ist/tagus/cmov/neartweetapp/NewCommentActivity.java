@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+
 import org.apache.http.util.ByteArrayBuffer;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
@@ -117,7 +118,7 @@ public class NewCommentActivity extends Activity {
 		Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);;
 		User user;
 		String image_url = new String();
-
+		Toast.makeText(getApplicationContext(), "has url: " + image_url, Toast.LENGTH_LONG).show();
 		try {
 			user = twitter.showUser(twitter.getId());
 			image_url = user.getProfileImageURL();
