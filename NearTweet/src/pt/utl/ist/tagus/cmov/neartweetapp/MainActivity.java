@@ -111,56 +111,57 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
+		mProgressBar.setVisibility(View.VISIBLE);
 		myPreferences = new CmovPreferences(getApplicationContext());
-		
+
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 
-		    @Override
-		    public void onItemCheckedStateChanged(ActionMode mode, int position,
-		                                          long id, boolean checked) {
-		        // Here you can do something when items are selected/de-selected,
-		        // such as update the title in the CAB
-		    }
+			@Override
+			public void onItemCheckedStateChanged(ActionMode mode, int position,
+					long id, boolean checked) {
+				// Here you can do something when items are selected/de-selected,
+				// such as update the title in the CAB
+			}
 
-		    @Override
-		    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-		        // Respond to clicks on the actions in the CAB
-		        switch (item.getItemId()) {
-		            case R.id.share_twitter:
-		                Toast.makeText(getApplicationContext(), "Partilhado no twitter", Toast.LENGTH_LONG).show();
-		                mode.finish(); // Action picked, so close the CAB
-		                return true;
-		            case R.id.mark_as_spam:
-		            	Toast.makeText(getApplicationContext(), "Marcado como spam", Toast.LENGTH_LONG).show();
-		                mode.finish(); // Action picked, so close the CAB
-		                return true;
-		            default:
-		                return false;
-		        }
-		    }
+			@Override
+			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+				// Respond to clicks on the actions in the CAB
+				switch (item.getItemId()) {
+				case R.id.share_twitter:
+					Toast.makeText(getApplicationContext(), "Partilhado no twitter", Toast.LENGTH_LONG).show();
+					mode.finish(); // Action picked, so close the CAB
+					return true;
+				case R.id.mark_as_spam:
+					Toast.makeText(getApplicationContext(), "Marcado como spam", Toast.LENGTH_LONG).show();
+					mode.finish(); // Action picked, so close the CAB
+					return true;
+				default:
+					return false;
+				}
+			}
 
-		    @Override
-		    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-		        // Inflate the menu for the CAB
-		        MenuInflater inflater = mode.getMenuInflater();
-		        inflater.inflate(R.menu.main_activity_special_actions, menu);
-		        return true;
-		    }
+			@Override
+			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+				// Inflate the menu for the CAB
+				MenuInflater inflater = mode.getMenuInflater();
+				inflater.inflate(R.menu.main_activity_special_actions, menu);
+				return true;
+			}
 
-		    @Override
-		    public void onDestroyActionMode(ActionMode mode) {
-		        // Here you can make any necessary updates to the activity when
-		        // the CAB is removed. By default, selected items are deselected/unchecked.
-		    }
+			@Override
+			public void onDestroyActionMode(ActionMode mode) {
+				// Here you can make any necessary updates to the activity when
+				// the CAB is removed. By default, selected items are deselected/unchecked.
+			}
 
-		    @Override
-		    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-		        // Here you can perform updates to the CAB due to
-		        // an invalidate() request
-		        return false;
-		    }
+			@Override
+			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+				// Here you can perform updates to the CAB due to
+				// an invalidate() request
+				return false;
+			}
 		});
 
 		lat = 0;
@@ -198,14 +199,13 @@ public class MainActivity extends ListActivity implements LocationListener{
 		REL_SWIPE_THRESHOLD_VELOCITY = (int)(200.0f * dm.densityDpi / 160.0f + 0.5);
 
 		if (isNetworkAvailable()){
-			mProgressBar.setVisibility(View.VISIBLE);
 			// Inicia thread que actualiza as messagens
-			
+
 			connectionHandlerTask = new ConnectionHandlerTask();
 			connectionHandlerTask.execute();
 
 			/**
-			 * offline dummies: NAO APAGAR
+			 * offline dummies: NAO APAGAR	
 			 */
 			//Tweet tweetGenerator = new Tweet();
 			//mTweetsArray = tweetGenerator.generateTweets();
@@ -266,14 +266,14 @@ public class MainActivity extends ListActivity implements LocationListener{
 	@Override
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Main Activity");
-		
+
 		//unbinding from the Service
 		// NOTA: nao remover if, utilizado para se destruir a aplicão caso variaveis estejam a null
 		if (mConnection != null && connectionHandlerTask!=null){
 			if(mBound){ unbindService(mConnection); }
 			connectionHandlerTask.stop();
 			connectionHandlerTask.cancel(true);
-			}
+		}
 		mTweetsArray.removeAll(mTweetsArray);
 		super.onDestroy();
 	}
@@ -296,20 +296,20 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
 			details.putExtra("username", tweet.getUsername());
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
-			
+
 			if (tweet.hasCoordenates()){
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
 				details.putExtra("gps_location_lat", "" + tweet.getLNG());
 				details.putExtra("username", tweet.getUsername());
 			}
-			
+
 			if(tweet.hasImage()){
 				details.putExtra("tweet_hasImage", true);
 				details.putExtra("tweet_image", tweet.getImage());
 			}else{
 				details.putExtra("tweet_hasImage", false);
 			}
-			
+
 			//Toast.makeText(getApplicationContext(), tweet.getLNG() + " " +tweet.getLNG(), Toast.LENGTH_LONG).show();
 			startActivity(details);
 		}
@@ -322,7 +322,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		return true;
 	}
 
-	
+
 
 	/***************************************************************************************
 	 * 
@@ -358,7 +358,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		case android.R.id.home:
 			mSlideHolder.toggle();
 			return true;
-			
+
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
 
@@ -401,7 +401,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 	} 
 
 	public void handleServerResponse() {
-		mProgressBar.setVisibility(View.INVISIBLE);
 		if (mTweetsArray == null){
 			updateDisplayForError();
 		}
@@ -652,7 +651,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 				StrictMode.setThreadPolicy(policy);
 			}
 
-			
+
 			if (myPreferences.hasProfileImgUrl() && myPreferences.hasUserName()){
 				String url = myPreferences.getUsername();
 				String username = myPreferences.getProfileImgUrl();

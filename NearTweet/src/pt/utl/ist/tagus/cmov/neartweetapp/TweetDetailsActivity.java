@@ -314,16 +314,12 @@ public class TweetDetailsActivity extends ListActivity {
 			//login to twitter and post stuff
 			loginToTwitter();
 			return true;
-			
-			// Goes to google maps
-		case R.id.location_map:
-			return true;
 
 			// private Comment
 		case R.id.send_response:
 			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
 			newCommentIntent.putExtra("tweet2", Encoding.encodeTweet(tweet));
-			newCommentIntent.putExtra("toAll", false);
+			newCommentIntent.putExtra("toAll", true);
 			startActivity(newCommentIntent);
 			return true;
 
@@ -331,7 +327,7 @@ public class TweetDetailsActivity extends ListActivity {
 		case R.id.send_response_all:
 			Intent newCommentIntent2 = new Intent(this,NewCommentActivity.class);
 			newCommentIntent2.putExtra("tweet2", Encoding.encodeTweet(tweet));
-			newCommentIntent2.putExtra("toAll", true);
+			newCommentIntent2.putExtra("toAll", false);
 			startActivity(newCommentIntent2);
 			return true;
 
