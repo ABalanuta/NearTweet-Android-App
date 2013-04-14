@@ -141,8 +141,9 @@ public class NewCommentActivity extends Activity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
-
-
+		
+		String test_download = myPreferences.getProfilePictureLocation();
+		Toast.makeText(getApplicationContext(), test_download, Toast.LENGTH_LONG).show();
 	}		
 
 
