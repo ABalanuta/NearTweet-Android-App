@@ -18,6 +18,7 @@ public class ConnectionHandler extends Thread{
 	//artur-4g
 	//private	final String serverIP = "172.20.41.19";
 	//private	final String serverIP = "artur-4g.tagus.ist.url.pt";
+
 	private	final int serverPort = 4444;
 	private Socket localSock = null;
 	private ObjectInputStream in = null;

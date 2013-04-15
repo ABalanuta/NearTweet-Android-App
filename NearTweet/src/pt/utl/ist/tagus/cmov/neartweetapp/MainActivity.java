@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
@@ -78,8 +79,13 @@ public class MainActivity extends ListActivity implements LocationListener{
 	private String provider;// location stuff
 	private static SharedPreferences mSharedPreferences;
 
-	public static int lat;
-	public static int lng;
+
+	private int REL_SWIPE_MIN_DISTANCE; 
+	private int REL_SWIPE_MAX_OFF_PATH;
+	private int REL_SWIPE_THRESHOLD_VELOCITY;
+	public static double lat;
+	public static double lng;
+
 
 	Executor executor = null;
 	ConnectionHandlerTask connectionHandlerTask = null;
@@ -107,7 +113,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		setContentView(R.layout.activity_main);
 		getActionBar().setHomeButtonEnabled(true);
-
+		
+		
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 		mListView = (ListView) findViewById(android.R.id.list);
@@ -210,21 +217,35 @@ public class MainActivity extends ListActivity implements LocationListener{
 		if (isNetworkAvailable()){
 			// Inicia thread que actualiza as messagens
 
+			/*
 			connectionHandlerTask = new ConnectionHandlerTask();
 			connectionHandlerTask.execute();
-
+			 */
 			/**
 			 * offline dummies: NAO APAGAR	
 			 */
-			//Tweet tweetGenerator = new Tweet();
-			//mTweetsArray = tweetGenerator.generateTweets();
-			//handleServerResponse();
+			Tweet tweetGenerator = new Tweet();
+			mTweetsArray = tweetGenerator.generateTweets();
+			handleServerResponse();
 		}
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
 
+		
 
+		
+		
+		/* HOW TO CALL MAP
+		 * USE PUT EXTRA */
+		/*
+		Intent map = new Intent(this,pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
+		map.putExtra("gps_location_lat", Double.toString(lat));
+		map.putExtra("gps_location_lng", Double.toString(lng));
+		map.putExtra("tweet_text", "EU SOU UM TWEET");
+		startActivity(map);
+		*/
+		
 	}
 
 
@@ -589,8 +610,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	@Override
 	public void onLocationChanged(Location location) {
-		lat = (int) (location.getLatitude());
-		lng = (int) (location.getLongitude());
+		lat = (double) (location.getLatitude());
+		lng = (double) (location.getLongitude());
 		Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
 	}
 
