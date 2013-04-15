@@ -54,6 +54,15 @@ public class TweetPoll extends Tweet{
 	public void setPollRead(){
 		updated = false;
 	}
+
+	@Override
+	public String toString() {
+		return "TweetPoll [options=" + options + ", responses=" + responses
+				+ ", updated=" + updated + "]";
+	}
+	
+	
+	
 	
 //	public void addOptions(String answer){
 //		mOptions.put(answer, new ArrayList<String>());	

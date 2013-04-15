@@ -572,6 +572,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 					if(mService.hasUpdates()){
 						Log.e("ServiceP", "Loop Receve");
 						mTweetsArray = mService.getAllTweets();
+						mService.setNoUpdates();
 						
 						for(Tweet t : mTweetsArray){
 							if(t.isBanned()){

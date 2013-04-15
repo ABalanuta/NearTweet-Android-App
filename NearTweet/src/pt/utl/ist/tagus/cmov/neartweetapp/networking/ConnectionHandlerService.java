@@ -252,10 +252,15 @@ public class ConnectionHandlerService extends Service {
 
 	public ArrayList<Tweet> getAllTweets() {
 		synchronized (mTweetsArray) {
-			this.hasPostUpdates = false;
+			
 			return (ArrayList<Tweet>) mTweetsArray.clone();
 		}
 	}
+	
+	public void setNoUpdates() {
+		this.hasPostUpdates = false;
+	}
+	
 
 	public ArrayList<TweetResponseDTO> getAllResponses(String srcDeviceID, long tweetID2){
 
@@ -276,23 +281,28 @@ public class ConnectionHandlerService extends Service {
 
 	public ArrayList<PollResponseDTO> getAllPollResponses(String srcDeviceID, long tweetID2){
 
-		ArrayList<Tweet> work = null;
+		Log.e("ServiceP", "Get my all for : "+ srcDeviceID + " with id " + tweetID2);
+
+
 		synchronized (mTweetsArray) {
-			work = (ArrayList<Tweet>) mTweetsArray.clone();
-		}
-		for(Tweet t : work){
-			if(t.getDeviceID().equals(srcDeviceID)){
-				if(t.getTweetId() == tweetID2){
-					Log.e("ServiceP", "deatails for "+srcDeviceID+":"+tweetID2+" Are: "+t.toString());
-					((TweetPoll) t).setPollRead();
-					return ((TweetPoll) t).getAllResponses();
+
+			for(Tweet t : (ArrayList<Tweet>) mTweetsArray.clone()){
+
+				if(t instanceof TweetPoll){
+					Log.e("ServiceP", "Got  : "+ t.getDeviceID() +" with id " + t.getTweetId());
+					if(t.getDeviceID().equals(srcDeviceID)){
+						if(t.getTweetId() == tweetID2){
+							Log.e("ServiceP", "fILTRED  : "+ t.getDeviceID() +" with id " + t.getTweetId());
+							return ((TweetPoll) t).getAllResponses();
+						}
+					}
 				}
 			}
 		}
 		return null;
 	}
-	
-	
+
+
 	private ArrayList<BasicDTO> receveNewTweets(){		  
 		ArrayList<BasicDTO> tmp = this.mConectionHandler.receve();
 
@@ -345,7 +355,7 @@ public class ConnectionHandlerService extends Service {
 
 							TweetDTO t = (TweetDTO) dto;		
 							Log.e("ServiceP", "TweetDTO is " + t);
-							
+
 							Tweet tweet = new Tweet(t.getTweet(), t.getNickName(), t.getDeviceID(),t.getTweetID());
 
 
@@ -433,22 +443,30 @@ public class ConnectionHandlerService extends Service {
 
 						else if( dto.getType().equals(TypeofDTO.POLL_RESPONSE_DTO)){
 
-							Log.e("ServiceP", "PollResponseReceved");
+
 
 							PollResponseDTO rsp = (PollResponseDTO) dto;
-							Log.e("ServiceP", "PollResponseReceved is " + rsp);
 
+							Log.e("ServiceP", "PollReceved " + rsp);
+							
 							synchronized (mTweetsArray) {
+								
 								for(Tweet t : mTweetsArray){
 
-									if(rsp.getDesDeviceID().equals(t.getDeviceID())){
+									if(t.getDeviceID().equals(rsp.getDesDeviceID())){
+
+
+
+
 										if(rsp.getTweetID() == t.getTweetId()){
 
 											((TweetPoll) t).addResponse(rsp);
-
+											Log.e("ServiceP", "PollAded");
 											break;
 										}
+
 									}
+
 								}
 							}	
 

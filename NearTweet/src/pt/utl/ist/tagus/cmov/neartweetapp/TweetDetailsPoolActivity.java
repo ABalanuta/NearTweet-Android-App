@@ -91,6 +91,7 @@ public class TweetDetailsPoolActivity extends Activity {
 
 		// Limpar Old
 		vote_options = new ArrayList<HashMap<String,String>>();
+		myHashMap = new HashMap<String,ArrayList<String>>();
 
 		if(tweet != null){
 			for(String s : tweet.getOptions()){
@@ -280,7 +281,7 @@ public class TweetDetailsPoolActivity extends Activity {
 			// Esperar que se ligue ao Server
 			while((mService == null || !mService.isConnected()) && running){
 				try {
-					Thread.sleep(250);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -290,45 +291,64 @@ public class TweetDetailsPoolActivity extends Activity {
 
 			while(running){
 
+				Log.e("ServiceP", "-1");
+
 				if(mService != null){
+					Log.e("ServiceP", "Loop Receve");
 
-					if(mService.hasResponsePollUpdates(tweet.getDeviceID(), tweet.getTweetId())){
-						Log.e("ServiceP", "Loop Receve");
 
-						// Preencher com campos Vazios
-						myHashMap = new HashMap<String,ArrayList<String>>();
-						ArrayList<String> opt = new ArrayList<String>();
-						ArrayList<String> voted = new ArrayList<String>();
-						synchronized(myHashMap){
-							for(String s : tweet.getOptions()){
 
-								// Cria os Arrays PAra guardar os Dados
-								myHashMap.put(s, new ArrayList<String>());
-								opt.add(s);
-								HashMap<String,String> vote_interface = new HashMap<String,String>();
-								vote_interface.put("Option", s);
-								vote_options.add(vote_interface);
-							}
-						}
 
-						ArrayList<PollResponseDTO> resp = mService.getAllPollResponses(tweet.getDeviceID(), tweet.getTweetId());
-						for(PollResponseDTO r : resp){
+					// Preencher com campos Vazios
+					myHashMap = new HashMap<String,ArrayList<String>>();
+					ArrayList<String> opt = new ArrayList<String>();
+					ArrayList<String> voted = new ArrayList<String>();
+					synchronized(myHashMap){
+						for(String s : tweet.getOptions()){
 
-							if(!voted.contains(r.getSrcDeviceID())){
-								if(opt.contains(r.getResponse())){
-									synchronized(myHashMap){
-										Log.e("ServiceP", "?! " + r);
-										myHashMap.get(r.getResponse()).add(r.getNickName());
-									}
-								}
-							}
-
+							// Cria os Arrays PAra guardar os Dados
+							myHashMap.put(s, new ArrayList<String>());
+							opt.add(s);
+							HashMap<String,String> vote_interface = new HashMap<String,String>();
+							vote_interface.put("Option", s);
+							vote_options.add(vote_interface);
 						}
 					}
 
+					ArrayList<Tweet> all = mService.getAllTweets();
+					for(Tweet t : all){
+						Log.e("ServiceP", "-");
+						if(t instanceof TweetPoll){
+							//Tweets por este device
+							if(t.getDeviceID().equals(tweet.getDeviceID())){
+								// o Tweet
+								if(t.getTweetId() == tweet.getTweetId()){
+									Log.e("ServiceP", "------------------------");
+
+									TweetPoll tp = (TweetPoll) t;
+									for(PollResponseDTO r : tp.getAllResponses()){
+										if(!voted.contains(r.getSrcDeviceID())){
+											if(opt.contains(r.getResponse())){
+												synchronized(myHashMap){
+													Log.e("ServiceP", "»»Add " + r.getResponse()+ "  " +r.getNickName());
+													myHashMap.get(r.getResponse()).add(r.getNickName());
+												}
+											}
+										}
+
+									}
+									Log.e("ServiceP", tp.toString());
+									Log.e("ServiceP", "------------------------");
+									break;
+								}
+							}
+						}
+					}
+
+
 					publishProgress();
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(3000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
