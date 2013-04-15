@@ -160,6 +160,7 @@ public class ConnectionHandlerService extends Service {
 			poll.setSrcDeviceID(deviceID);
 			poll.setTweetID(++this.tweetID);
 			mConectionHandler.send(poll);
+			Log.e("ServiceP", "PollSent");
 		}else{
 			Log.e("ServiceP", "Channel is Closed");
 		}
@@ -369,6 +370,8 @@ public class ConnectionHandlerService extends Service {
 
 						else if( dto.getType().equals(TypeofDTO.POLL_DTO)){
 
+							Log.e("ServiceP", "PollReceved");
+							
 							PollDTO p = (PollDTO) dto;
 
 							TweetPoll poll = new TweetPoll(p.getQuestion(), p.getNickName(), p.getSrcDeviceID(), p.getTweetID());

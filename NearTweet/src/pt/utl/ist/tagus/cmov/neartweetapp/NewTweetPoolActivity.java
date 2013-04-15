@@ -136,9 +136,6 @@ public class NewTweetPoolActivity extends Activity {
 				}else{
 					Toast.makeText(getApplicationContext(), "Server Error", Toast.LENGTH_SHORT).show();
 				}
-
-//				Toast.makeText(getApplicationContext(), "hade enviar par um servidor", Toast.LENGTH_LONG).show();
-//				startActivity(new Intent(getApplicationContext(), MainActivity.class));
 			}
 		});
 
