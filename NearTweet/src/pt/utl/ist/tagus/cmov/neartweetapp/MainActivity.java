@@ -619,6 +619,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 					this.running = false;
 					MainActivity.mListView.setVisibility(View.INVISIBLE);
 					MainActivity.mImageLock.setVisibility(View.VISIBLE);
+					getActionBar().setHomeButtonEnabled(false);
 					Toast.makeText(getApplicationContext(), "You Have Been Banned!!!", Toast.LENGTH_LONG).show();
 				}
 			}

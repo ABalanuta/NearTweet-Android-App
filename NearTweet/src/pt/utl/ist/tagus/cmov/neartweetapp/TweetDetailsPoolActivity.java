@@ -109,7 +109,7 @@ public class TweetDetailsPoolActivity extends Activity {
 
 
 		txtTweet.setText(tweet_text);
-		txtUserName.setText("@ " + tweet_uid);
+		txtUserName.setText("@ " + tweet.getUsername());
 
 		// Starts the assync Task
 		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
@@ -125,16 +125,15 @@ public class TweetDetailsPoolActivity extends Activity {
 				String selected = (String) option.values().toArray()[0];
 				CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
 				PollResponseDTO rsp = new PollResponseDTO(myPreferences.getUsername(), selected, tweet.getDeviceID(), tweet.getTweetId());
-				
-				
-				
+
+
+
 				for(int x = 200; x > 0; x--){
 					if(mService != null && mService.isConnected()){
-						
+
 						mService.sendResponsePoll(rsp);
 						Log.e("ServiceP", "Sent Selection: " + selected);
 						Toast.makeText(getApplicationContext(), "Vote Sent", Toast.LENGTH_LONG).show();
-						finish();
 						return true;
 					}else{
 						try {
@@ -144,9 +143,9 @@ public class TweetDetailsPoolActivity extends Activity {
 						}
 					}
 				}
-				
-				
-				
+
+
+
 
 				return false;
 			}
@@ -289,31 +288,59 @@ public class TweetDetailsPoolActivity extends Activity {
 
 			Log.e("ServiceP", "Poll Activity Conected to Service");
 
+			while(running){
 
-			do{
+				if(mService != null){
 
-				if(mService.hasUpdates()){
+					if(mService.hasResponsePollUpdates(tweet.getDeviceID(), tweet.getTweetId())){
+						Log.e("ServiceP", "Loop Receve");
 
-					myHashMap = new HashMap<String,ArrayList<String>>();
-					ArrayList<Tweet> tweets = mService.getAllTweets();
-					for(Tweet t : tweets){
-						if( t instanceof TweetPoll){
-							//	TweetPoll tr = (TweetPoll) t;
-							//	tr.g
+						// Preencher com campos Vazios
+						myHashMap = new HashMap<String,ArrayList<String>>();
+						ArrayList<String> opt = new ArrayList<String>();
+						ArrayList<String> voted = new ArrayList<String>();
+						synchronized(myHashMap){
+							for(String s : tweet.getOptions()){
+
+								// Cria os Arrays PAra guardar os Dados
+								myHashMap.put(s, new ArrayList<String>());
+								opt.add(s);
+								HashMap<String,String> vote_interface = new HashMap<String,String>();
+								vote_interface.put("Option", s);
+								vote_options.add(vote_interface);
+							}
 						}
+
+						ArrayList<PollResponseDTO> resp = mService.getAllPollResponses(tweet.getDeviceID(), tweet.getTweetId());
+						for(PollResponseDTO r : resp){
+
+							if(!voted.contains(r.getSrcDeviceID())){
+								if(opt.contains(r.getResponse())){
+									synchronized(myHashMap){
+										Log.e("ServiceP", "?! " + r);
+										myHashMap.get(r.getResponse()).add(r.getNickName());
+									}
+								}
+							}
+
+						}
+					}
+
+					publishProgress();
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}else{
 					try {
-						Thread.sleep(1500);
+						Thread.sleep(250);
 					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
+
 			}
-			while(running);
-
-
-			publishProgress();
-
 
 			return null;
 		}
@@ -324,10 +351,11 @@ public class TweetDetailsPoolActivity extends Activity {
 
 			// Renova a lista
 			vote_options = new ArrayList<HashMap<String,String>>();
-
-			Set<String> options = myHashMap.keySet();
-			for(String option : options){
-				insertVote(option, myHashMap.get(option));
+			synchronized(myHashMap){
+				Set<String> options = myHashMap.keySet();
+				for(String option : options){
+					insertVote(option, myHashMap.get(option));
+				}
 			}
 			UpdatePollView();
 

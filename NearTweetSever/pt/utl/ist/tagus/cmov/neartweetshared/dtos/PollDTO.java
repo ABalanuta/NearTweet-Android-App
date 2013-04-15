@@ -50,7 +50,13 @@ public class PollDTO extends BasicDTO {
 	public ArrayList<String> getOptions() {
 		return options;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "PollDTO [nickName=" + nickName + ", question=" + question
+				+ ", srcDeviceID=" + srcDeviceID + ", tweetID=" + tweetID
+				+ ", options=" + options + "]";
+	}
 	
 	
 }

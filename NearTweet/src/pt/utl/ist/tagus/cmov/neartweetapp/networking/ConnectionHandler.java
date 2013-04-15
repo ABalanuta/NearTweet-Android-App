@@ -14,9 +14,9 @@ import java.util.HashMap;
 
 public class ConnectionHandler extends Thread{
 
-	//private	final String serverIP = "10.0.2.2";
+	private	final String serverIP = "10.0.2.2";
 	//artur-4g
-	private	final String serverIP = "172.20.41.19";
+	//private	final String serverIP = "172.20.41.19";
 	//private	final String serverIP = "artur-4g.tagus.ist.url.pt";
 
 	private	final int serverPort = 4444;
@@ -220,10 +220,6 @@ class OutConnectionHandler extends Thread{
 	private ObjectOutputStream out;
 	private boolean running = false;
 
-	public OutConnectionHandler(ObjectOutputStream out) {
-		this.out = out;
-	}
-
 	public boolean isRunning(){
 		return this.running;
 	}
@@ -254,6 +250,10 @@ class OutConnectionHandler extends Thread{
 
 			//Thread.yield();
 		}
+	}
+
+	public OutConnectionHandler(ObjectOutputStream out) {
+		this.out = out;
 	}
 }
 

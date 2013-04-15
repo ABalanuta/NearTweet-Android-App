@@ -16,7 +16,7 @@ public class PollResponseDTO extends BasicDTO {
 	private String desDeviceID = null;
 	private long tweetID = -1;
 	
-	public PollResponseDTO(String nickName, String response,String desDeviceID, long tweetID) {
+	public PollResponseDTO(String nickName, String response, String desDeviceID, long tweetID) {
 		super(TypeofDTO.POLL_RESPONSE_DTO);
 		this.nickName = nickName;
 		this.response = response;
@@ -49,4 +49,16 @@ public class PollResponseDTO extends BasicDTO {
 	public long getTweetID() {
 		return tweetID;
 	}
+
+
+
+	@Override
+	public String toString() {
+		return "PollResponseDTO [nickName=" + nickName + ", response="
+				+ response + ", srcDeviceID=" + srcDeviceID + ", desDeviceID="
+				+ desDeviceID + ", tweetID=" + tweetID + "]";
+	}
+	
+	
+	
 }
