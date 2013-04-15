@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.provider.Settings.Secure;
+import android.util.Log;
 
 public class CmovPreferences {
 	SharedPreferences mSharedPreferences;
@@ -33,8 +34,10 @@ public class CmovPreferences {
 	public final String PREF_KEY_OAUTH_SECRET = "PREF_KEY_OAUTH_SECRET";
 	public final String TWITTER_CONSUMER_KEY = "20o4JfRtmLAQ9v1HpwwHKw";
 	public final String TWITTER_CONSUMER_SECRET = "pmLgr4ozXj2Dw8HBk3sqHykuOwAf0mDrjed4fzlkc";
-	public final String USER_PROFILE_PICTURE_LOCATION = "USER_PROFILE_PICTURE_LOCATION";
+	public final String USER_PROFILE_PICTURE_LOCATION_PATH = "USER_PROFILE_PICTURE_LOCATION";
+	public final String USER_PROFILE_PICTURE_LOCATION_IMAGE_NAME = "USER_PROFILE_PICTURE_LOCATION_IMAGE_NAME";
 	public final Context mAppContext;
+	public final String SHARE_MY_LOCATION = "SHARE_MY_LOCATION";
 
 	public CmovPreferences(Context appContext){
 		mSharedPreferences = appContext.getSharedPreferences("MyPref",1);
@@ -42,18 +45,22 @@ public class CmovPreferences {
 				Secure.ANDROID_ID);
 		mAppContext = appContext;
 		setDeviceID(android_id);
+		setShareMyLocationTrue();
 	}
 
+	public boolean getShareMyLocation(){
+		return mSharedPreferences.getBoolean(SHARE_MY_LOCATION,false);
+	}
+	
 	public String getProfilePictureLocation(){
 		if (getTwitOautScrt()!=null && getTwitOautTkn()!=null){
-			
+
 			//foto nao existe
 			File sdCardDirectory = Environment.getExternalStorageDirectory();
-			File file = mAppContext.getFileStreamPath(sdCardDirectory.getAbsolutePath() +
-					"/neartweet/me.png");
-			
+			File file = new File("/sdcard/neartweet/me.jpg");
+
 			if(!file.exists()){
-				
+
 				//get profile url from twitter
 				ConfigurationBuilder builder = new ConfigurationBuilder();
 				builder.setOAuthConsumerKey(getConsumerKey());
@@ -70,7 +77,7 @@ public class CmovPreferences {
 				} catch (TwitterException e1) {
 					e1.printStackTrace();
 				}
-				
+
 				//download image from URL
 				URL newurl;
 				Bitmap mIcon_val=null;
@@ -82,46 +89,68 @@ public class CmovPreferences {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} 
-				
-				//save image to sdcard
-				File image = new File(sdCardDirectory, "/neartweet/me.png");
-			    boolean success = false;
 
-			    // Encode the file as a PNG image.
-			    FileOutputStream outStream;
-			    try {
+				createDirIfNotExists("neartweet");
+				File filename=null;
+				FileOutputStream outStream=null;
+				try {
+					filename = new File(Environment.getExternalStorageDirectory().toString() + "/neartweet/me.jpg");
+					
+					outStream = new FileOutputStream(filename);
+					
+					mIcon_val.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+					outStream.flush();
+					outStream.close();
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
-			        outStream = new FileOutputStream(image);
-			        mIcon_val.compress(Bitmap.CompressFormat.PNG, 100, outStream); 
-			        /* 100 to keep full quality of the image */
-
-			        outStream.flush();
-			        outStream.close();
-			        success = true;
-			    } catch (FileNotFoundException e) {
-			        e.printStackTrace();
-			    } catch (IOException e) {
-			        e.printStackTrace();
-			    }
-				
 				//write image location to shared preferences
 				Editor e = mSharedPreferences.edit();
-				e.putString(USER_PROFILE_PICTURE_LOCATION, sdCardDirectory +  "/neartweet/me.png");
+				e.putString(USER_PROFILE_PICTURE_LOCATION_PATH, sdCardDirectory +  "/neartweet/");
+				e.putString(USER_PROFILE_PICTURE_LOCATION_IMAGE_NAME, "me.png");
 				e.commit();
-				return sdCardDirectory +  "/neartweet/me.png";
+
+				return "/sdcard/neartweet/me.jpg";
 			}
-			
+
 			//foto ja existe
 			else{
-				return mSharedPreferences.getString(USER_PROFILE_PICTURE_LOCATION,"");
+				return "/sdcard/neartweet/me.jpg";
 			}
 		}
 		return null;
+	}
+	public static boolean createDirIfNotExists(String path) {
+		boolean ret = true;
+
+		File file = new File(Environment.getExternalStorageDirectory(), path);
+		if (!file.exists()) {
+			if (!file.mkdirs()) {
+				Log.e("blala :: ", "Problem creating Image folder");
+				ret = false;
+			}
+		}
+		return ret;
 	}
 
 	public void setUsernam(String username){
 		Editor e = mSharedPreferences.edit();
 		e.putString(USERNAME, username);
+		e.commit();
+	}
+	public void setShareMyLocationTrue(){
+		Editor e = mSharedPreferences.edit();
+		e.putBoolean(SHARE_MY_LOCATION, true);
+		e.commit();
+	}
+	public void setShareMyLocationFalse(){
+		Editor e = mSharedPreferences.edit();
+		e.putBoolean(SHARE_MY_LOCATION, false);
 		e.commit();
 	}
 	public void setDeviceID(String deviceId){

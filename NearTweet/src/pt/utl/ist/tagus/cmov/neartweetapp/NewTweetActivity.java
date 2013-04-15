@@ -43,7 +43,6 @@ public class NewTweetActivity extends Activity{
 	public static EditText mSendTextBox;
 	private String mUsername = null;
 
-	public static Switch swtchGps;
 	public static ImageView imgChoosen;
 	private Intent pictureActionIntent = null;
 	public static ConnectionHandler connectionHandler = null;
@@ -158,9 +157,6 @@ public class NewTweetActivity extends Activity{
 					tweet.setPhoto(byteArray);
 				}
 
-				if (swtchGps.isChecked()){
-					// inserir gps
-				}
 
 				mService.sendTweet(tweet);
 				mSendTextBox.setText(null);
@@ -241,6 +237,7 @@ public class NewTweetActivity extends Activity{
 	}
 	
 	private void attatchUrlFotoToTwitt(){
+		
 		
 	}
 
