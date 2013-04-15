@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Comment;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CommentCustomAdapter;
@@ -36,6 +37,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -66,7 +68,8 @@ public class TweetDetailsActivity extends ListActivity {
 	static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
 	public String tweet_text;
-
+	
+	
 	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
 
 	// Twitter oauth urls
@@ -118,14 +121,16 @@ public class TweetDetailsActivity extends ListActivity {
 		txtLong = (TextView) findViewById(R.id.textViewCoordinateLong);
 		image = (ImageView) findViewById(R.id.imageViewTweetImage);
 		userImage = (ImageView) findViewById(R.id.imageViewUserPicTweet);
+		
 
 		Bundle bundle = getIntent().getExtras();
 		final String tweet_uid = bundle.getString("tweet_uid");
-		String location_lng = bundle.getString("gps_location_lng");
-		String location_lat = bundle.getString("gps_location_lat");
+		final String location_lng = bundle.getString("gps_location_lng");
+		final String location_lat = bundle.getString("gps_location_lat");
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
 		tweet_text = bundle.getString("tweet_text");
+		final String tweet_text_to_map = tweet_text; // it had to be final to pass on clicl listener
 		if(bundle.getByteArray("tweet") == null){
 			finish();
 		}else{
@@ -146,6 +151,21 @@ public class TweetDetailsActivity extends ListActivity {
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
 
+		
+		txtLat.setOnLongClickListener(new OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+				
+
+				Intent map = new Intent(getApplicationContext(),pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
+				map.putExtra("gps_location_lat", location_lat);
+				map.putExtra("gps_location_lng", location_lng);
+				map.putExtra("tweet_text", tweet_text_to_map);
+				startActivity(map);
+				return false;
+			}
+		});
 
 
 

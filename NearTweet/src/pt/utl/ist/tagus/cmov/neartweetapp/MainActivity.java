@@ -198,10 +198,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 		if (isNetworkAvailable()){
 			// Inicia thread que actualiza as messagens
 
-			/*
+			
 			connectionHandlerTask = new ConnectionHandlerTask();
 			connectionHandlerTask.execute();
-			 */
+			 
 			/**
 			 * offline dummies: NAO APAGAR	
 			 */
@@ -310,7 +310,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 			if (tweet.hasCoordenates()){
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
-				details.putExtra("gps_location_lat", "" + tweet.getLNG());
+				details.putExtra("gps_location_lat", "" + tweet.getLAT());
 				details.putExtra("username", tweet.getUsername());
 			}
 

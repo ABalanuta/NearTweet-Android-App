@@ -128,7 +128,7 @@ public class Tweet implements Serializable{
 	}
 
 	public void setLNG(String lng) {
-		mCoordinates[0] = lng;
+		mCoordinates[1] = lng;
 	}
 
 	public void deleteResponses(){

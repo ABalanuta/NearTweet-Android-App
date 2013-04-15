@@ -122,7 +122,11 @@ public class NewTweetActivity extends Activity{
 							}
 
 							if (swtchGps.isChecked()){
-								// inserir gps
+								tweet.setLAT(lat);
+								tweet.setLNG(lng);
+								
+								Toast.makeText(getApplicationContext(), "Do I Have lat?" + lat, Toast.LENGTH_LONG);
+								Toast.makeText(getApplicationContext(), "Do I Have lng?" + lng, Toast.LENGTH_LONG);
 							}
 
 							mService.sendTweet(tweet);
