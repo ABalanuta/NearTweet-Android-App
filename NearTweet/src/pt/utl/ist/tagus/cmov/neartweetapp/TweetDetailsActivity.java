@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Comment;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CommentCustomAdapter;
@@ -36,6 +37,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -45,6 +47,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class TweetDetailsActivity extends ListActivity {
+
+
 	public static TextView txtTweet;
 	public static TextView txtUserName;
 	public static Button btnShareTwitter;
@@ -66,7 +70,8 @@ public class TweetDetailsActivity extends ListActivity {
 	static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
 	public String tweet_text;
-
+	
+	
 	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
 
 	// Twitter oauth urls
@@ -85,11 +90,27 @@ public class TweetDetailsActivity extends ListActivity {
 	public boolean mBound = false;
 	private Intent service;
 	private ConnectionHandlerService mService;
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className,
+				IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			mBound = true;
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			mBound = false;
+		}
+	};
 
 	private Tweet tweet;
 	public static ArrayList<Comment> comments = new ArrayList<Comment>();
 
 	public static  ListView listView;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -118,19 +139,22 @@ public class TweetDetailsActivity extends ListActivity {
 		txtLong = (TextView) findViewById(R.id.textViewCoordinateLong);
 		image = (ImageView) findViewById(R.id.imageViewTweetImage);
 		userImage = (ImageView) findViewById(R.id.imageViewUserPicTweet);
+		
 
 		Bundle bundle = getIntent().getExtras();
+
 		final String tweet_uid = bundle.getString("tweet_uid");
-		String location_lng = bundle.getString("gps_location_lng");
-		String location_lat = bundle.getString("gps_location_lat");
+		final String location_lng = bundle.getString("gps_location_lng");
+		final String location_lat = bundle.getString("gps_location_lat");
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
 		tweet_text = bundle.getString("tweet_text");
-		if(bundle.getByteArray("tweet") == null){
-			finish();
-		}else{
-			tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
-		}
+		final String tweet_text_to_map = tweet_text; // it had to be final to pass on clicl listener
+//		if(bundle.getByteArray("tweet") == null){
+//			finish();
+//		}else{
+//			tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
+//		}
 
 		// If Existes Insrt Image
 		if(bundle.getBoolean("tweet_hasImage")){
@@ -146,6 +170,21 @@ public class TweetDetailsActivity extends ListActivity {
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
 
+		
+		txtLat.setOnLongClickListener(new OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+				
+
+				Intent map = new Intent(getApplicationContext(),pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
+				map.putExtra("gps_location_lat", location_lat);
+				map.putExtra("gps_location_lng", location_lng);
+				map.putExtra("tweet_text", tweet_text_to_map);
+				startActivity(map);
+				return false;
+			}
+		});
 
 
 
@@ -241,10 +280,15 @@ public class TweetDetailsActivity extends ListActivity {
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Details Activity");
 
-		//OFFLINE rut.kill();
-		//OFFLINE rut.cancel(true);
+		// Stops the assync thread gently the kills it 
+		rut.kill();
+		try {Thread.sleep(25);} catch (InterruptedException e) {}
+		rut.cancel(true);
+
+
 		//unbinding from the Service
 		if(mBound){ unbindService(mConnection);}
+		comments = new ArrayList<Comment>();
 		super.onDestroy();
 	}
 
@@ -305,7 +349,7 @@ public class TweetDetailsActivity extends ListActivity {
 		case R.id.send_response:
 			Intent newCommentIntent = new Intent(this,NewCommentActivity.class);
 			newCommentIntent.putExtra("tweet2", Encoding.encodeTweet(tweet));
-			newCommentIntent.putExtra("toAll", true);
+			newCommentIntent.putExtra("toAll", false);
 			startActivity(newCommentIntent);
 			return true;
 
@@ -313,7 +357,7 @@ public class TweetDetailsActivity extends ListActivity {
 		case R.id.send_response_all:
 			Intent newCommentIntent2 = new Intent(this,NewCommentActivity.class);
 			newCommentIntent2.putExtra("tweet2", Encoding.encodeTweet(tweet));
-			newCommentIntent2.putExtra("toAll", false);
+			newCommentIntent2.putExtra("toAll", true);
 			startActivity(newCommentIntent2);
 			return true;
 
@@ -331,21 +375,7 @@ public class TweetDetailsActivity extends ListActivity {
 		}
 	}
 
-	private ServiceConnection mConnection = new ServiceConnection() {
 
-		@Override
-		public void onServiceConnected(ComponentName className,
-				IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			mBound = true;
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			mBound = false;
-		}
-	};
 
 	/**
 	 * Function to update status
@@ -485,7 +515,18 @@ public class TweetDetailsActivity extends ListActivity {
 				}
 			}
 
+			Log.e("ServiceP", "Details Activity Conected to Service");
 
+			// primeiro get Preencher
+			mComments = new ArrayList<Comment>();
+			for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
+				//Log.e("ServiceP", "MSG:"+ dto.toString());						
+				mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
+			}
+			publishProgress();
+
+
+			// verificar por updates
 			while(running){
 
 
@@ -502,6 +543,7 @@ public class TweetDetailsActivity extends ListActivity {
 
 				}else{
 					try {
+						Log.e("ServiceP", "Details Activity Sleep");
 						Thread.sleep(1500);
 					} catch (InterruptedException e) {
 						e.printStackTrace();

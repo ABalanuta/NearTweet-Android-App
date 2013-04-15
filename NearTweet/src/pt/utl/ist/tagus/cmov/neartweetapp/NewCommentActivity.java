@@ -13,9 +13,6 @@ import java.net.URLConnection;
 import org.apache.http.util.ByteArrayBuffer;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
-import pt.utl.ist.tagus.cmov.neartweet.R.id;
-import pt.utl.ist.tagus.cmov.neartweet.R.layout;
-import pt.utl.ist.tagus.cmov.neartweet.R.menu;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
@@ -54,7 +51,8 @@ public class NewCommentActivity extends Activity {
 	TextView typeOfResponse;
 	Tweet tweet;
 	boolean toAll = false;
-
+	String username;
+	private CmovPreferences myPreferences;
 
 	// Connection to Service Vriables
 	public boolean mBound = false;
@@ -87,7 +85,7 @@ public class NewCommentActivity extends Activity {
 		typeOfResponse = (TextView) findViewById(R.id.textTypeOfResponse);
 		personImage.setVisibility(ImageView.VISIBLE);
 
-		CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
+		myPreferences = new CmovPreferences(getApplicationContext());
 
 		if (android.os.Build.VERSION.SDK_INT > 9) {
 			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -102,6 +100,7 @@ public class NewCommentActivity extends Activity {
 		Bundle bundle = getIntent().getExtras();
 		tweet = Encoding.decodeTweet(bundle.getByteArray("tweet2"));
 		toAll = bundle.getBoolean("toAll");
+		username = bundle.getString("username");
 
 		if(toAll){
 			typeOfResponse.setText("Public Response");
@@ -175,9 +174,9 @@ public class NewCommentActivity extends Activity {
 			for(int x = 200; x > 0; x--){
 				if(mService != null && mService.isConnected()){
 					String text = responseText.getText().toString();
-					TweetResponseDTO res = new TweetResponseDTO(tweet.getUsername(), text, tweet.getDeviceID(), tweet.getTweetId(), toAll);
+					TweetResponseDTO res = new TweetResponseDTO(myPreferences.getUsername(), text, tweet.getDeviceID(), tweet.getTweetId(), !toAll);
 					mService.sendResponseTweet(res);
-					Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), "SENT as "+myPreferences.getUsername(), Toast.LENGTH_SHORT).show();
 					finish();
 					return true;
 				}else{

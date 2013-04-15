@@ -5,9 +5,6 @@ import java.util.Arrays;
 
 
 public class TweetDTO extends BasicDTO{
-
-	
-
 	/**
 	 * Default Serial Version
 	 */

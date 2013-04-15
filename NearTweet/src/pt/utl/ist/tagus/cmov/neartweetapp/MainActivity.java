@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
@@ -66,6 +67,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	public static final String TAG = MainActivity.class.getSimpleName();
 	public static ProgressBar mProgressBar;
+	public static ListView mListView;
 
 	private String mUsername = null;
 	private int REQUEST_CODE = 42424242; //Used for Login
@@ -74,6 +76,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 	private SlideHolder mSlideHolder;
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
+	public static ImageView mImageLock;
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
@@ -81,8 +84,13 @@ public class MainActivity extends ListActivity implements LocationListener{
 	private String provider;// location stuff
 	private static SharedPreferences mSharedPreferences;
 
-	public static int lat;
-	public static int lng;
+
+	private int REL_SWIPE_MIN_DISTANCE; 
+	private int REL_SWIPE_MAX_OFF_PATH;
+	private int REL_SWIPE_THRESHOLD_VELOCITY;
+	public static double lat;
+	public static double lng;
+
 
 	Executor executor = null;
 	ConnectionHandlerTask connectionHandlerTask = null;
@@ -110,9 +118,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		setContentView(R.layout.activity_main);
 		getActionBar().setHomeButtonEnabled(true);
-
+		
+		
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
+		mListView = (ListView) findViewById(android.R.id.list);
+		mImageLock = (ImageView) findViewById(R.id.imageViewMainLockBan);
 		myPreferences = new CmovPreferences(getApplicationContext());
 
 		ListView listView = getListView();
@@ -145,26 +156,41 @@ public class MainActivity extends ListActivity implements LocationListener{
 		});
 		
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+			int calledPosition = -1;
 
 			@Override
 			public void onItemCheckedStateChanged(ActionMode mode, int position,
 					long id, boolean checked) {
+				calledPosition = position;
 				// Here you can do something when items are selected/de-selected,
 				// such as update the title in the CAB
 			}
 
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+
 				// Respond to clicks on the actions in the CAB
 				switch (item.getItemId()) {
+
+
 				case R.id.share_twitter:
 					Toast.makeText(getApplicationContext(), "Partilhado no twitter", Toast.LENGTH_LONG).show();
 					mode.finish(); // Action picked, so close the CAB
 					return true;
+
+
 				case R.id.mark_as_spam:
-					Toast.makeText(getApplicationContext(), "Marcado como spam", Toast.LENGTH_LONG).show();
+					if(mService != null && mService.isConnected()){
+						Tweet t = mTweetsArray.get(calledPosition);
+						mService.reportSpammer(t.getDeviceID(), t.getTweetId());
+						Toast.makeText(getApplicationContext(), "Marcado como spam", Toast.LENGTH_LONG).show();
+					}else{
+						Toast.makeText(getApplicationContext(), "Erro na Ligação", Toast.LENGTH_LONG).show();
+					}
 					mode.finish(); // Action picked, so close the CAB
 					return true;
+
+
 				default:
 					return false;
 				}
@@ -223,21 +249,35 @@ public class MainActivity extends ListActivity implements LocationListener{
 		if (isNetworkAvailable()){
 			// Inicia thread que actualiza as messagens
 
+			
 			connectionHandlerTask = new ConnectionHandlerTask();
 			connectionHandlerTask.execute();
-
+			 
 			/**
 			 * offline dummies: NAO APAGAR	
 			 */
-			//Tweet tweetGenerator = new Tweet();
-			//mTweetsArray = tweetGenerator.generateTweets();
-			//handleServerResponse();
+			Tweet tweetGenerator = new Tweet();
+			mTweetsArray = tweetGenerator.generateTweets();
+			handleServerResponse();
 		}
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
 
+		
 
+		
+		
+		/* HOW TO CALL MAP
+		 * USE PUT EXTRA */
+		/*
+		Intent map = new Intent(this,pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
+		map.putExtra("gps_location_lat", Double.toString(lat));
+		map.putExtra("gps_location_lng", Double.toString(lng));
+		map.putExtra("tweet_text", "EU SOU UM TWEET");
+		startActivity(map);
+		*/
+		
 	}
 
 
@@ -304,10 +344,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
+		
 		if(tweet instanceof TweetPoll){
 			Intent details = new Intent(this,TweetDetailsPoolActivity.class);
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_text", tweet.getText());
+			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 			startActivity(details);
 		}
 		else{
@@ -316,12 +358,11 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_text", tweet.getText());
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
-			details.putExtra("username", tweet.getUsername());
-			details.putExtra("tweet", Encoding.encodeTweet(tweet));
+			
 
 			if (tweet.hasCoordenates()){
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
-				details.putExtra("gps_location_lat", "" + tweet.getLNG());
+				details.putExtra("gps_location_lat", "" + tweet.getLAT());
 				details.putExtra("username", tweet.getUsername());
 			}
 
@@ -489,7 +530,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 			running = true;
 			mProgressBar.setVisibility(View.VISIBLE);
-			
+
 			Log.e("ServiceP", "ConnectionHandlerTask Created");
 			// Criar um serviço que estabelece a communicação com o server
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
@@ -519,7 +560,16 @@ public class MainActivity extends ListActivity implements LocationListener{
 					if(mService.hasUpdates()){
 						Log.e("ServiceP", "Loop Receve");
 						mTweetsArray = mService.getAllTweets();
+						
+						for(Tweet t : mTweetsArray){
+							if(t.isBanned()){
+								publishProgress("Ban_Me");
+								break;
+							}
+						}
+						
 						publishProgress("Reload_Screen");
+						
 					}else{
 						try {
 							Thread.sleep(250);
@@ -553,6 +603,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 				}
 				else if(updadeCommand.equals("Reload_Screen")){
 					onProgressUpdateAux();
+				}else if(updadeCommand.equals("Ban_Me")){
+					this.running = false;
+					MainActivity.mListView.setVisibility(View.INVISIBLE);
+					MainActivity.mImageLock.setVisibility(View.VISIBLE);
 				}
 			}
 		}
@@ -588,8 +642,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	@Override
 	public void onLocationChanged(Location location) {
-		lat = (int) (location.getLatitude());
-		lng = (int) (location.getLongitude());
+		lat = (double) (location.getLatitude());
+		lng = (double) (location.getLongitude());
 		Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
 	}
 

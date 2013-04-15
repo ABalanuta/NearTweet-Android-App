@@ -3,6 +3,7 @@
     android:id="@+id/slideHolder"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:focusable="true"
     tools:context=".MainActivity" >
 
     <ScrollView
@@ -87,6 +88,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true" />
+
+            <ImageView
+                android:id="@+id/imageViewMainLockBan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:minHeight="200dp"
+                android:minWidth="200dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/device_access_secure"
+                android:visibility="gone" />
+
         </RelativeLayout>
     </LinearLayout>
 

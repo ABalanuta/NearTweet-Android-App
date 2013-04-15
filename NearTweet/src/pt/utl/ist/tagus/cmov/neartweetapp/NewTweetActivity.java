@@ -115,7 +115,7 @@ public class NewTweetActivity extends Activity{
 					//TODO download and show jpeg
 				}
 				else if(format.equals("png")){
-					Log.v("Ž png, url: ", originalUrl);
+					Log.v("ï¿½ png, url: ", originalUrl);
 					URL newurl;
 					Bitmap mIcon_val=null;
 					try {
@@ -143,6 +143,7 @@ public class NewTweetActivity extends Activity{
 		//Bundle bundle = getIntent().getExtras();
 		//String gpsLocation = bundle.getString("gps_location");
 		//Toast.makeText(getApplicationContext(), gpsLocation, Toast.LENGTH_LONG).show();
+
 	}
 	
 	@Override
