@@ -150,11 +150,11 @@ public class TweetDetailsActivity extends ListActivity {
 		final long tweet_ID = bundle.getLong("tweet_id");
 		tweet_text = bundle.getString("tweet_text");
 		final String tweet_text_to_map = tweet_text; // it had to be final to pass on clicl listener
-		if(bundle.getByteArray("tweet") == null){
-			finish();
-		}else{
-			tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
-		}
+//		if(bundle.getByteArray("tweet") == null){
+//			finish();
+//		}else{
+//			tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
+//		}
 
 		// If Existes Insrt Image
 		if(bundle.getBoolean("tweet_hasImage")){
