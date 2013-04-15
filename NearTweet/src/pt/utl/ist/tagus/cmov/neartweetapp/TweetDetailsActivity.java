@@ -70,7 +70,7 @@ public class TweetDetailsActivity extends ListActivity {
 	static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
 	public String tweet_text;
-	
+
 	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
 
 	// Twitter oauth urls
@@ -130,7 +130,7 @@ public class TweetDetailsActivity extends ListActivity {
 		txtLong = (TextView) findViewById(R.id.textViewCoordinateLong);
 		image = (ImageView) findViewById(R.id.imageViewTweetImage);
 		userImage = (ImageView) findViewById(R.id.imageViewUserPicTweet);
-		
+
 
 		Bundle bundle = getIntent().getExtras();
 
@@ -142,15 +142,18 @@ public class TweetDetailsActivity extends ListActivity {
 		final String location_lng = "-9.302851";
 		final String location_lat = "38.7371";
 		// ----------		
-		
-		
+
+
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
 		tweet_text = bundle.getString("tweet_text");
 		final String tweet_text_to_map = tweet_text; // it had to be final to pass on clicl listener
-//		if(bundle.getByteArray("tweet") == null){
-//			finish();
-//		}else{ tweet = Encoding.decodeTweet(bundle.getByteArray("tweet")); }
+
+		if(bundle.getByteArray("tweet") == null){
+			finish();
+		}else{ 
+			tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
+		}
 
 		// If Existes Insrt Image
 		if(bundle.getBoolean("tweet_hasImage")){
@@ -170,7 +173,7 @@ public class TweetDetailsActivity extends ListActivity {
 
 			@Override
 			public boolean onLongClick(View v) {
-			
+
 				Intent map = new Intent(getApplicationContext(),pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
 				map.putExtra("gps_location_lat", location_lat);
 				map.putExtra("gps_location_lng", location_lng);
@@ -268,7 +271,7 @@ public class TweetDetailsActivity extends ListActivity {
 
 		//unbinding from the Service
 		if(mBound){ unbindService(mConnection); }
-		
+
 		comments = new ArrayList<Comment>();
 		super.onDestroy();
 	}

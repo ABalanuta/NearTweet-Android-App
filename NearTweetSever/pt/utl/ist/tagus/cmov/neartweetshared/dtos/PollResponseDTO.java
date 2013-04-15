@@ -16,18 +16,29 @@ public class PollResponseDTO extends BasicDTO {
 	private String desDeviceID = null;
 	private long tweetID = -1;
 	
-	public PollResponseDTO(String nickName, String response, String desDeviceID, long tweetID) {
+	public PollResponseDTO(String nickName, String response, String desDeviceID, String srcDeviceID, long tweetID) {
 		super(TypeofDTO.POLL_RESPONSE_DTO);
 		this.nickName = nickName;
 		this.response = response;
 		this.tweetID = tweetID;
 		this.desDeviceID = desDeviceID;
+		this.srcDeviceID = srcDeviceID;
 	}
 
-	
-	
-	public String getDesDeviceID() {
-		return desDeviceID;
+	public String getNickName() {
+		return nickName;
+	}
+
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+
+	public String getResponse() {
+		return response;
+	}
+
+	public void setResponse(String response) {
+		this.response = response;
 	}
 
 	public String getSrcDeviceID() {
@@ -38,19 +49,21 @@ public class PollResponseDTO extends BasicDTO {
 		this.srcDeviceID = srcDeviceID;
 	}
 
-	public String getNickName() {
-		return nickName;
+	public String getDesDeviceID() {
+		return desDeviceID;
 	}
 
-	public String getResponse() {
-		return response;
+	public void setDesDeviceID(String desDeviceID) {
+		this.desDeviceID = desDeviceID;
 	}
 
 	public long getTweetID() {
 		return tweetID;
 	}
 
-
+	public void setTweetID(long tweetID) {
+		this.tweetID = tweetID;
+	}
 
 	@Override
 	public String toString() {
@@ -58,7 +71,6 @@ public class PollResponseDTO extends BasicDTO {
 				+ response + ", srcDeviceID=" + srcDeviceID + ", desDeviceID="
 				+ desDeviceID + ", tweetID=" + tweetID + "]";
 	}
-	
-	
+
 	
 }
