@@ -111,21 +111,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		setContentView(R.layout.activity_main);
 		getActionBar().setHomeButtonEnabled(true);
-
-		
-		
-		
-		/* HOW TO CALL MAP
-		 * USE PUT EXTRA */
-		/*
-		Intent map = new Intent(this,BasicMapActivity.class);
-		map.putExtra("gps_location_lat", "0");
-		map.putExtra("gps_location_lng", "0");
-		map.putExtra("tweet_text", "EU SOU UM TWEET");
-		startActivity(map);*/
-		
-		
-		
 		
 		
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
@@ -234,13 +219,13 @@ public class MainActivity extends ListActivity implements LocationListener{
 		
 		/* HOW TO CALL MAP
 		 * USE PUT EXTRA */
-		
+		/*
 		Intent map = new Intent(this,pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
 		map.putExtra("gps_location_lat", Double.toString(lat));
 		map.putExtra("gps_location_lng", Double.toString(lng));
 		map.putExtra("tweet_text", "EU SOU UM TWEET");
 		startActivity(map);
-		
+		*/
 		
 	}
 
