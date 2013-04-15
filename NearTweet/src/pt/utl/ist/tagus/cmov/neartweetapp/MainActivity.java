@@ -353,12 +353,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 			if(tweet.hasImage()){
 				Toast.makeText(getApplicationContext(), "I've IMAGE", Toast.LENGTH_LONG).show();
-
 				details.putExtra("tweet_hasImage", true);
 				details.putExtra("tweet_image", tweet.getImage());
 			}else{
 				Toast.makeText(getApplicationContext(), "I've  DONT IMAGE", Toast.LENGTH_LONG).show();
-
 				details.putExtra("tweet_hasImage", false);
 			}
 
@@ -611,11 +609,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 		for (Tweet tr : mTweetsArray){
 			String text = tr.getText();
 			String username = tr.getUsername();
-
 			HashMap<String,String> tweetInterface = new HashMap<String,String>();
 			tweetInterface.put(KEY_TEXT,text);
 			tweetInterface.put(KEY_TWEETER,username);
-
 			tweets.add(tweetInterface);
 		}
 
