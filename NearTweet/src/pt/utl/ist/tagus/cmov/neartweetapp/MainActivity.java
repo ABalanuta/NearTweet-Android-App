@@ -129,11 +129,19 @@ public class MainActivity extends ListActivity implements LocationListener{
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		
-		String picture_location = myPreferences.getProfilePictureLocation();
+		if (android.os.Build.VERSION.SDK_INT > 9) {
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+			StrictMode.setThreadPolicy(policy);
+		}
+		if (myPreferences.isUserTwittLoggin()){
+			String picture_location = myPreferences.getProfilePictureLocation();
+		
+		
+		
 		ImageView userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
 		BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
 		userImg.setImageDrawable(d);
-		
+		}
 		TextView myUserName = (TextView) findViewById(R.id.textViewUsername);
 		myUserName.setText(myPreferences.getUsername());
 		
