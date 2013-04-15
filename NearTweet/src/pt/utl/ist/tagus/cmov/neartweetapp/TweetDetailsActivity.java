@@ -257,7 +257,6 @@ public class TweetDetailsActivity extends ListActivity {
 					User user = twitter.showUser(userID);
 					String username = user.getName();
 
-					Toast.makeText(getApplicationContext(), username, Toast.LENGTH_LONG).show();
 
 				} catch (Exception e) {
 					// Check log for login errors

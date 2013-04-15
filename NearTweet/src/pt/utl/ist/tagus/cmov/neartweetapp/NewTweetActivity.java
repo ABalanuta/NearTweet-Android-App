@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
@@ -11,6 +14,7 @@ import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -24,27 +28,32 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.StrictMode;
+import android.text.Editable;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
 public class NewTweetActivity extends Activity{
 
 	///////////////////////////////////<Variables>
-	public static Button mSendButton;
 	public static EditText mSendTextBox;
 	private String mUsername = null;
 
-	public static Switch swtchGps;
-	public static Button btnPicture;
 	public static ImageView imgChoosen;
+	public static Button btnGetUrl;
+	public static EditText addUrlField;
+	public static LinearLayout add_url_layout;
 	private Intent pictureActionIntent = null;
 	public static ConnectionHandler connectionHandler = null;
 	private static final int CAMERA_PIC_REQUEST = 1337; 
@@ -67,11 +76,12 @@ public class NewTweetActivity extends Activity{
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.activity_new_tweet);
 		
-		mSendButton = (Button) findViewById(R.id.sendButton);
+		
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
-		btnPicture = (Button) findViewById(R.id.cameraButton);
 		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);	
-		swtchGps = (Switch) findViewById(R.id.switchGps);
+		btnGetUrl = (Button) findViewById(R.id.btnGetUrl);
+		addUrlField = (EditText) findViewById(R.id.addUrlField);
+		add_url_layout = (LinearLayout) findViewById(R.id.addUrlLayout);
 
 		Bundle bundle = getIntent().getExtras();
 		lat = bundle.getString("gps_location_lat");
@@ -85,11 +95,48 @@ public class NewTweetActivity extends Activity{
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
-		btnPicture.setOnClickListener(new OnClickListener() {
-
+		btnGetUrl.setOnClickListener(new OnClickListener() {
+			
 			@Override
-			public void onClick(View arg0) {
-				startDialog();
+			
+			public void onClick(View v) {
+				String imageUrl = addUrlField.getText().toString();
+				String originalUrl = imageUrl;
+				String format = imageUrl.substring(imageUrl.lastIndexOf('.') + 1);
+				
+				addUrlField.setFocusable(true);
+				
+				Log.v("formato: ",format);
+				if (android.os.Build.VERSION.SDK_INT > 9) {
+					StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+					StrictMode.setThreadPolicy(policy);
+				}
+				if (format.equals("jpg")){
+					//TODO download and show jpeg
+				}
+				else if(format.equals("png")){
+					Log.v("� png, url: ", originalUrl);
+					URL newurl;
+					Bitmap mIcon_val=null;
+					try {
+						newurl = new URL(originalUrl);
+						mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
+						imgChoosen.setImageBitmap(mIcon_val);
+						imgChoosen.setVisibility(ImageView.VISIBLE);
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					} 
+					
+					
+				}
+				else{
+					Toast.makeText(getApplicationContext(), "Formato de imagem nao suportado", Toast.LENGTH_LONG).show();
+				}
+				addUrlField.clearComposingText();
+				add_url_layout.setVisibility(LinearLayout.INVISIBLE);
+				
 			}
 		});
 
@@ -97,50 +144,13 @@ public class NewTweetActivity extends Activity{
 		//String gpsLocation = bundle.getString("gps_location");
 		//Toast.makeText(getApplicationContext(), gpsLocation, Toast.LENGTH_LONG).show();
 
-		mSendButton.setOnClickListener(
-				new View.OnClickListener() {
-
-					@Override
-					public void onClick(View view) {
-
-						if(mSendTextBox.getText().length() == 0){
-							Toast t = Toast.makeText(getApplicationContext(), "Insert Text", Toast.LENGTH_SHORT);
-							t.setGravity(Gravity.CENTER, 0, 0);
-							t.show();
-							return;
-						}
-
-						if(mBound && mService.isConnected()){
-
-							TweetDTO tweet = new TweetDTO(mUsername, mSendTextBox.getText().toString());
-
-							if(bitmap != null){
-								ByteArrayOutputStream stream = new ByteArrayOutputStream();
-								bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-								byte[] byteArray = stream.toByteArray();
-								tweet.setPhoto(byteArray);
-							}
-
-							if (swtchGps.isChecked()){
-								tweet.setLAT(lat);
-								tweet.setLNG(lng);
-								
-								Toast.makeText(getApplicationContext(), "Do I Have lat?" + lat, Toast.LENGTH_LONG);
-								Toast.makeText(getApplicationContext(), "Do I Have lng?" + lng, Toast.LENGTH_LONG);
-							}
-
-							mService.sendTweet(tweet);
-							mSendTextBox.setText(null);
-							Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
-							t.setGravity(Gravity.CENTER, 0, 0);
-							t.show();
-							finish();
-						}else{
-							Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show();
-						}
-
-					}
-				} );
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.new_tweet_activity2, menu);
+		return true;
 	}
 
 
@@ -181,6 +191,43 @@ public class NewTweetActivity extends Activity{
                     Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(parentActivityIntent);
             finish();
+		case R.id.take_picture:
+			startDialog();
+            return true;
+            
+		case R.id.send_tweet:
+			if(mSendTextBox.getText().length() == 0){
+				Toast t = Toast.makeText(getApplicationContext(), "Insert Text", Toast.LENGTH_SHORT);
+				t.setGravity(Gravity.CENTER, 0, 0);
+				t.show();
+				return true;
+			}
+
+			if(mBound && mService.isConnected()){
+
+				TweetDTO tweet = new TweetDTO(mUsername, mSendTextBox.getText().toString());
+
+				if(bitmap != null){
+					ByteArrayOutputStream stream = new ByteArrayOutputStream();
+					bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+					byte[] byteArray = stream.toByteArray();
+					tweet.setPhoto(byteArray);
+				}
+
+
+				mService.sendTweet(tweet);
+				mSendTextBox.setText(null);
+				Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
+				t.setGravity(Gravity.CENTER, 0, 0);
+				t.show();
+				finish();
+			}else{
+				Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show();
+			}
+            return true;
+            
+		case R.id.attach_url:
+			attatchUrlFotoToTwitt();
             return true;
 
 		default:
@@ -244,6 +291,12 @@ public class NewTweetActivity extends Activity{
 			}
 		});
 		myAlertDialog.show();
+	}
+	
+	private void attatchUrlFotoToTwitt(){
+		add_url_layout = (LinearLayout) findViewById(R.id.addUrlLayout);
+		add_url_layout.setVisibility(LinearLayout.VISIBLE);
+		
 	}
 
 

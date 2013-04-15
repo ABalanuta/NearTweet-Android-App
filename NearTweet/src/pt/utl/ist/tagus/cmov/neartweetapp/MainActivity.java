@@ -24,6 +24,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -43,16 +44,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -123,6 +128,33 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+		
+		String picture_location = myPreferences.getProfilePictureLocation();
+		ImageView userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
+		BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+		userImg.setImageDrawable(d);
+		
+		TextView myUserName = (TextView) findViewById(R.id.textViewUsername);
+		myUserName.setText(myPreferences.getUsername());
+		
+		Switch toggle_gps = (Switch) findViewById(R.id.switchGps);
+		
+		if(myPreferences.getShareMyLocation())toggle_gps.setChecked(true);
+		else toggle_gps.setChecked(false);
+		
+		toggle_gps.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+			    if(isChecked) {
+			        myPreferences.setShareMyLocationTrue();
+			    } else {
+			    	myPreferences.setShareMyLocationFalse();
+			    }
+				
+			}
+		});
+		
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 			int calledPosition = -1;
 
@@ -680,11 +712,13 @@ public class MainActivity extends ListActivity implements LocationListener{
 			ImageView pollImg = (ImageView) itemLayout.findViewById(R.id.imagePool);
 			ImageView gpsImg = (ImageView) itemLayout.findViewById(R.id.imageGps);
 			ImageView imgImg = (ImageView) itemLayout.findViewById(R.id.imageImage);
-			ImageView userImg = (ImageView) itemLayout.findViewById(R.id.imageViewUserPicTweet);
+			ImageView twitUserImg = (ImageView) itemLayout.findViewById(R.id.imageViewUserPicTweet);
 
 			gpsImg.setVisibility(ImageView.INVISIBLE);
 			pollImg.setVisibility(ImageView.INVISIBLE);
 			imgImg.setVisibility(ImageView.INVISIBLE);
+			
+
 			tweetText.setText(tweet.getText());
 			tweetUsername.setText("@" + tweet.getUsername());
 
@@ -696,31 +730,17 @@ public class MainActivity extends ListActivity implements LocationListener{
 				StrictMode.setThreadPolicy(policy);
 			}
 
+			Log.v("loggedin??: ", String.valueOf(myPreferences.isUserTwittLoggin()));
+			Log.v("username??: ", String.valueOf(myPreferences.hasUserName()));
+			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
 
-			if (myPreferences.hasProfileImgUrl() && myPreferences.hasUserName()){
-				String url = myPreferences.getUsername();
-				String username = myPreferences.getProfileImgUrl();
-
-				if(tweet.getUsername()!=null){
-					Log.v("tweet username", tweet.getUsername());
-				}
-				if (username!=null){
-					Log.v("username", username);
-				}
-				if (tweet.getUsername()!=null && username!=null){
-					if (tweet.getUsername().equals(username)){
-						URL newurl;
-						try {
-							newurl = new URL(url);
-							Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream());
-							userImg.setImageBitmap(mIcon_val);
-						} catch (MalformedURLException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+				Log.v("tweet_username: ", tweet.getUsername());
+				Log.v("user_username: ", myPreferences.getUsername());
+				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
+					if (tweet.getUsername().equals(myPreferences.getUsername())){
+							String picture_location = myPreferences.getProfilePictureLocation();
+							BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+							twitUserImg.setImageDrawable(d);
 					}
 				}
 			}
