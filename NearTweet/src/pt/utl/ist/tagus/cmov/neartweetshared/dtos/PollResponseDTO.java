@@ -13,13 +13,21 @@ public class PollResponseDTO extends BasicDTO {
 	private String nickName = null;
 	private String response = null;
 	private String srcDeviceID = null;
+	private String desDeviceID = null;
 	private long tweetID = -1;
 	
-	public PollResponseDTO(TypeofDTO type, String nickName, String response,long tweetID) {
+	public PollResponseDTO(String nickName, String response,String desDeviceID, long tweetID) {
 		super(TypeofDTO.POLL_RESPONSE_DTO);
 		this.nickName = nickName;
 		this.response = response;
 		this.tweetID = tweetID;
+		this.desDeviceID = desDeviceID;
+	}
+
+	
+	
+	public String getDesDeviceID() {
+		return desDeviceID;
 	}
 
 	public String getSrcDeviceID() {

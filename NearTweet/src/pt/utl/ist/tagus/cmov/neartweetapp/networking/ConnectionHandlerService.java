@@ -12,6 +12,7 @@ import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.IdentityDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollDTO;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollResponseDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.SpammDetectorDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
@@ -176,6 +177,18 @@ public class ConnectionHandlerService extends Service {
 			Log.e("ServiceP", "Channel is Closed");
 		}
 	}
+	
+	public void sendResponsePoll(PollResponseDTO response){
+
+		if(mConectionHandler != null){
+			response.setSrcDeviceID(deviceID);
+			mConectionHandler.send(response);
+		}else{
+			Log.e("ServiceP", "Channel is Closed");
+		}
+	}
+	
+	
 
 	public boolean isConnected(){
 		if(mConectionHandler == null){

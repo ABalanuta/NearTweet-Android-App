@@ -39,11 +39,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class NewTweetPoolActivity extends Activity {
+
 	public static Button btnSendPoll;
 	public static Button btnAddItemPoll;
 	public static EditText edtTxtPergunta;
 	public static EditText edtTxtResposta;
 	public static ListView lstVwRespostas;
+
 	ArrayList<String> respostas;
 	ArrayAdapter<String> adapter;
 
@@ -87,9 +89,7 @@ public class NewTweetPoolActivity extends Activity {
 
 		respostas = new ArrayList<String>();
 
-		adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1,
-				respostas);
+		adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,respostas);
 		lstVwRespostas.setAdapter(adapter);
 
 		lstVwRespostas.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -113,6 +113,8 @@ public class NewTweetPoolActivity extends Activity {
 				adapter.notifyDataSetChanged();
 			}
 		});
+
+
 		btnSendPoll.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -175,6 +177,8 @@ public class NewTweetPoolActivity extends Activity {
 		if (mConnection != null){
 			unbindService(mConnection);
 		}
+
+		respostas = new ArrayList<String>();
 		super.onDestroy();
 	}
 

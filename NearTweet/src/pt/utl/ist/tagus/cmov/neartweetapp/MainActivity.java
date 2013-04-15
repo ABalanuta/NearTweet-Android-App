@@ -355,7 +355,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		
 		if(tweet instanceof TweetPoll){
 			Intent details = new Intent(this,TweetDetailsPoolActivity.class);
-			details.putExtra("tweet_uid", tweet.getUsername());
+			details.putExtra("username", tweet.getUsername());
 			details.putExtra("tweet_text", tweet.getText());
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 			startActivity(details);
