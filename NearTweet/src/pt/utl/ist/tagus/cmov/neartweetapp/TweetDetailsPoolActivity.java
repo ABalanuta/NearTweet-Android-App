@@ -7,6 +7,7 @@ import java.util.Set;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.TweetDetailsActivity.ResponseUpdaterTask;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Comment;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CommentCustomAdapter;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
@@ -14,6 +15,7 @@ import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.Encoding;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollResponseDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 import twitter4j.User;
 import android.app.Activity;
@@ -87,6 +89,10 @@ public class TweetDetailsPoolActivity extends Activity {
 		final String tweet_text = bundle.getString("tweet_text");
 		tweet = (TweetPoll) Encoding.decodeTweet(bundle.getByteArray("tweet"));
 
+		// Limpar Old
+		vote_options = new ArrayList<HashMap<String,String>>();
+		myHashMap = new HashMap<String,ArrayList<String>>();
+
 		if(tweet != null){
 			for(String s : tweet.getOptions()){
 
@@ -104,10 +110,10 @@ public class TweetDetailsPoolActivity extends Activity {
 
 
 		txtTweet.setText(tweet_text);
-		txtUserName.setText("@ " + tweet_uid);
+		txtUserName.setText("@ " + tweet.getUsername());
 
 		// Starts the assync Task
-		//rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 
 
 		lstVwOptions.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -115,12 +121,33 @@ public class TweetDetailsPoolActivity extends Activity {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int position, long arg3) {
-				
-			//	arg0.getAdapter().getItem(position).toString();
-				
-				
-				
-				Toast.makeText(getApplicationContext(), "votaste nesta opcao", Toast.LENGTH_LONG).show();
+
+				HashMap<String,String> option = (HashMap<String, String>) arg0.getAdapter().getItem(position);
+				String selected = (String) option.values().toArray()[0];
+				CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
+				PollResponseDTO rsp = new PollResponseDTO(myPreferences.getUsername(), selected, tweet.getDeviceID(), tweet.getTweetId());
+
+
+
+				for(int x = 200; x > 0; x--){
+					if(mService != null && mService.isConnected()){
+
+						mService.sendResponsePoll(rsp);
+						Log.e("ServiceP", "Sent Selection: " + selected);
+						Toast.makeText(getApplicationContext(), "Vote Sent", Toast.LENGTH_LONG).show();
+						return true;
+					}else{
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+
+
+
+
 				return false;
 			}
 		});
@@ -158,9 +185,11 @@ public class TweetDetailsPoolActivity extends Activity {
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Poll Activity");
 
-		// Stops the assync thread gently the kills it 
-		rut.kill();
-		try {Thread.sleep(25);} catch (InterruptedException e) {}
+		// Stops the assync thread gently the kills it
+		if(rut != null){
+			rut.stopLoop();
+		}
+		try {Thread.sleep(30);} catch (InterruptedException e) {}
 		rut.cancel(true);
 
 
@@ -231,7 +260,7 @@ public class TweetDetailsPoolActivity extends Activity {
 
 		private boolean running = false;
 
-		public void kill(){
+		public void stopLoop(){
 			running = false;
 		}
 
@@ -252,7 +281,7 @@ public class TweetDetailsPoolActivity extends Activity {
 			// Esperar que se ligue ao Server
 			while((mService == null || !mService.isConnected()) && running){
 				try {
-					Thread.sleep(250);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -260,31 +289,78 @@ public class TweetDetailsPoolActivity extends Activity {
 
 			Log.e("ServiceP", "Poll Activity Conected to Service");
 
+			while(running){
 
-			do{
+				Log.e("ServiceP", "-1");
 
-				if(mService.hasUpdates()){
+				if(mService != null){
+					Log.e("ServiceP", "Loop Receve");
 
+
+
+
+					// Preencher com campos Vazios
 					myHashMap = new HashMap<String,ArrayList<String>>();
-					ArrayList<Tweet> tweets = mService.getAllTweets();
-					for(Tweet t : tweets){
-						if( t instanceof TweetPoll){
-							//	TweetPoll tr = (TweetPoll) t;
-							//	tr.g
+					ArrayList<String> opt = new ArrayList<String>();
+					ArrayList<String> voted = new ArrayList<String>();
+					synchronized(myHashMap){
+						for(String s : tweet.getOptions()){
+
+							// Cria os Arrays PAra guardar os Dados
+							myHashMap.put(s, new ArrayList<String>());
+							opt.add(s);
+							HashMap<String,String> vote_interface = new HashMap<String,String>();
+							vote_interface.put("Option", s);
+							vote_options.add(vote_interface);
 						}
+					}
+
+					ArrayList<Tweet> all = mService.getAllTweets();
+					for(Tweet t : all){
+						Log.e("ServiceP", "-");
+						if(t instanceof TweetPoll){
+							//Tweets por este device
+							if(t.getDeviceID().equals(tweet.getDeviceID())){
+								// o Tweet
+								if(t.getTweetId() == tweet.getTweetId()){
+									Log.e("ServiceP", "------------------------");
+
+									TweetPoll tp = (TweetPoll) t;
+									for(PollResponseDTO r : tp.getAllResponses()){
+										if(!voted.contains(r.getSrcDeviceID())){
+											if(opt.contains(r.getResponse())){
+												synchronized(myHashMap){
+													Log.e("ServiceP", "»»Add " + r.getResponse()+ "  " +r.getNickName());
+													myHashMap.get(r.getResponse()).add(r.getNickName());
+												}
+											}
+										}
+
+									}
+									Log.e("ServiceP", tp.toString());
+									Log.e("ServiceP", "------------------------");
+									break;
+								}
+							}
+						}
+					}
+
+
+					publishProgress();
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}else{
 					try {
-						Thread.sleep(1500);
+						Thread.sleep(250);
 					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
+
 			}
-			while(running);
-
-
-			publishProgress();
-
 
 			return null;
 		}
@@ -295,10 +371,11 @@ public class TweetDetailsPoolActivity extends Activity {
 
 			// Renova a lista
 			vote_options = new ArrayList<HashMap<String,String>>();
-
-			Set<String> options = myHashMap.keySet();
-			for(String option : options){
-				insertVote(option, myHashMap.get(option));
+			synchronized(myHashMap){
+				Set<String> options = myHashMap.keySet();
+				for(String option : options){
+					insertVote(option, myHashMap.get(option));
+				}
 			}
 			UpdatePollView();
 

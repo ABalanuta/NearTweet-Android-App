@@ -12,6 +12,7 @@ import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.IdentityDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollDTO;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollResponseDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.SpammDetectorDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
@@ -160,6 +161,7 @@ public class ConnectionHandlerService extends Service {
 			poll.setSrcDeviceID(deviceID);
 			poll.setTweetID(++this.tweetID);
 			mConectionHandler.send(poll);
+			Log.e("ServiceP", "PollSent");
 		}else{
 			Log.e("ServiceP", "Channel is Closed");
 		}
@@ -176,6 +178,18 @@ public class ConnectionHandlerService extends Service {
 		}
 	}
 
+	public void sendResponsePoll(PollResponseDTO response){
+
+		if(mConectionHandler != null){
+			response.setSrcDeviceID(deviceID);
+			mConectionHandler.send(response);
+		}else{
+			Log.e("ServiceP", "Channel is Closed");
+		}
+	}
+
+
+
 	public boolean isConnected(){
 		if(mConectionHandler == null){
 			return false;
@@ -188,6 +202,7 @@ public class ConnectionHandlerService extends Service {
 			return hasPostUpdates;
 		}
 	}
+
 	public boolean hasResponseUpdates(String srcDeviceID, long tweetID2){
 		ArrayList<Tweet> work = null;
 		synchronized (mTweetsArray) {
@@ -202,6 +217,24 @@ public class ConnectionHandlerService extends Service {
 		}
 		return false;
 	}
+
+	public boolean hasResponsePollUpdates(String DeviceID, long tweetID){
+		ArrayList<Tweet> work = null;
+		synchronized (mTweetsArray) {
+			work = (ArrayList<Tweet>) mTweetsArray.clone();
+		}
+		for(Tweet t : work){
+			if(t instanceof TweetPoll){
+				if(t.getDeviceID().equals(deviceID)){
+					if(t.getTweetId() == tweetID){
+						return ((TweetPoll) t).hasPollUpdates();
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 
 	private void addTweet(Tweet t){
 		synchronized (mTweetsArray) {
@@ -219,10 +252,15 @@ public class ConnectionHandlerService extends Service {
 
 	public ArrayList<Tweet> getAllTweets() {
 		synchronized (mTweetsArray) {
-			this.hasPostUpdates = false;
+			
 			return (ArrayList<Tweet>) mTweetsArray.clone();
 		}
 	}
+	
+	public void setNoUpdates() {
+		this.hasPostUpdates = false;
+	}
+	
 
 	public ArrayList<TweetResponseDTO> getAllResponses(String srcDeviceID, long tweetID2){
 
@@ -233,13 +271,37 @@ public class ConnectionHandlerService extends Service {
 		for(Tweet t : work){
 			if(t.getDeviceID().equals(srcDeviceID)){
 				if(t.getTweetId() == tweetID2){
-					Log.e("ServiceP", "deatails for "+srcDeviceID+":"+tweetID2+" Are: "+t.toString());
+					//Log.e("ServiceP", "deatails for "+srcDeviceID+":"+tweetID2+" Are: "+t.toString());
 					return t.getResponses();
 				}
 			}
 		}
 		return null;
 	}
+
+	public ArrayList<PollResponseDTO> getAllPollResponses(String srcDeviceID, long tweetID2){
+
+		Log.e("ServiceP", "Get my all for : "+ srcDeviceID + " with id " + tweetID2);
+
+
+		synchronized (mTweetsArray) {
+
+			for(Tweet t : (ArrayList<Tweet>) mTweetsArray.clone()){
+
+				if(t instanceof TweetPoll){
+					Log.e("ServiceP", "Got  : "+ t.getDeviceID() +" with id " + t.getTweetId());
+					if(t.getDeviceID().equals(srcDeviceID)){
+						if(t.getTweetId() == tweetID2){
+							Log.e("ServiceP", "fILTRED  : "+ t.getDeviceID() +" with id " + t.getTweetId());
+							return ((TweetPoll) t).getAllResponses();
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 
 	private ArrayList<BasicDTO> receveNewTweets(){		  
 		ArrayList<BasicDTO> tmp = this.mConectionHandler.receve();
@@ -292,6 +354,7 @@ public class ConnectionHandlerService extends Service {
 						if(dto.getType().equals(TypeofDTO.TWEET_DTO)){
 
 							TweetDTO t = (TweetDTO) dto;		
+							Log.e("ServiceP", "TweetDTO is " + t);
 
 							Tweet tweet = new Tweet(t.getTweet(), t.getNickName(), t.getDeviceID(),t.getTweetID());
 
@@ -371,12 +434,46 @@ public class ConnectionHandlerService extends Service {
 
 						else if( dto.getType().equals(TypeofDTO.POLL_DTO)){
 
+							Log.e("ServiceP", "PollReceved " + (PollDTO) dto);
+
 							PollDTO p = (PollDTO) dto;
 
 							TweetPoll poll = new TweetPoll(p.getQuestion(), p.getNickName(), p.getSrcDeviceID(), p.getTweetID());
 							poll.setOptions(p.getOptions());
 							addTweet(poll);
 						}
+
+						else if( dto.getType().equals(TypeofDTO.POLL_RESPONSE_DTO)){
+
+
+
+							PollResponseDTO rsp = (PollResponseDTO) dto;
+
+							Log.e("ServiceP", "PollReceved " + rsp);
+							
+							synchronized (mTweetsArray) {
+								
+								for(Tweet t : mTweetsArray){
+
+									if(t.getDeviceID().equals(rsp.getDesDeviceID())){
+
+
+
+
+										if(rsp.getTweetID() == t.getTweetId()){
+
+											((TweetPoll) t).addResponse(rsp);
+											Log.e("ServiceP", "PollAded");
+											break;
+										}
+
+									}
+
+								}
+							}	
+
+						}
+
 
 						else{
 							Log.e("ServiceP", "There is no Such Type of Tweet : "  + dto.getType());	

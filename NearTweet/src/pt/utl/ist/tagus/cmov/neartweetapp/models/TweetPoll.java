@@ -3,14 +3,15 @@ package pt.utl.ist.tagus.cmov.neartweetapp.models;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollResponseDTO;
+
 public class TweetPoll extends Tweet{
 
 //	private HashMap<String,ArrayList<String>> mOptions;
 
 	private ArrayList<String> options = new ArrayList<String>();
-	
-	
-	
+	private ArrayList<PollResponseDTO> responses = new ArrayList<PollResponseDTO>();
+	private boolean updated = false;
 	public TweetPoll(String texto, String mUsername, String mDeviceID, Long mTweetId){
 		super( texto, mUsername, mDeviceID,mTweetId); 
 		
@@ -29,6 +30,37 @@ public class TweetPoll extends Tweet{
 	public void setOptions(ArrayList<String> options) {
 		this.options = options;
 	}
+
+	
+	public ArrayList<PollResponseDTO> getAllResponses() {
+		return responses;
+	}
+
+	public void addResponse(PollResponseDTO resp) {
+		
+		for(PollResponseDTO p : responses){
+			if(p.getSrcDeviceID().equals(resp.getSrcDeviceID())){
+				return;
+			}
+		}
+		responses.add(resp);
+		updated = true;
+	}
+	
+	public boolean hasPollUpdates(){
+		return updated;
+	}
+	
+	public void setPollRead(){
+		updated = false;
+	}
+
+	@Override
+	public String toString() {
+		return "TweetPoll [options=" + options + ", responses=" + responses
+				+ ", updated=" + updated + "]";
+	}
+	
 	
 	
 	

@@ -220,10 +220,6 @@ class OutConnectionHandler extends Thread{
 	private ObjectOutputStream out;
 	private boolean running = false;
 
-	public OutConnectionHandler(ObjectOutputStream out) {
-		this.out = out;
-	}
-
 	public boolean isRunning(){
 		return this.running;
 	}
@@ -247,13 +243,17 @@ class OutConnectionHandler extends Thread{
 		while (this.running) {
 
 			try {
-				Thread.sleep(100);
+				Thread.sleep(2);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 
 			//Thread.yield();
 		}
+	}
+
+	public OutConnectionHandler(ObjectOutputStream out) {
+		this.out = out;
 	}
 }
 

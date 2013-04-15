@@ -257,9 +257,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 			/**
 			 * offline dummies: NAO APAGAR	
 			 */
-			Tweet tweetGenerator = new Tweet();
-			mTweetsArray = tweetGenerator.generateTweets();
-			handleServerResponse();
+			//Tweet tweetGenerator = new Tweet();
+			//mTweetsArray = tweetGenerator.generateTweets();
+			//handleServerResponse();
 		}
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
@@ -334,7 +334,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		if(tweet instanceof TweetPoll){
 			Intent details = new Intent(this,TweetDetailsPoolActivity.class);
-			details.putExtra("tweet_uid", tweet.getUsername());
+			details.putExtra("username", tweet.getUsername());
 			details.putExtra("tweet_text", tweet.getText());
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 			startActivity(details);
@@ -558,6 +558,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 					if(mService.hasUpdates()){
 						Log.e("ServiceP", "Loop Receve");
 						mTweetsArray = mService.getAllTweets();
+						mService.setNoUpdates();
 
 						for(Tweet t : mTweetsArray){
 							if(t.isBanned()){
@@ -594,6 +595,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 					this.running = false;
 					MainActivity.mListView.setVisibility(View.INVISIBLE);
 					MainActivity.mImageLock.setVisibility(View.VISIBLE);
+					getActionBar().setHomeButtonEnabled(false);
+					Toast.makeText(getApplicationContext(), "You Have Been Banned!!!", Toast.LENGTH_LONG).show();
 				}
 			}
 		}
