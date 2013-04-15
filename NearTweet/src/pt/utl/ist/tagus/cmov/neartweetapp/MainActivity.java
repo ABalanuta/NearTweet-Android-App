@@ -62,6 +62,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	public static final String TAG = MainActivity.class.getSimpleName();
 	public static ProgressBar mProgressBar;
+	public static ListView mListView;
 
 	private String mUsername = null;
 	private int REQUEST_CODE = 42424242; //Used for Login
@@ -70,6 +71,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 	private SlideHolder mSlideHolder;
 	public static Button mSendButton;
 	public static EditText mSendTextBox;
+	public static ImageView mImageLock;
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
@@ -115,31 +117,48 @@ public class MainActivity extends ListActivity implements LocationListener{
 		
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
+		mListView = (ListView) findViewById(android.R.id.list);
+		mImageLock = (ImageView) findViewById(R.id.imageViewMainLockBan);
 		myPreferences = new CmovPreferences(getApplicationContext());
 
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+			int calledPosition = -1;
 
 			@Override
 			public void onItemCheckedStateChanged(ActionMode mode, int position,
 					long id, boolean checked) {
+				calledPosition = position;
 				// Here you can do something when items are selected/de-selected,
 				// such as update the title in the CAB
 			}
 
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+
 				// Respond to clicks on the actions in the CAB
 				switch (item.getItemId()) {
+
+
 				case R.id.share_twitter:
 					Toast.makeText(getApplicationContext(), "Partilhado no twitter", Toast.LENGTH_LONG).show();
 					mode.finish(); // Action picked, so close the CAB
 					return true;
+
+
 				case R.id.mark_as_spam:
-					Toast.makeText(getApplicationContext(), "Marcado como spam", Toast.LENGTH_LONG).show();
+					if(mService != null && mService.isConnected()){
+						Tweet t = mTweetsArray.get(calledPosition);
+						mService.reportSpammer(t.getDeviceID(), t.getTweetId());
+						Toast.makeText(getApplicationContext(), "Marcado como spam", Toast.LENGTH_LONG).show();
+					}else{
+						Toast.makeText(getApplicationContext(), "Erro na Ligação", Toast.LENGTH_LONG).show();
+					}
 					mode.finish(); // Action picked, so close the CAB
 					return true;
+
+
 				default:
 					return false;
 				}
@@ -293,10 +312,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
+		
 		if(tweet instanceof TweetPoll){
 			Intent details = new Intent(this,TweetDetailsPoolActivity.class);
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_text", tweet.getText());
+			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 			startActivity(details);
 		}
 		else{
@@ -305,8 +326,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_text", tweet.getText());
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
-			details.putExtra("username", tweet.getUsername());
-			details.putExtra("tweet", Encoding.encodeTweet(tweet));
+			
 
 			if (tweet.hasCoordenates()){
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
@@ -478,7 +498,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 			running = true;
 			mProgressBar.setVisibility(View.VISIBLE);
-			
+
 			Log.e("ServiceP", "ConnectionHandlerTask Created");
 			// Criar um serviço que estabelece a communicação com o server
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
@@ -508,7 +528,16 @@ public class MainActivity extends ListActivity implements LocationListener{
 					if(mService.hasUpdates()){
 						Log.e("ServiceP", "Loop Receve");
 						mTweetsArray = mService.getAllTweets();
+						
+						for(Tweet t : mTweetsArray){
+							if(t.isBanned()){
+								publishProgress("Ban_Me");
+								break;
+							}
+						}
+						
 						publishProgress("Reload_Screen");
+						
 					}else{
 						try {
 							Thread.sleep(250);
@@ -542,6 +571,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 				}
 				else if(updadeCommand.equals("Reload_Screen")){
 					onProgressUpdateAux();
+				}else if(updadeCommand.equals("Ban_Me")){
+					this.running = false;
+					MainActivity.mListView.setVisibility(View.INVISIBLE);
+					MainActivity.mImageLock.setVisibility(View.VISIBLE);
 				}
 			}
 		}
