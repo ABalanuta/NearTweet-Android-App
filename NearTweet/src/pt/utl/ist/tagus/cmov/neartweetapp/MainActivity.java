@@ -257,9 +257,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 			/**
 			 * offline dummies: NAO APAGAR	
 			 */
-			Tweet tweetGenerator = new Tweet();
-			mTweetsArray = tweetGenerator.generateTweets();
-			handleServerResponse();
+			//Tweet tweetGenerator = new Tweet();
+			//mTweetsArray = tweetGenerator.generateTweets();
+			//handleServerResponse();
 		}
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
