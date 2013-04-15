@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
@@ -25,6 +28,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.StrictMode;
+import android.text.Editable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -34,6 +39,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -44,6 +51,9 @@ public class NewTweetActivity extends Activity{
 	private String mUsername = null;
 
 	public static ImageView imgChoosen;
+	public static Button btnGetUrl;
+	public static EditText addUrlField;
+	public static LinearLayout add_url_layout;
 	private Intent pictureActionIntent = null;
 	public static ConnectionHandler connectionHandler = null;
 	private static final int CAMERA_PIC_REQUEST = 1337; 
@@ -69,6 +79,9 @@ public class NewTweetActivity extends Activity{
 		
 		mSendTextBox = (EditText) findViewById(R.id.sendTextField);
 		imgChoosen = (ImageView) findViewById(R.id.imageViewChoosen);	
+		btnGetUrl = (Button) findViewById(R.id.btnGetUrl);
+		addUrlField = (EditText) findViewById(R.id.addUrlField);
+		add_url_layout = (LinearLayout) findViewById(R.id.addUrlLayout);
 
 		Bundle bundle = getIntent().getExtras();
 		lat = bundle.getString("gps_location_lat");
@@ -82,7 +95,50 @@ public class NewTweetActivity extends Activity{
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
-
+		btnGetUrl.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			
+			public void onClick(View v) {
+				String imageUrl = addUrlField.getText().toString();
+				String originalUrl = imageUrl;
+				String format = imageUrl.substring(imageUrl.lastIndexOf('.') + 1);
+				
+				addUrlField.setFocusable(true);
+				
+				Log.v("formato: ",format);
+				if (android.os.Build.VERSION.SDK_INT > 9) {
+					StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+					StrictMode.setThreadPolicy(policy);
+				}
+				if (format.equals("jpg")){
+					//TODO download and show jpeg
+				}
+				else if(format.equals("png")){
+					Log.v("Ž png, url: ", originalUrl);
+					URL newurl;
+					Bitmap mIcon_val=null;
+					try {
+						newurl = new URL(originalUrl);
+						mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
+						imgChoosen.setImageBitmap(mIcon_val);
+						imgChoosen.setVisibility(ImageView.VISIBLE);
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					} 
+					
+					
+				}
+				else{
+					Toast.makeText(getApplicationContext(), "Formato de imagem nao suportado", Toast.LENGTH_LONG).show();
+				}
+				addUrlField.clearComposingText();
+				add_url_layout.setVisibility(LinearLayout.INVISIBLE);
+				
+			}
+		});
 
 		//Bundle bundle = getIntent().getExtras();
 		//String gpsLocation = bundle.getString("gps_location");
@@ -237,7 +293,8 @@ public class NewTweetActivity extends Activity{
 	}
 	
 	private void attatchUrlFotoToTwitt(){
-		
+		add_url_layout = (LinearLayout) findViewById(R.id.addUrlLayout);
+		add_url_layout.setVisibility(LinearLayout.VISIBLE);
 		
 	}
 
