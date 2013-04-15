@@ -96,9 +96,7 @@ public class NewTweetActivity extends Activity{
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
 		btnGetUrl.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			
+			@Override		
 			public void onClick(View v) {
 				String imageUrl = addUrlField.getText().toString();
 				String originalUrl = imageUrl;
@@ -123,20 +121,13 @@ public class NewTweetActivity extends Activity{
 						mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
 						imgChoosen.setImageBitmap(mIcon_val);
 						imgChoosen.setVisibility(ImageView.VISIBLE);
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					} 
-					
-					
+						bitmap = mIcon_val;
+					} catch (MalformedURLException e) { e.printStackTrace();
+					} catch (IOException e) { e.printStackTrace(); } 
 				}
-				else{
-					Toast.makeText(getApplicationContext(), "Formato de imagem nao suportado", Toast.LENGTH_LONG).show();
-				}
+				else{ Toast.makeText(getApplicationContext(), "Formato de imagem nao suportado", Toast.LENGTH_LONG).show();}
 				addUrlField.clearComposingText();
 				add_url_layout.setVisibility(LinearLayout.INVISIBLE);
-				
 			}
 		});
 
@@ -204,32 +195,25 @@ public class NewTweetActivity extends Activity{
 			}
 
 			if(mBound && mService.isConnected()){
-
 				TweetDTO tweet = new TweetDTO(mUsername, mSendTextBox.getText().toString());
-
 				if(bitmap != null){
 					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
 					byte[] byteArray = stream.toByteArray();
 					tweet.setPhoto(byteArray);
 				}
-
-
 				mService.sendTweet(tweet);
 				mSendTextBox.setText(null);
 				Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
 				t.setGravity(Gravity.CENTER, 0, 0);
 				t.show();
 				finish();
-			}else{
-				Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show();
-			}
+			}else{ Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show(); }
             return true;
             
 		case R.id.attach_url:
 			attatchUrlFotoToTwitt();
             return true;
-
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -253,10 +237,7 @@ public class NewTweetActivity extends Activity{
 				imgChoosen.setVisibility(ImageView.VISIBLE);
 				cursor.close();
 			}
-			else {
-				Toast toast = Toast.makeText(this, "No Image is selected.", Toast.LENGTH_LONG);
-				toast.show();
-			}
+			else { Toast.makeText(this, "No Image is selected.", Toast.LENGTH_LONG).show(); }
 		}
 		else if (requestCode == CAMERA_PICTURE) {
 			if (data.getExtras() != null) {
@@ -324,8 +305,7 @@ public class NewTweetActivity extends Activity{
 			o2.inSampleSize = scale;
 			return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
 		}
-		catch (FileNotFoundException e) {
-		}
+		catch (FileNotFoundException e) { }
 		return null;
 	}
 }

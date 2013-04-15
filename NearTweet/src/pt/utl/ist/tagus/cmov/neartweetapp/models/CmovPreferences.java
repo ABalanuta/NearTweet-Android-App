@@ -48,6 +48,12 @@ public class CmovPreferences {
 		setShareMyLocationTrue();
 	}
 
+	
+	/**
+	 * ESTE METODO DÁ A NOSSA LOCALIZAÇÃO JÁ COM CONSCIENCIA DO TOGGLE!
+	 * 
+	 * @return
+	 */
 	public boolean getShareMyLocation(){
 		return mSharedPreferences.getBoolean(SHARE_MY_LOCATION,false);
 	}
