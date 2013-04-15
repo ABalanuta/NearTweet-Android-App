@@ -318,34 +318,34 @@ public class TweetDetailsPoolActivity extends Activity {
 					for(Tweet t : all){
 						Log.e("ServiceP", t.toString());
 
-						//						if(t instanceof TweetPoll){
-						//							//Tweets por este device
-						//							if(t.getDeviceID().equals(tweet.getDeviceID())){
-						//								// o Tweet
-						//								if(t.getTweetId() == tweet.getTweetId()){
-						//									Log.e("ServiceP", "------------------------");
-						//
-						//									
-						//									
-						//									TweetPoll tp = (TweetPoll) t;
-						//									
-						//									for(PollResponseDTO r : tp.getAllResponses()){
-						//										if(!voted.contains(r.getSrcDeviceID())){
-						//											if(opt.contains(r.getResponse())){
-						//												synchronized(myHashMap){
-						//													Log.e("ServiceP", "»»Add " + r.getResponse()+ "  " +r.getNickName());
-						//													myHashMap.get(r.getResponse()).add(r.getNickName());
-						//												}
-						//											}
-						//										}
-						//
-						//									}
-						//									//Log.e("ServiceP", t.toString());
-						//									Log.e("ServiceP", "------------------------");
-						//									break;
-						//								}
-						//							}
-						//						}
+						if(t instanceof TweetPoll){
+							//Tweets por este device
+							if(t.getDeviceID().equals(tweet.getDeviceID())){
+								// o Tweet
+								if(t.getTweetId() == tweet.getTweetId()){
+									Log.e("ServiceP", "------------------------");
+
+
+
+									TweetPoll tp = (TweetPoll) t;
+
+									for(PollResponseDTO r : tp.getAllResponses()){
+										if(!voted.contains(r.getSrcDeviceID())){
+											if(opt.contains(r.getResponse())){
+												synchronized(myHashMap){
+													Log.e("ServiceP", "»»Add " + r.getResponse()+ "  " +r.getNickName());
+													myHashMap.get(r.getResponse()).add(r.getNickName());
+												}
+											}
+										}
+
+									}
+									//Log.e("ServiceP", t.toString());
+									Log.e("ServiceP", "------------------------");
+									break;
+								}
+							}
+						}
 					}
 
 
