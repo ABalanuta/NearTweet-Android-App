@@ -71,7 +71,6 @@ public class TweetDetailsActivity extends ListActivity {
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
 	public String tweet_text;
 	
-	
 	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
 
 	// Twitter oauth urls
@@ -81,9 +80,7 @@ public class TweetDetailsActivity extends ListActivity {
 
 	private static Twitter twitter;
 	private static RequestToken requestToken;
-
 	private CmovPreferences myPreferences;
-
 	private ResponseUpdaterTask rut = null;
 
 	// Connection to Service Variables
@@ -91,7 +88,6 @@ public class TweetDetailsActivity extends ListActivity {
 	private Intent service;
 	private ConnectionHandlerService mService;
 	private ServiceConnection mConnection = new ServiceConnection() {
-
 		@Override
 		public void onServiceConnected(ComponentName className,
 				IBinder service) {
@@ -99,7 +95,6 @@ public class TweetDetailsActivity extends ListActivity {
 			mService = binder.getService();
 			mBound = true;
 		}
-
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
 			mBound = false;
@@ -108,7 +103,6 @@ public class TweetDetailsActivity extends ListActivity {
 
 	private Tweet tweet;
 	public static ArrayList<Comment> comments = new ArrayList<Comment>();
-
 	public static  ListView listView;
 
 
@@ -123,9 +117,6 @@ public class TweetDetailsActivity extends ListActivity {
 		listView = getListView();
 		listView.addHeaderView(header);
 		listView.setAdapter(new CommentCustomAdapter(this, android.R.layout.simple_list_item_1, comments));
-
-
-
 
 		myPreferences = new CmovPreferences(getApplicationContext());
 
@@ -144,17 +135,21 @@ public class TweetDetailsActivity extends ListActivity {
 		Bundle bundle = getIntent().getExtras();
 
 		final String tweet_uid = bundle.getString("tweet_uid");
-		final String location_lng = bundle.getString("gps_location_lng");
-		final String location_lat = bundle.getString("gps_location_lat");
+		// For Demo purposes
+		//final String location_lng = bundle.getString("gps_location_lng");
+		//final String location_lat = bundle.getString("gps_location_lat");
+		final String location_lng = "30";
+		final String location_lat = "29";
+		// ----------		
+		
+		
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
 		tweet_text = bundle.getString("tweet_text");
 		final String tweet_text_to_map = tweet_text; // it had to be final to pass on clicl listener
 //		if(bundle.getByteArray("tweet") == null){
 //			finish();
-//		}else{
-//			tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
-//		}
+//		}else{ tweet = Encoding.decodeTweet(bundle.getByteArray("tweet")); }
 
 		// If Existes Insrt Image
 		if(bundle.getBoolean("tweet_hasImage")){
@@ -170,13 +165,11 @@ public class TweetDetailsActivity extends ListActivity {
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
 
-		
 		txtLat.setOnLongClickListener(new OnLongClickListener() {
 
 			@Override
 			public boolean onLongClick(View v) {
-				
-
+			
 				Intent map = new Intent(getApplicationContext(),pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
 				map.putExtra("gps_location_lat", location_lat);
 				map.putExtra("gps_location_lng", location_lng);
@@ -185,9 +178,6 @@ public class TweetDetailsActivity extends ListActivity {
 				return false;
 			}
 		});
-
-
-
 
 		//OFFLINE 
 		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
@@ -212,12 +202,6 @@ public class TweetDetailsActivity extends ListActivity {
 		//
 		//			}
 		//		});
-
-
-
-
-
-
 
 
 		/**
@@ -264,8 +248,6 @@ public class TweetDetailsActivity extends ListActivity {
 				}
 			}
 		}
-
-
 		/**
 		 * Lets You access internet on the interface thread
 		 */
@@ -278,16 +260,14 @@ public class TweetDetailsActivity extends ListActivity {
 
 	@Override
 	protected void onDestroy() {
-		Log.e("ServiceP", "Killing Details Activity");
-
-		// Stops the assync thread gently the kills it 
-		rut.kill();
+		Log.e("ServiceP", "Killing Details Activity");		
+		rut.kill(); // Stops the assync thread gently the kills it 
 		try {Thread.sleep(25);} catch (InterruptedException e) {}
 		rut.cancel(true);
 
-
 		//unbinding from the Service
-		if(mBound){ unbindService(mConnection);}
+		if(mBound){ unbindService(mConnection); }
+		
 		comments = new ArrayList<Comment>();
 		super.onDestroy();
 	}
@@ -301,8 +281,7 @@ public class TweetDetailsActivity extends ListActivity {
 	}
 
 
-	//    * Function to login twitter
-
+	// Function to login twitter
 	private void loginToTwitter() {
 		// Check if already logged in
 		if (!isTwitterLoggedInAlready()) {
@@ -315,13 +294,9 @@ public class TweetDetailsActivity extends ListActivity {
 			twitter = factory.getInstance();
 
 			try {
-				requestToken = twitter
-						.getOAuthRequestToken(TWITTER_CALLBACK_URL);
-				this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
-						.parse(requestToken.getAuthenticationURL())));
-			} catch (TwitterException e) {
-				e.printStackTrace();
-			}
+				requestToken = twitter.getOAuthRequestToken(TWITTER_CALLBACK_URL);
+				this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requestToken.getAuthenticationURL())));
+			} catch (TwitterException e) { e.printStackTrace(); }
 		}
 		else{
 			Toast.makeText(getApplicationContext(),
@@ -421,10 +396,7 @@ public class TweetDetailsActivity extends ListActivity {
 				twitter4j.Status response = twitter.updateStatus(status);
 
 				Log.d("Status", "> " + response.getText());
-			} catch (TwitterException e) {
-				// Error in updating status
-				Log.d("Twitter Update Error", e.getMessage());
-			}
+			} catch (TwitterException e) { Log.d("Twitter Update Error", e.getMessage()); }
 			return null;
 		}
 
@@ -434,10 +406,8 @@ public class TweetDetailsActivity extends ListActivity {
 		 * from background thread, otherwise you will get error
 		 * **/
 		protected void onPostExecute(String file_url) {
-			// dismiss the dialog after getting all products
-			pDialog.dismiss();
-			// updating UI from Background Thread
-			runOnUiThread(new Runnable() {
+			pDialog.dismiss(); // dismiss the dialog after getting all products
+			runOnUiThread(new Runnable() { // updating UI from Background Thread
 				@Override
 				public void run() {
 				}
@@ -465,10 +435,7 @@ public class TweetDetailsActivity extends ListActivity {
 		//
 		//		TweetPoll dummyComments = new TweetPoll();
 
-		public void kill(){
-			running = false;
-		}
-
+		public void kill(){ running = false; }
 
 		@Override
 		protected void onProgressUpdate(Void... values) {
@@ -482,12 +449,9 @@ public class TweetDetailsActivity extends ListActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-
-
-			// Conect with the Service
+			// Connect with the Service
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-
 
 			// Testes
 
@@ -504,15 +468,10 @@ public class TweetDetailsActivity extends ListActivity {
 			Log.e("ServiceP", "doInBackground Update");
 
 			running = true;
-
-
 			// Transformar num assync
 			while((mService == null || !mService.isConnected()) && running){
-				try {
-					Thread.sleep(250);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				try { Thread.sleep(250);
+				} catch (InterruptedException e) { e.printStackTrace(); }
 			}
 
 			Log.e("ServiceP", "Details Activity Conected to Service");
@@ -525,35 +484,22 @@ public class TweetDetailsActivity extends ListActivity {
 			}
 			publishProgress();
 
-
 			// verificar por updates
 			while(running){
-
-
 				if(mService.hasResponseUpdates(srcDeviceID, tweetID)){
-
-
 					mComments = new ArrayList<Comment>();
 					for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
 						//Log.e("ServiceP", "MSG:"+ dto.toString());						
 						mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
 					}
-
 					publishProgress();
-
 				}else{
 					try {
 						Log.e("ServiceP", "Details Activity Sleep");
 						Thread.sleep(1500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					} catch (InterruptedException e) { e.printStackTrace(); }
 				}
 			}
-
-			//			publishProgress();
-			//			break;
-
 			return null;
 		}
 	}

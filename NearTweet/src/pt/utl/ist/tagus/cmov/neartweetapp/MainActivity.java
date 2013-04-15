@@ -118,8 +118,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		setContentView(R.layout.activity_main);
 		getActionBar().setHomeButtonEnabled(true);
-		
-		
+
+
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 		mListView = (ListView) findViewById(android.R.id.list);
@@ -128,41 +128,39 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-		
+
 		if (android.os.Build.VERSION.SDK_INT > 9) {
 			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 			StrictMode.setThreadPolicy(policy);
 		}
-		if (myPreferences.isUserTwittLoggin()){
+		//if (myPreferences.isUserTwittLoggin()){
 			String picture_location = myPreferences.getProfilePictureLocation();
+			ImageView userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
+			BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+			userImg.setImageDrawable(d);
+		//}
 		
-		
-		
-		ImageView userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
-		BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-		userImg.setImageDrawable(d);
-		}
 		TextView myUserName = (TextView) findViewById(R.id.textViewUsername);
 		myUserName.setText(myPreferences.getUsername());
-		
+
 		Switch toggle_gps = (Switch) findViewById(R.id.switchGps);
-		
+
 		if(myPreferences.getShareMyLocation())toggle_gps.setChecked(true);
 		else toggle_gps.setChecked(false);
-		
+
 		toggle_gps.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
+
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			    if(isChecked) {
-			        myPreferences.setShareMyLocationTrue();
-			    } else {
-			    	myPreferences.setShareMyLocationFalse();
-			    }
-				
+				if(isChecked) {
+					myPreferences.setShareMyLocationTrue();
+				} else {
+					myPreferences.setShareMyLocationFalse();
+				}
+
 			}
 		});
-		
+
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 			int calledPosition = -1;
 
@@ -229,13 +227,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 		lat = 0;
 		lng = 0;
 
-		/**
-		 * Location stuff
-		 */
+		/* Location stuff */
 		// Acquire a reference to the system Location Manager
 		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		boolean enabled = locationManager
-				.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
 		if (!enabled) {
 			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -248,19 +243,15 @@ public class MainActivity extends ListActivity implements LocationListener{
 		if (location != null) {
 			System.out.println("Provider " + provider + " has been selected.");
 			onLocationChanged(location);
-		} else {
-
-		}
+		} else { }
 
 
 
 		if (isNetworkAvailable()){
 			// Inicia thread que actualiza as messagens
-
-			
 			connectionHandlerTask = new ConnectionHandlerTask();
 			connectionHandlerTask.execute();
-			 
+
 			/**
 			 * offline dummies: NAO APAGAR	
 			 */
@@ -272,20 +263,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		}
 
-		
-
-		
-		
-		/* HOW TO CALL MAP
-		 * USE PUT EXTRA */
-		/*
-		Intent map = new Intent(this,pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
-		map.putExtra("gps_location_lat", Double.toString(lat));
-		map.putExtra("gps_location_lng", Double.toString(lng));
-		map.putExtra("tweet_text", "EU SOU UM TWEET");
-		startActivity(map);
-		*/
-		
 	}
 
 
@@ -352,7 +329,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
-		
+
 		if(tweet instanceof TweetPoll){
 			Intent details = new Intent(this,TweetDetailsPoolActivity.class);
 			details.putExtra("username", tweet.getUsername());
@@ -366,7 +343,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_text", tweet.getText());
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
-			
+
 
 			if (tweet.hasCoordenates()){
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
@@ -376,12 +353,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 			if(tweet.hasImage()){
 				Toast.makeText(getApplicationContext(), "I've IMAGE", Toast.LENGTH_LONG).show();
-				
 				details.putExtra("tweet_hasImage", true);
 				details.putExtra("tweet_image", tweet.getImage());
 			}else{
 				Toast.makeText(getApplicationContext(), "I've  DONT IMAGE", Toast.LENGTH_LONG).show();
-				
 				details.putExtra("tweet_hasImage", false);
 			}
 
@@ -573,16 +548,16 @@ public class MainActivity extends ListActivity implements LocationListener{
 						Log.e("ServiceP", "Loop Receve");
 						mTweetsArray = mService.getAllTweets();
 						mService.setNoUpdates();
-						
+
 						for(Tweet t : mTweetsArray){
 							if(t.isBanned()){
 								publishProgress("Ban_Me");
 								break;
 							}
 						}
-						
+
 						publishProgress("Reload_Screen");
-						
+
 					}else{
 						try {
 							Thread.sleep(250);
@@ -637,11 +612,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 		for (Tweet tr : mTweetsArray){
 			String text = tr.getText();
 			String username = tr.getUsername();
-
 			HashMap<String,String> tweetInterface = new HashMap<String,String>();
 			tweetInterface.put(KEY_TEXT,text);
 			tweetInterface.put(KEY_TWEETER,username);
-			
 			tweets.add(tweetInterface);
 		}
 
@@ -733,7 +706,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			gpsImg.setVisibility(ImageView.INVISIBLE);
 			pollImg.setVisibility(ImageView.INVISIBLE);
 			imgImg.setVisibility(ImageView.INVISIBLE);
-			
+
 
 			tweetText.setText(tweet.getText());
 			tweetUsername.setText("@" + tweet.getUsername());
@@ -749,18 +722,18 @@ public class MainActivity extends ListActivity implements LocationListener{
 			Log.v("loggedin??: ", String.valueOf(myPreferences.isUserTwittLoggin()));
 			Log.v("username??: ", String.valueOf(myPreferences.hasUserName()));
 			//TODO add images
-//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
-//
-//				Log.v("tweet_username: ", tweet.getUsername());
-//				Log.v("user_username: ", myPreferences.getUsername());
-//				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
-//					if (tweet.getUsername().equals(myPreferences.getUsername())){
-//							String picture_location = myPreferences.getProfilePictureLocation();
-//							BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-//							twitUserImg.setImageDrawable(d);
-//					}
-//				}
-//			}
+			//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
+			//
+			//				Log.v("tweet_username: ", tweet.getUsername());
+			//				Log.v("user_username: ", myPreferences.getUsername());
+			//				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
+			//					if (tweet.getUsername().equals(myPreferences.getUsername())){
+			//							String picture_location = myPreferences.getProfilePictureLocation();
+			//							BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+			//							twitUserImg.setImageDrawable(d);
+			//					}
+			//				}
+			//			}
 
 
 			if(tweet instanceof TweetPoll){
