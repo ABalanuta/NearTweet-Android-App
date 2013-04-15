@@ -164,8 +164,8 @@ public class ConnectionHandlerService extends Service {
 			Log.e("ServiceP", "Channel is Closed");
 		}
 	}
-	
-	
+
+
 	public void sendResponseTweet(TweetResponseDTO tweet){
 
 		if(mConectionHandler != null){
@@ -341,22 +341,22 @@ public class ConnectionHandlerService extends Service {
 							}	
 
 						}
-						
-						
+
+
 						else if( dto.getType().equals(TypeofDTO.IDENTITY_DTO)){	
 						}
-						
-						
-						
+
+
+
 						else if( dto.getType().equals(TypeofDTO.SPAMM_DTO)){
 
 							SpammDetectorDTO spam = (SpammDetectorDTO) dto;
 
 							if(spam.getDestDeviceID().equals(deviceID)){
-								
+
 								synchronized (mTweetsArray) {
 									for(Tweet t : mTweetsArray){
-										
+
 										if(spam.getTweetID() == t.getTweetId()){
 											t.addReporter(spam.getSrcDeviceID());
 											hasPostUpdates = true;
@@ -366,18 +366,16 @@ public class ConnectionHandlerService extends Service {
 								}	
 							}
 						}
-						
+
 						else if( dto.getType().equals(TypeofDTO.POLL_DTO)){
-							
+
 							PollDTO p = (PollDTO) dto;
-							
+
 							TweetPoll poll = new TweetPoll(p.getQuestion(), p.getNickName(), p.getSrcDeviceID(), p.getTweetID());
-							for(String s : p.getOptions()){
-								poll.addOptions(s);
-							}
+							poll.setOptions(p.getOptions());
 							addTweet(poll);
 						}
-						
+
 						else{
 							Log.e("ServiceP", "There is no Such Type of Tweet : "  + dto.getType());	
 						}

@@ -291,10 +291,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		Tweet tweet = mTweetsArray.get(position);
+		
 		if(tweet instanceof TweetPoll){
 			Intent details = new Intent(this,TweetDetailsPoolActivity.class);
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_text", tweet.getText());
+			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 			startActivity(details);
 		}
 		else{
@@ -303,7 +305,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_text", tweet.getText());
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
-			details.putExtra("tweet", Encoding.encodeTweet(tweet));
+			
 
 			if (tweet.hasCoordenates()){
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
