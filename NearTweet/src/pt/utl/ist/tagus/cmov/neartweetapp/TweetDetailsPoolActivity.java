@@ -7,6 +7,7 @@ import java.util.Set;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.TweetDetailsActivity.ResponseUpdaterTask;
+import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Comment;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CommentCustomAdapter;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
@@ -14,6 +15,7 @@ import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.Encoding;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
+import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollResponseDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 import twitter4j.User;
 import android.app.Activity;
@@ -87,6 +89,9 @@ public class TweetDetailsPoolActivity extends Activity {
 		final String tweet_text = bundle.getString("tweet_text");
 		tweet = (TweetPoll) Encoding.decodeTweet(bundle.getByteArray("tweet"));
 
+		// Limpar Old
+		vote_options = new ArrayList<HashMap<String,String>>();
+
 		if(tweet != null){
 			for(String s : tweet.getOptions()){
 
@@ -107,7 +112,7 @@ public class TweetDetailsPoolActivity extends Activity {
 		txtUserName.setText("@ " + tweet_uid);
 
 		// Starts the assync Task
-		//rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 
 
 		lstVwOptions.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -115,12 +120,34 @@ public class TweetDetailsPoolActivity extends Activity {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int position, long arg3) {
+
+				HashMap<String,String> option = (HashMap<String, String>) arg0.getAdapter().getItem(position);
+				String selected = (String) option.values().toArray()[0];
+				CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
+				PollResponseDTO rsp = new PollResponseDTO(myPreferences.getUsername(), selected, tweet.getDeviceID(), tweet.getTweetId());
 				
-			//	arg0.getAdapter().getItem(position).toString();
+				
+				
+				for(int x = 200; x > 0; x--){
+					if(mService != null && mService.isConnected()){
+						
+						mService.sendResponsePoll(rsp);
+						Log.e("ServiceP", "Sent Selection: " + selected);
+						Toast.makeText(getApplicationContext(), "Vote Sent", Toast.LENGTH_LONG).show();
+						finish();
+						return true;
+					}else{
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 				
 				
 				
-				Toast.makeText(getApplicationContext(), "votaste nesta opcao", Toast.LENGTH_LONG).show();
+
 				return false;
 			}
 		});
@@ -158,9 +185,11 @@ public class TweetDetailsPoolActivity extends Activity {
 	protected void onDestroy() {
 		Log.e("ServiceP", "Killing Poll Activity");
 
-		// Stops the assync thread gently the kills it 
-		rut.kill();
-		try {Thread.sleep(25);} catch (InterruptedException e) {}
+		// Stops the assync thread gently the kills it
+		if(rut != null){
+			rut.stopLoop();
+		}
+		try {Thread.sleep(30);} catch (InterruptedException e) {}
 		rut.cancel(true);
 
 
@@ -231,7 +260,7 @@ public class TweetDetailsPoolActivity extends Activity {
 
 		private boolean running = false;
 
-		public void kill(){
+		public void stopLoop(){
 			running = false;
 		}
 

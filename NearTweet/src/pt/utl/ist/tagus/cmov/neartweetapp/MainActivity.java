@@ -264,9 +264,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 			/**
 			 * offline dummies: NAO APAGAR	
 			 */
-			Tweet tweetGenerator = new Tweet();
-			mTweetsArray = tweetGenerator.generateTweets();
-			handleServerResponse();
+			//Tweet tweetGenerator = new Tweet();
+			//mTweetsArray = tweetGenerator.generateTweets();
+			//handleServerResponse();
 		}
 		else{
 			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
@@ -355,7 +355,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		
 		if(tweet instanceof TweetPoll){
 			Intent details = new Intent(this,TweetDetailsPoolActivity.class);
-			details.putExtra("tweet_uid", tweet.getUsername());
+			details.putExtra("username", tweet.getUsername());
 			details.putExtra("tweet_text", tweet.getText());
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 			startActivity(details);
@@ -619,6 +619,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 					this.running = false;
 					MainActivity.mListView.setVisibility(View.INVISIBLE);
 					MainActivity.mImageLock.setVisibility(View.VISIBLE);
+					Toast.makeText(getApplicationContext(), "You Have Been Banned!!!", Toast.LENGTH_LONG).show();
 				}
 			}
 		}
@@ -657,7 +658,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 	public void onLocationChanged(Location location) {
 		lat = (double) (location.getLatitude());
 		lng = (double) (location.getLongitude());
-		Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
+		//Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
 	}
 
 
