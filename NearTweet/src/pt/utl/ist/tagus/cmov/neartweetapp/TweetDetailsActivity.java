@@ -45,6 +45,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class TweetDetailsActivity extends ListActivity {
+
+
 	public static TextView txtTweet;
 	public static TextView txtUserName;
 	public static Button btnShareTwitter;
@@ -85,6 +87,21 @@ public class TweetDetailsActivity extends ListActivity {
 	public boolean mBound = false;
 	private Intent service;
 	private ConnectionHandlerService mService;
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className,
+				IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			mBound = true;
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			mBound = false;
+		}
+	};
 
 	private Tweet tweet;
 	public static ArrayList<Comment> comments = new ArrayList<Comment>();
@@ -338,21 +355,7 @@ public class TweetDetailsActivity extends ListActivity {
 		}
 	}
 
-	private ServiceConnection mConnection = new ServiceConnection() {
 
-		@Override
-		public void onServiceConnected(ComponentName className,
-				IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			mBound = true;
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			mBound = false;
-		}
-	};
 
 	/**
 	 * Function to update status
