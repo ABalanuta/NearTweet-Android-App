@@ -61,8 +61,8 @@ public class NewTweetActivity extends Activity{
 	private final int GALLERY_PICTURE = 2;
 	private static final String gpsLocation = null;
 	private Bitmap bitmap = null;
-	String lat;
-	String lng;
+	private static String lat;
+	private static String lng;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
@@ -86,6 +86,8 @@ public class NewTweetActivity extends Activity{
 		Bundle bundle = getIntent().getExtras();
 		lat = bundle.getString("gps_location_lat");
 		lng = bundle.getString("gps_location_lng");
+		Toast.makeText(getApplicationContext(), "I WANT THE LOCATION " + lat + " " + lng, Toast.LENGTH_LONG).show();
+		
 		CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
 		mUsername = myPreferences.getUsername();
 		Toast.makeText(getApplicationContext(), mUsername + lat +lng, Toast.LENGTH_LONG).show();
@@ -118,7 +120,7 @@ public class NewTweetActivity extends Activity{
 					Bitmap mIcon_val=null;
 					try {
 						newurl = new URL(originalUrl);
-						mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
+						mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream()); 
 						imgChoosen.setImageBitmap(mIcon_val);
 						imgChoosen.setVisibility(ImageView.VISIBLE);
 						bitmap = mIcon_val;
@@ -130,11 +132,9 @@ public class NewTweetActivity extends Activity{
 				add_url_layout.setVisibility(LinearLayout.INVISIBLE);
 			}
 		});
-
 		//Bundle bundle = getIntent().getExtras();
 		//String gpsLocation = bundle.getString("gps_location");
 		//Toast.makeText(getApplicationContext(), gpsLocation, Toast.LENGTH_LONG).show();
-
 	}
 	
 	@Override
@@ -147,12 +147,9 @@ public class NewTweetActivity extends Activity{
 
 	@Override
 	protected void onDestroy() {
-		Log.e("ServiceP", "Killing New Tweet Activity");
-
+		Log.d("ServiceP", "Killing New Tweet Activity");
 		// unbinding from the Service
-		if(mBound){
-			unbindService(mConnection);
-		}
+		if(mBound){ unbindService(mConnection); }
 		super.onDestroy();
 	}
 
@@ -202,6 +199,12 @@ public class NewTweetActivity extends Activity{
 					byte[] byteArray = stream.toByteArray();
 					tweet.setPhoto(byteArray);
 				}
+				
+				Toast.makeText(getApplicationContext(), "SENDING TWWET WITH LAT+LNG: " + lat + lng, Toast.LENGTH_LONG).show();
+				tweet.setLAT(lat);
+				tweet.setLNG(lng);
+				
+				
 				mService.sendTweet(tweet);
 				mSendTextBox.setText(null);
 				Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
@@ -276,8 +279,7 @@ public class NewTweetActivity extends Activity{
 	
 	private void attatchUrlFotoToTwitt(){
 		add_url_layout = (LinearLayout) findViewById(R.id.addUrlLayout);
-		add_url_layout.setVisibility(LinearLayout.VISIBLE);
-		
+		add_url_layout.setVisibility(LinearLayout.VISIBLE);	
 	}
 
 

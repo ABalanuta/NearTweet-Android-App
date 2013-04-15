@@ -134,19 +134,21 @@ public class MainActivity extends ListActivity implements LocationListener{
 			StrictMode.setThreadPolicy(policy);
 		}
 		//if (myPreferences.isUserTwittLoggin()){
-			String picture_location = myPreferences.getProfilePictureLocation();
-			ImageView userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
-			BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-			userImg.setImageDrawable(d);
+		String picture_location = myPreferences.getProfilePictureLocation();
+		ImageView userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
+		BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+		userImg.setImageDrawable(d);
 		//}
-		
+
 		TextView myUserName = (TextView) findViewById(R.id.textViewUsername);
 		myUserName.setText(myPreferences.getUsername());
 
 		Switch toggle_gps = (Switch) findViewById(R.id.switchGps);
 
-		if(myPreferences.getShareMyLocation())toggle_gps.setChecked(true);
-		else toggle_gps.setChecked(false);
+		if(myPreferences.getShareMyLocation())
+			toggle_gps.setChecked(true);
+		else 
+			toggle_gps.setChecked(false);
 
 		toggle_gps.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -344,8 +346,11 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
 
+			
 
+			Toast.makeText(getApplicationContext(), "BANANAS " +tweet.getLAT(), Toast.LENGTH_LONG).show();
 			if (tweet.hasCoordenates()){
+				Toast.makeText(getApplicationContext(), "I HAVE COORDINATES!", Toast.LENGTH_LONG).show();
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
 				details.putExtra("gps_location_lat", "" + tweet.getLAT());
 				details.putExtra("username", tweet.getUsername());
@@ -411,9 +416,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
-
-			newTweetIntent.putExtra("gps_location_lng",""+lng);
-			newTweetIntent.putExtra("gps_location_lat",""+lat);
+			
+		
+			newTweetIntent.putExtra("gps_location_lng", ((Double)lng).toString());
+			newTweetIntent.putExtra("gps_location_lat",((Double)lat).toString());
+			Toast.makeText(getApplicationContext(), "LAT: " + lat + " LNG: " + lng, Toast.LENGTH_LONG).show();
+			
 			newTweetIntent.putExtra("username", mUsername);
 			startActivity(newTweetIntent);
 			return true;
@@ -466,6 +474,13 @@ public class MainActivity extends ListActivity implements LocationListener{
 				tweetInterface.put(KEY_TEXT,text);
 				tweetInterface.put(KEY_TWEETER,userId);
 				tweets.add(tweetInterface);
+				
+				
+				//---------------------------------------
+				//AQUI TEMOS DE POR LÁ TAMBEM AS COORDENADAS SE NÃO, NÃO
+				//HÁ GPS PARA NINGUÉM)
+				
+				//---------------------------------------
 			}
 
 			TweetAdapter adapter = new TweetAdapter(mTweetsArray,this);
@@ -533,11 +548,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 					break;
 				}
 				else{
-					try { 
-						Thread.sleep(250);
-					} catch (InterruptedException e) {
-						e.printStackTrace(); 
-					}
+					try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace();  }
 				}
 			}
 
@@ -554,23 +565,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 								break;
 							}
 						}
-
 						publishProgress("Reload_Screen");
-
 					}else{
-						try {
-							Thread.sleep(250);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+						try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); }
 					}
-
 				}else{
-					try {
-						Thread.sleep(250);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); }
 				}
 			}
 			return "";
