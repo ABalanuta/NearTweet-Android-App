@@ -43,8 +43,8 @@ public class BasicMapActivity extends FragmentActivity {
      * Note that this may be null if the Google Play services APK is not available.
      */
     private GoogleMap mMap;
-    private int mlat = 0;
-    private int mlng = 0;
+    private Double mlat = 0.0;
+    private Double mlng = 0.0;
     private String mTweetText = "Marker";
     
     
@@ -55,9 +55,14 @@ public class BasicMapActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.maps);
         
+        if(!(com.google.android.gms.common.ConnectionResult.SUCCESS == 
+         com.google.android.gms.common.GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext()))){
+        	finish();
+        }
+        
         Bundle bundle = getIntent().getExtras();
-		mlat = Integer.parseInt(bundle.getString("gps_location_lat"));
-		mlng = Integer.parseInt(bundle.getString("gps_location_lng"));
+		mlat = Double.parseDouble(bundle.getString("gps_location_lat"));
+		mlng = Double.parseDouble(bundle.getString("gps_location_lng"));
 		mTweetText = bundle.getString("tweet_text");
         
         setUpMapIfNeeded();
@@ -73,8 +78,8 @@ public class BasicMapActivity extends FragmentActivity {
     protected void onDestroy(){
     	super.onDestroy();
     	mMap = null;
-    	mlat = 0;
-    	mlng = 0;
+    	mlat = 0.0;
+    	mlng = 0.0;
     }
     
     /**
@@ -112,6 +117,6 @@ public class BasicMapActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(mlat, mlng)).title("mTweetText"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(mlat, mlng)).title(mTweetText));
     }
 }
