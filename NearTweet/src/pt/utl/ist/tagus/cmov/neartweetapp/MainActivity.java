@@ -348,20 +348,20 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 			
 
-			Toast.makeText(getApplicationContext(), "BANANAS " +tweet.getLAT(), Toast.LENGTH_LONG).show();
+			//Toast.makeText(getApplicationContext(), "BANANAS " +tweet.getLAT(), Toast.LENGTH_LONG).show();
 			if (tweet.hasCoordenates()){
-				Toast.makeText(getApplicationContext(), "I HAVE COORDINATES!", Toast.LENGTH_LONG).show();
+				//Toast.makeText(getApplicationContext(), "I HAVE COORDINATES!", Toast.LENGTH_LONG).show();
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
 				details.putExtra("gps_location_lat", "" + tweet.getLAT());
 				details.putExtra("username", tweet.getUsername());
 			}
 
 			if(tweet.hasImage()){
-				Toast.makeText(getApplicationContext(), "I've IMAGE", Toast.LENGTH_LONG).show();
+				//Toast.makeText(getApplicationContext(), "I've IMAGE", Toast.LENGTH_LONG).show();
 				details.putExtra("tweet_hasImage", true);
 				details.putExtra("tweet_image", tweet.getImage());
 			}else{
-				Toast.makeText(getApplicationContext(), "I've  DONT IMAGE", Toast.LENGTH_LONG).show();
+				//Toast.makeText(getApplicationContext(), "I've  DONT IMAGE", Toast.LENGTH_LONG).show();
 				details.putExtra("tweet_hasImage", false);
 			}
 
@@ -420,7 +420,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 		
 			newTweetIntent.putExtra("gps_location_lng", ((Double)lng).toString());
 			newTweetIntent.putExtra("gps_location_lat",((Double)lat).toString());
-			Toast.makeText(getApplicationContext(), "LAT: " + lat + " LNG: " + lng, Toast.LENGTH_LONG).show();
+			//Toast.makeText(getApplicationContext(), "LAT: " + lat + " LNG: " + lng, Toast.LENGTH_LONG).show();
 			
 			newTweetIntent.putExtra("username", mUsername);
 			startActivity(newTweetIntent);
@@ -630,7 +630,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 	public void onLocationChanged(Location location) {
 		lat = (double) (location.getLatitude());
 		lng = (double) (location.getLongitude());
-		Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
+		//Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
 	}
 
 

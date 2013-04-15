@@ -86,7 +86,7 @@ public class NewTweetActivity extends Activity{
 		Bundle bundle = getIntent().getExtras();
 		lat = bundle.getString("gps_location_lat");
 		lng = bundle.getString("gps_location_lng");
-		Toast.makeText(getApplicationContext(), "I WANT THE LOCATION " + lat + " " + lng, Toast.LENGTH_LONG).show();
+		//Toast.makeText(getApplicationContext(), "I WANT THE LOCATION " + lat + " " + lng, Toast.LENGTH_LONG).show();
 		
 		CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
 		mUsername = myPreferences.getUsername();
@@ -200,16 +200,16 @@ public class NewTweetActivity extends Activity{
 					tweet.setPhoto(byteArray);
 				}
 				
-				Toast.makeText(getApplicationContext(), "SENDING TWWET WITH LAT+LNG: " + lat + lng, Toast.LENGTH_LONG).show();
+				//Toast.makeText(getApplicationContext(), "SENDING TWWET WITH LAT+LNG: " + lat + lng, Toast.LENGTH_LONG).show();
 				tweet.setLAT(lat);
 				tweet.setLNG(lng);
 				
 				
 				mService.sendTweet(tweet);
 				mSendTextBox.setText(null);
-				Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
-				t.setGravity(Gravity.CENTER, 0, 0);
-				t.show();
+				//Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
+				//t.setGravity(Gravity.CENTER, 0, 0);
+				//t.show();
 				finish();
 			}else{ Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show(); }
             return true;
