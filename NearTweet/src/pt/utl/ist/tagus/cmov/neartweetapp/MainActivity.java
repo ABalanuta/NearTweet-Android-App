@@ -740,18 +740,19 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 			Log.v("loggedin??: ", String.valueOf(myPreferences.isUserTwittLoggin()));
 			Log.v("username??: ", String.valueOf(myPreferences.hasUserName()));
-			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
-
-				Log.v("tweet_username: ", tweet.getUsername());
-				Log.v("user_username: ", myPreferences.getUsername());
-				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
-					if (tweet.getUsername().equals(myPreferences.getUsername())){
-							String picture_location = myPreferences.getProfilePictureLocation();
-							BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-							twitUserImg.setImageDrawable(d);
-					}
-				}
-			}
+			//TODO add images
+//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
+//
+//				Log.v("tweet_username: ", tweet.getUsername());
+//				Log.v("user_username: ", myPreferences.getUsername());
+//				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
+//					if (tweet.getUsername().equals(myPreferences.getUsername())){
+//							String picture_location = myPreferences.getProfilePictureLocation();
+//							BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+//							twitUserImg.setImageDrawable(d);
+//					}
+//				}
+//			}
 
 
 			if(tweet instanceof TweetPoll){
