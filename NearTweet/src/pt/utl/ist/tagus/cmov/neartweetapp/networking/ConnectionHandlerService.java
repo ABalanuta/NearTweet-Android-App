@@ -368,7 +368,9 @@ public class ConnectionHandlerService extends Service {
 							}
 
 							if(t.hasCoordenates()){
-								tweet.setCoordinates(t.getCoordenates());
+								tweet.setLAT(t.getLAT());
+								tweet.setLNG(t.getLNG());
+								//tweet.setCoordinates(t.getCoordenates());
 							}
 
 							addTweet(tweet);

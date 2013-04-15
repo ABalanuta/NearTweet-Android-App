@@ -136,10 +136,12 @@ public class TweetDetailsActivity extends ListActivity {
 
 		final String tweet_uid = bundle.getString("tweet_uid");
 		// For Demo purposes
-		//final String location_lng = bundle.getString("gps_location_lng");
-		//final String location_lat = bundle.getString("gps_location_lat");
-		final String location_lng = "30";
-		final String location_lat = "29";
+		final String location_lng = bundle.getString("gps_location_lng");
+		final String location_lat = bundle.getString("gps_location_lat");
+		Toast.makeText(getApplicationContext(), "DO I HAVE LAT AND LNG " + location_lat + location_lng, Toast.LENGTH_LONG).show();
+		
+		//final String location_lng = "30";
+		//final String location_lat = "29";
 		// ----------		
 		
 		

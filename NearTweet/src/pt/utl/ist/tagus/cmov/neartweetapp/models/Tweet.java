@@ -23,7 +23,7 @@ public class Tweet implements Serializable{
 	byte[] mImage = null;
 	byte[] mUserImage = null;
 	ArrayList<TweetResponseDTO> mResponses = new ArrayList<TweetResponseDTO>();
-	String[] mCoordinates = new String[2];
+	String[] mCoordinates = {"",""};
 	boolean newResponses = false;
 
 	// Ban
@@ -163,8 +163,10 @@ public class Tweet implements Serializable{
 	}
 
 	public boolean hasCoordenates(){
-		if (mCoordinates[0] ==null || mCoordinates[1]==null)return false;
-		else return true;
+		if (mCoordinates[0].equals("") || mCoordinates[1].equals(""))
+			return false;
+		else 
+			return true;
 	}
 
 
