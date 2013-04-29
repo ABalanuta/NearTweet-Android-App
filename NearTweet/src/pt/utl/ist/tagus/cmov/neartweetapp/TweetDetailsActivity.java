@@ -130,7 +130,6 @@ public class TweetDetailsActivity extends ListActivity {
 		txtLong = (TextView) findViewById(R.id.textViewCoordinateLong);
 		image = (ImageView) findViewById(R.id.imageViewTweetImage);
 		userImage = (ImageView) findViewById(R.id.imageViewUserPicTweet);
-		
 
 		Bundle bundle = getIntent().getExtras();
 

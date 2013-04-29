@@ -719,8 +719,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 				StrictMode.setThreadPolicy(policy);
 			}
 
-			Log.v("loggedin??: ", String.valueOf(myPreferences.isUserTwittLoggin()));
-			Log.v("username??: ", String.valueOf(myPreferences.hasUserName()));
+
 			//TODO add images
 			//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
 			//
