@@ -182,6 +182,8 @@ public class ConnectionHandlerService extends Service {
 
 		if(mConectionHandler != null){
 			response.setSrcDeviceID(deviceID);
+			Log.e("ServiceP", "::::-> " + response);
+
 			mConectionHandler.send(response);
 		}else{
 			Log.e("ServiceP", "Channel is Closed");
@@ -252,15 +254,15 @@ public class ConnectionHandlerService extends Service {
 
 	public ArrayList<Tweet> getAllTweets() {
 		synchronized (mTweetsArray) {
-			
+
 			return (ArrayList<Tweet>) mTweetsArray.clone();
 		}
 	}
-	
+
 	public void setNoUpdates() {
 		this.hasPostUpdates = false;
 	}
-	
+
 
 	public ArrayList<TweetResponseDTO> getAllResponses(String srcDeviceID, long tweetID2){
 
@@ -449,17 +451,11 @@ public class ConnectionHandlerService extends Service {
 
 							PollResponseDTO rsp = (PollResponseDTO) dto;
 
-							Log.e("ServiceP", "PollReceved " + rsp);
-							
 							synchronized (mTweetsArray) {
-								
+
 								for(Tweet t : mTweetsArray){
-
+									
 									if(t.getDeviceID().equals(rsp.getDesDeviceID())){
-
-
-
-
 										if(rsp.getTweetID() == t.getTweetId()){
 
 											((TweetPoll) t).addResponse(rsp);

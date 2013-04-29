@@ -102,6 +102,12 @@ public class NewCommentActivity extends Activity {
 		toAll = bundle.getBoolean("toAll");
 		username = bundle.getString("username");
 
+		
+		if(tweet == null){
+			finish();
+		}
+		
+		
 		if(toAll){
 			typeOfResponse.setText("Public Response");
 		}else{
@@ -151,7 +157,7 @@ public class NewCommentActivity extends Activity {
 		if (d!=null){
 			Log.v("byte array", String.valueOf(d.toString()));
 		}
-			Log.v("byte array Ž null", "I am null");
+			Log.v("byte array ï¿½ null", "I am null");
 
 		personImage.setImageDrawable(d);
 		
@@ -175,6 +181,8 @@ public class NewCommentActivity extends Activity {
 				if(mService != null && mService.isConnected()){
 					String text = responseText.getText().toString();
 					TweetResponseDTO res = new TweetResponseDTO(myPreferences.getUsername(), text, tweet.getDeviceID(), tweet.getTweetId(), !toAll);
+
+					
 					mService.sendResponseTweet(res);
 					Toast.makeText(getApplicationContext(), "SENT as "+myPreferences.getUsername(), Toast.LENGTH_SHORT).show();
 					finish();

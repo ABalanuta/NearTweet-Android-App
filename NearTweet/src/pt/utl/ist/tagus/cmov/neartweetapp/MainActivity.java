@@ -345,6 +345,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_text", tweet.getText());
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
+			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 
 			
 
