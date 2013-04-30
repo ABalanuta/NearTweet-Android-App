@@ -86,7 +86,7 @@ public class ConnectionHandler extends Thread{
 
 		this.running = true;
 
-		int secondsBeforeServer = 5;
+		int secondsBeforeServer = 0;
 
 		// Contacting the Server , Retry if error
 		while(running){

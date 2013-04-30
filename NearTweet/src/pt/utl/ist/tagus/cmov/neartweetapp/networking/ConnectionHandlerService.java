@@ -39,29 +39,15 @@ public class ConnectionHandlerService extends Service {
 	private boolean hasPostUpdates = false;
 	private boolean hasResponseUpdates = false;
 	private SearchingForTweets searcher = null;
-	private ServiceKiller killer = null;
 
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 
-
-		if(this.mConectionHandler != null){
-			Log.e("ServiceP", "Connection Handler already exists");
-			
-			if(mGOServer != null){
-				Log.e("ServiceP", "I am The Server Conecting to myself");
-				this.mConectionHandler.setServerIP("localhost");
-				mConectionHandler.kill();
-				mConectionHandler.start();
-			}
-		}else{
-			this.mConectionHandler = new ConnectionHandler(this);
-			mConectionHandler.start();
-		}
+		this.mConectionHandler = new ConnectionHandler(this);
+		mConectionHandler.start();
 		
-
 		deviceID = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
 		if(deviceID == null){
 			deviceID = "BogusID"+(new Random()).nextLong();
@@ -105,11 +91,7 @@ public class ConnectionHandlerService extends Service {
 		super.onUnbind(intent);
 		if(Clients == 0){
 			Log.e("ServiceP", "No Clients Binded to Service Killing Service");
-
-			if(killer == null){
-				killer = new ServiceKiller();
-				killer.start();
-			} 
+			this.stopSelf();
 
 		}
 		return 	true;
@@ -122,6 +104,9 @@ public class ConnectionHandlerService extends Service {
 		Log.e("ServiceP", "TCP Service Destroy");
 
 		this.mConectionHandler.close();
+		if(mGOServer != null){
+			this.mGOServer.kill();
+		}
 
 		super.onDestroy();
 
@@ -512,41 +497,6 @@ public class ConnectionHandlerService extends Service {
 				}
 
 			}
-		}
-	}
-
-	class ServiceKiller extends Thread{
-
-		@Override
-		public void run() {
-			int x = 120;
-			if (mGOServer != null){
-				x = 360;
-			}
-
-			Log.e("ServiceP", "Waiting for Clients for "+x+"s ");
-
-			while(x > 0){
-
-				if(Clients > 0){
-					Log.e("ServiceP", "Client Entered, Destroy Aborted");
-					return;
-
-				}
-
-				try {
-					if(x%10 == 0){
-						Log.e("ServiceP", x+"Seconds until Service Destroy");
-					}
-
-
-					Thread.sleep(1000);
-					x--;
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			onDestroy();
 		}
 	}
 
