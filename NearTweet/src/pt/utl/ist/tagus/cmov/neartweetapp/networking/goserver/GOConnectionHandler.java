@@ -1,4 +1,4 @@
-package pt.utl.ist.tagus.cmov.neatweet;
+package pt.utl.ist.tagus.cmov.neartweetapp.networking.goserver;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.*;
 
@@ -11,7 +11,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 
-public class ConnectionHandler extends Thread{
+public class GOConnectionHandler extends Thread{
 
 	private Socket localSock = null;
 	private ObjectInputStream in = null;
@@ -20,11 +20,11 @@ public class ConnectionHandler extends Thread{
 	private OutConnectionHandler outc = null;
 	private boolean running = false;
 	private ArrayList<BasicDTO> objects = null;
-	private ArrayList<ConnectionHandler> connections = null;
+	private ArrayList<GOConnectionHandler> connections = null;
 	private ArrayList<BasicDTO> sentObjects = null;
 	protected String channelDeviceID = null;
 
-	public ConnectionHandler(Socket sock, ArrayList<BasicDTO> objects, ArrayList<ConnectionHandler> connections,
+	public GOConnectionHandler(Socket sock, ArrayList<BasicDTO> objects, ArrayList<GOConnectionHandler> connections,
 			ArrayList<BasicDTO> sentObjects) {
 		this.localSock = sock;
 		this.objects = objects;

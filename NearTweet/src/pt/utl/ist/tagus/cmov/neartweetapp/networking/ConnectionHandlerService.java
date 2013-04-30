@@ -9,6 +9,7 @@ import java.util.Random;
 
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
+import pt.utl.ist.tagus.cmov.neartweetapp.networking.goserver.GOServer;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.IdentityDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollDTO;
@@ -29,6 +30,7 @@ import android.util.Log;
 public class ConnectionHandlerService extends Service {
 
 	private ConnectionHandler mConectionHandler = null;
+	private GOServer mGOServer= null;
 	private final IBinder mBinder = new LocalBinder();
 	private int Clients = 0;
 	public static String deviceID = null;
@@ -37,13 +39,14 @@ public class ConnectionHandlerService extends Service {
 	private boolean hasPostUpdates = false;
 	private boolean hasResponseUpdates = false;
 	private SearchingForTweets searcher = null;
+	private ServiceKiller killer = null;
 
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 
-		this.mConectionHandler = new ConnectionHandler();
+		this.mConectionHandler = new ConnectionHandler(this);
 		mConectionHandler.start();
 
 		deviceID = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
@@ -77,7 +80,7 @@ public class ConnectionHandlerService extends Service {
 
 	@Override
 	public IBinder onBind(Intent arg0) {
-		Log.e("ServiceP", "TCP Service Binded, now " + (Clients+1) + " are binded");
+		Log.e("ServiceP", "TCP Service Binded, now " + (Clients+1) + " are binded################################");
 		Clients++;
 		return mBinder;
 	}
@@ -89,7 +92,12 @@ public class ConnectionHandlerService extends Service {
 		super.onUnbind(intent);
 		if(Clients == 0){
 			Log.e("ServiceP", "No Clients Binded to Service Killing Service");
-			this.stopSelf();
+
+			if(killer == null){
+				killer = new ServiceKiller();
+				killer.start();
+			} 
+
 		}
 		return 	true;
 	}
@@ -97,27 +105,6 @@ public class ConnectionHandlerService extends Service {
 
 	@Override
 	public void onDestroy() {
-
-
-		// Mais Eficiente
-		//		Log.e("ServiceP", "Waiting for Clients for 60s ");
-		//		
-		//		int x = 60;
-		//		
-		//		while(x > 0){
-		//			
-		//			if(Clients > 0){
-		//				Log.e("ServiceP", "Client Entered, Destroy Aborted");
-		//			}
-		//			
-		//			try {
-		//				Thread.sleep(1000);
-		//				x--;
-		//			} catch (InterruptedException e) {
-		//				e.printStackTrace();
-		//			}
-
-
 
 		Log.e("ServiceP", "TCP Service Destroy");
 
@@ -134,6 +121,32 @@ public class ConnectionHandlerService extends Service {
 			return ConnectionHandlerService.this;
 		}
 	}
+
+
+
+	//LOCAL METHODS
+	//------------------------------------------------------------------------------------
+
+
+	public void StartGOServer(){
+		this.mGOServer = new GOServer();
+		this.mGOServer.start();
+
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		this.mConectionHandler = new ConnectionHandler(this);
+		mConectionHandler.setServerIP("localhost");
+		mConectionHandler.start();
+
+	}
+
+
+
 
 	public void reportSpammer(String destDeviceID, long tweetID){
 		if(mConectionHandler != null){
@@ -454,7 +467,7 @@ public class ConnectionHandlerService extends Service {
 							synchronized (mTweetsArray) {
 
 								for(Tweet t : mTweetsArray){
-									
+
 									if(t.getDeviceID().equals(rsp.getDesDeviceID())){
 										if(rsp.getTweetID() == t.getTweetId()){
 
@@ -489,14 +502,42 @@ public class ConnectionHandlerService extends Service {
 		}
 	}
 
+	class ServiceKiller extends Thread{
+		
+		@Override
+		public void run() {
+			int x = 120;
+			if (mGOServer != null){
+				x = 360;
+			}
+			
+			Log.e("ServiceP", "Waiting for Clients for "+x+"s ");
+			
+			while(x > 0){
 
+				if(Clients > 0){
+					Log.e("ServiceP", "Client Entered, Destroy Aborted");
+					return;
+					
+				}
+
+				try {
+					if(x%10 == 0){
+						Log.e("ServiceP", x+"Seconds until Service Destroy");
+					}
+					
+					
+					Thread.sleep(1000);
+					x--;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			onDestroy();
+		}
+	}
+	
 }
 
 
 
-//class WaitingToDie extends Thread{
-//	@Override
-//	public void run() {
-//
-//	}
-//}

@@ -569,10 +569,10 @@ public class MainActivity extends ListActivity implements LocationListener{
 						}
 						publishProgress("Reload_Screen");
 					}else{
-						try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); }
+						try { Thread.sleep(250); } catch (InterruptedException e) {}
 					}
 				}else{
-					try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace(); }
+					try { Thread.sleep(250); } catch (InterruptedException e) {}
 				}
 			}
 			return "";

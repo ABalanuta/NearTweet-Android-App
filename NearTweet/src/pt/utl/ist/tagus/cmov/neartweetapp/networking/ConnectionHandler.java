@@ -14,10 +14,8 @@ import java.util.HashMap;
 
 public class ConnectionHandler extends Thread{
 
-	//private	final String serverIP = "10.0.2.2";
-	//artur-4g
-	private	final String serverIP = "172.20.41.19";
-	//private	final String serverIP = "artur-4g.tagus.ist.url.pt";
+	//private String serverIP = "10.0.2.2";
+	private String serverIP = "172.20.41.19";
 
 	private	final int serverPort = 4444;
 	private Socket localSock = null;
@@ -28,8 +26,11 @@ public class ConnectionHandler extends Thread{
 	private boolean running = false;
 	private ArrayList<BasicDTO> objects = new ArrayList<BasicDTO>();
 	private boolean isConnectedToServer = false;
+	private ConnectionHandlerService mService = null;
+	
 
-	public ConnectionHandler() {
+	public ConnectionHandler(ConnectionHandlerService connectionHandlerService) {
+		this.mService = connectionHandlerService;
 	}
 
 	public void send(Object oo){
@@ -85,8 +86,11 @@ public class ConnectionHandler extends Thread{
 
 		this.running = true;
 		
+		int secondsBeforeServer = 5;
+		
 		// Contacting the Server , Retry if error
-		while(true){
+		while(running){
+			
 			try{
 				this.localSock = new Socket(this.serverIP, this.serverPort);
 				break;
@@ -94,10 +98,20 @@ public class ConnectionHandler extends Thread{
 				System.out.println("Cannot Reach the Server " +this.serverIP + ":"+this.serverPort+"   Sleeping for 5s");
 				System.out.println(e.toString());
 				try {
+					
+					if(secondsBeforeServer < 0){
+						this.running = false;
+						this.mService.StartGOServer();
+						return;
+					}
+					
 					Thread.sleep(5000);
+					secondsBeforeServer -= 5;
+					
 				} catch (InterruptedException e1) {}
 			}
 		}
+		
 		System.out.println("Thread with Client"+ localSock.getRemoteSocketAddress().toString() + " started.");
 
 		try {
@@ -154,6 +168,11 @@ public class ConnectionHandler extends Thread{
 	}
 
 	public interface OnObjectReceived { public void informArrival(BasicDTO dto); }
+
+	public void setServerIP(String ip) {
+		this.serverIP = ip;
+		
+	}
 
 }
 
