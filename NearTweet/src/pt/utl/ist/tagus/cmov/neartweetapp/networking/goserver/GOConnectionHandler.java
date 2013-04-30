@@ -52,7 +52,7 @@ public class GOConnectionHandler extends Thread{
 	}
 
 	public void close(){
-		try { out.close(); } catch (IOException e) { e.printStackTrace(); }
+		try { out.close(); } catch (IOException e) { }
 	}
 
 	public boolean isRunning(){

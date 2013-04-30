@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 
 public class GOServer extends Thread {
-	
+
 
 	private static ArrayList<GOConnectionHandler> connections = new ArrayList<GOConnectionHandler>();
 	private static ArrayList<BasicDTO> objects = new  ArrayList<BasicDTO>();
@@ -17,34 +17,35 @@ public class GOServer extends Thread {
 	private boolean running = false;
 	private static ConnectionInicializer conHandler = null;
 	private static SwitchingHandler sHandler = null;
-	
+
 	@Override
 	public void run() {
 		running = true;
-		
+
 		StartServer();
-		
+
 		while (running){
-			
+
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
+
 		}
 
 	}
-	
+
 	public void kill(){
-		sHandler.stop();
-		conHandler.stop();
+
 		running = false;
+		sHandler.stopSwiching();
+		conHandler.stopRunning();
 	}
-	
+
 	public static void StartServer() {
-		 conHandler = new ConnectionInicializer(connections, objects, sentObjects);
-		 sHandler = new SwitchingHandler(connections, objects, sentObjects);
+		conHandler = new ConnectionInicializer(connections, objects, sentObjects);
+		sHandler = new SwitchingHandler(connections, objects, sentObjects);
 
 		sHandler.start();
 		conHandler.start();
@@ -69,6 +70,16 @@ class ConnectionInicializer extends Thread{
 		this.sentObjects = sentObjects;
 	}
 
+	public void stopRunning(){
+		this.running = false;
+		for(GOConnectionHandler c : connections){
+			c.close();
+		}
+		try{
+			this.stop();
+		}catch(Exception e){}
+	}
+
 	@Override
 	public void run() {
 		super.run();
@@ -77,7 +88,7 @@ class ConnectionInicializer extends Thread{
 			serverSocket = new ServerSocket(SERVERPORT);
 			System.out.println("S: Listening...");
 
-			while(true){
+			while(this.running){
 				// Cria um socket novo por cada pedido
 				Socket sock = serverSocket.accept();
 				System.out.println("New Client Request");
@@ -88,8 +99,7 @@ class ConnectionInicializer extends Thread{
 			}
 		} catch (Exception e) {
 			System.out.println("S: Error");
-			e.printStackTrace();
-		} finally{ try { serverSocket.close(); } catch (IOException e) { e.printStackTrace(); } }
+		} finally{ try { serverSocket.close(); } catch (IOException e) { } }
 
 	}
 
