@@ -50,6 +50,7 @@ public class GOConnectionHandler extends Thread{
 			outc.send(oo);
 		}
 	}
+	
 
 	public void close(){
 		try { out.close(); } catch (IOException e) { }
