@@ -46,8 +46,21 @@ public class ConnectionHandlerService extends Service {
 	public void onCreate() {
 		super.onCreate();
 
-		this.mConectionHandler = new ConnectionHandler(this);
-		mConectionHandler.start();
+
+		if(this.mConectionHandler != null){
+			Log.e("ServiceP", "Connection Handler already exists");
+			
+			if(mGOServer != null){
+				Log.e("ServiceP", "I am The Server Conecting to myself");
+				this.mConectionHandler.setServerIP("localhost");
+				mConectionHandler.kill();
+				mConectionHandler.start();
+			}
+		}else{
+			this.mConectionHandler = new ConnectionHandler(this);
+			mConectionHandler.start();
+		}
+		
 
 		deviceID = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
 		if(deviceID == null){
@@ -503,30 +516,30 @@ public class ConnectionHandlerService extends Service {
 	}
 
 	class ServiceKiller extends Thread{
-		
+
 		@Override
 		public void run() {
 			int x = 120;
 			if (mGOServer != null){
 				x = 360;
 			}
-			
+
 			Log.e("ServiceP", "Waiting for Clients for "+x+"s ");
-			
+
 			while(x > 0){
 
 				if(Clients > 0){
 					Log.e("ServiceP", "Client Entered, Destroy Aborted");
 					return;
-					
+
 				}
 
 				try {
 					if(x%10 == 0){
 						Log.e("ServiceP", x+"Seconds until Service Destroy");
 					}
-					
-					
+
+
 					Thread.sleep(1000);
 					x--;
 				} catch (InterruptedException e) {
@@ -536,7 +549,7 @@ public class ConnectionHandlerService extends Service {
 			onDestroy();
 		}
 	}
-	
+
 }
 
 

@@ -549,7 +549,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 					break;
 				}
 				else{
-					try { Thread.sleep(250); } catch (InterruptedException e) { e.printStackTrace();  }
+					try { Thread.sleep(250); } catch (InterruptedException e) {}
 				}
 			}
 

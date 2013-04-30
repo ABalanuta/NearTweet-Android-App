@@ -23,11 +23,11 @@ public class ConnectionHandler extends Thread{
 	private ObjectOutputStream out = null;
 	private InputConnectionHandler inc = null;
 	private OutConnectionHandler outc = null;
-	private boolean running = false;
+	public boolean running = false;
 	private ArrayList<BasicDTO> objects = new ArrayList<BasicDTO>();
 	private boolean isConnectedToServer = false;
 	private ConnectionHandlerService mService = null;
-	
+
 
 	public ConnectionHandler(ConnectionHandlerService connectionHandlerService) {
 		this.mService = connectionHandlerService;
@@ -76,7 +76,7 @@ public class ConnectionHandler extends Thread{
 	public boolean isRunning(){
 		return this.running;
 	}
-	
+
 	public boolean isConnected(){
 		return this.isConnectedToServer;
 	}
@@ -85,12 +85,12 @@ public class ConnectionHandler extends Thread{
 	public void run() {
 
 		this.running = true;
-		
+
 		int secondsBeforeServer = 5;
-		
+
 		// Contacting the Server , Retry if error
 		while(running){
-			
+
 			try{
 				this.localSock = new Socket(this.serverIP, this.serverPort);
 				break;
@@ -98,20 +98,20 @@ public class ConnectionHandler extends Thread{
 				System.out.println("Cannot Reach the Server " +this.serverIP + ":"+this.serverPort+"   Sleeping for 5s");
 				System.out.println(e.toString());
 				try {
-					
-					if(secondsBeforeServer < 0){
+
+					if(secondsBeforeServer <= 0){
 						this.running = false;
 						this.mService.StartGOServer();
 						return;
 					}
-					
+
 					Thread.sleep(5000);
 					secondsBeforeServer -= 5;
-					
+
 				} catch (InterruptedException e1) {}
 			}
 		}
-		
+
 		System.out.println("Thread with Client"+ localSock.getRemoteSocketAddress().toString() + " started.");
 
 		try {
@@ -133,13 +133,13 @@ public class ConnectionHandler extends Thread{
 		inc = new InputConnectionHandler(this.in , this);
 
 		inc.start();
-		System.out.println("Input Channel Created");
+		//System.out.println("Input Channel Created");
 
 
 
 		outc = new OutConnectionHandler(this.out);
 		outc.start();
-		System.out.println("Output Channel Created");
+		//System.out.println("Output Channel Created");
 
 		while(this.running){
 
@@ -171,7 +171,17 @@ public class ConnectionHandler extends Thread{
 
 	public void setServerIP(String ip) {
 		this.serverIP = ip;
-		
+
+	}
+
+	public void kill() {
+
+		try {	
+			this.in.close();
+			this.out.close();
+			Thread.sleep(250);
+		} catch (Exception e) {}
+
 	}
 
 }
