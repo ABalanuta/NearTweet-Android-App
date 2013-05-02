@@ -175,6 +175,17 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			}
 		});
 
+		
+		
+		// LIgar Serviço
+		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		Log.e("ServiceP", "Bind to Service Send");
+
+
+
+		Log.e("ServiceP", "-*-*");
+
 		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
 		mChannel = mManager.initialize(this, getMainLooper(), null);
 		mReceiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this);
@@ -185,6 +196,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
 		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
+		Log.e("ServiceP", "-*-*");
 
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 			int calledPosition = -1;
@@ -431,13 +443,13 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	// Este método é chamado quando recebemos um connect e tem a informação do peer que se ligou a nós =)
 	@Override
 	public void onConnectionInfoAvailable(WifiP2pInfo info) {
-		
+
 		Log.e("ServiceP", "Info Receved");
-		Log.e("ServiceP", "MY IP IS " + new String(info.groupOwnerAddress.getAddress()));
-		
+		Log.e("ServiceP", "MY IP IS " + info.groupOwnerAddress.getHostAddress());
+
 		// TODO Auto-generated method stub
-		Toast.makeText(getApplicationContext(), "Peer connection to me is: " + info.groupOwnerAddress.getAddress(), Toast.LENGTH_LONG).show();
-		Toast.makeText(getApplicationContext(), "Peer connection to me is(IN STRING): " + (new String(info.groupOwnerAddress.getAddress())), Toast.LENGTH_LONG).show();
+		//Toast.makeText(getApplicationContext(), "Peer connection to me is: " + info.groupOwnerAddress.getAddress(), Toast.LENGTH_LONG).show();
+		//Toast.makeText(getApplicationContext(), "Peer connection to me is(IN STRING): " + (new String(info.groupOwnerAddress.getAddress())), Toast.LENGTH_LONG).show();
 
 		// Espera que se ligue ao serviço
 		while(mService == null){
@@ -445,28 +457,30 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			try { Thread.sleep(1000); } catch (InterruptedException e) {}
 		}
 
+
+
 		//if Server
 		if(info.isGroupOwner){
-			
+
 			Log.e("ServiceP", "I AM GO");
 			this.isGO = true;
-			this.mService.StartGOServer();
-			try {
-				Thread.sleep(3500);
-			} catch (InterruptedException e) {}
+			//this.mService.StartGOServer();
+			//try {
+			//	Thread.sleep(3500);
+			//} catch (InterruptedException e) {}
 
-			this.mService.startClient(new String(info.groupOwnerAddress.getAddress()));
+			this.mService.startClient("localhost");
 		}
 
 		// is Client
 		else{
-			
+
 			Log.e("ServiceP", "I AM CLIENT");
-			
+
 			try {
 				Thread.sleep(3500);
 			} catch (InterruptedException e) {}
-			this.mService.startClient(new String(info.groupOwnerAddress.getAddress()));
+			this.mService.startClient(info.groupOwnerAddress.getHostAddress());
 		}
 
 
@@ -629,22 +643,16 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			mProgressBar.setVisibility(View.VISIBLE);
 
 			Log.e("ServiceP", "ConnectionHandlerTask Created");
-			// Criar um serviço que estabelece a communicação com o server
-			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-
-			// vamos efectuar uma ligação com o servidor
-			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-			
-			Log.e("ServiceP", "Will bind with service");
 
 			// Espera que se ligue ao server
 			while(running){
 				if(mService != null && mService.isConnected()){
 					publishProgress("Connected");
+					Log.e("ServiceP", "Connected");
 					break;
 				}
 				else{
-					try { Thread.sleep(250); } catch (InterruptedException e) {}
+					try { Thread.sleep(1000); } catch (InterruptedException e) {}
 				}
 			}
 

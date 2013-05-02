@@ -91,9 +91,9 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 			// request available peers from the wifi p2p manager. This is an
 			// asynchronous call and the calling activity is notified with a
 			// callback on PeerListListener.onPeersAvailable()
-			if (mManager != null) {
-				mManager.requestPeers(mChannel, myPeerListListener);
-			}
+			//if (mManager != null) {
+			//	mManager.requestPeers(mChannel, myPeerListListener);
+			//}
 
 
 
