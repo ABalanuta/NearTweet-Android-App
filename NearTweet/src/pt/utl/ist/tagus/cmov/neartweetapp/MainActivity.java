@@ -1,14 +1,11 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
 
+import pt.ist.utl.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
 import pt.utl.ist.tagus.cmov.neartweet.R;
-import pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
@@ -17,13 +14,13 @@ import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.Lo
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.Encoding;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Criteria;
 import android.location.Location;
@@ -31,12 +28,15 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.provider.Settings;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -44,7 +44,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.BaseAdapter;
@@ -63,7 +62,14 @@ import android.widget.Toast;
 
 import com.agimind.widget.SlideHolder;
 
-public class MainActivity extends ListActivity implements LocationListener{
+public class MainActivity extends ListActivity implements LocationListener, ConnectionInfoListener {
+
+	WifiP2pManager mManager;
+	Channel mChannel;
+	BroadcastReceiver mReceiver;
+	IntentFilter mIntentFilter; // used for the Broadcast Receiver
+
+
 
 	public static final String TAG = MainActivity.class.getSimpleName();
 	public static ProgressBar mProgressBar;
@@ -92,6 +98,11 @@ public class MainActivity extends ListActivity implements LocationListener{
 	public static double lng;
 
 
+	private boolean isGO = false;
+	private boolean isClient = false;
+	private boolean inGroup = false;
+
+
 	Executor executor = null;
 	ConnectionHandlerTask connectionHandlerTask = null;
 	private LocationManager locationManager = null;
@@ -118,6 +129,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		setContentView(R.layout.activity_main);
 		getActionBar().setHomeButtonEnabled(true);
+
 
 
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
@@ -163,6 +175,17 @@ public class MainActivity extends ListActivity implements LocationListener{
 			}
 		});
 
+		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+		mChannel = mManager.initialize(this, getMainLooper(), null);
+		mReceiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this);
+
+		mIntentFilter = new IntentFilter();
+		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 			int calledPosition = -1;
 
@@ -202,6 +225,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 				default:
 					return false;
 				}
+
+
+
 			}
 
 			@Override
@@ -267,7 +293,6 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 	}
 
-
 	@Override
 	protected void onResume(){
 		/**
@@ -287,6 +312,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
 			startActivityForResult(i, REQUEST_CODE);		
 		}
+
+		registerReceiver(mReceiver, mIntentFilter); // Aqui é que se faz a associação entre o intentFilter e o Receiver
+
 		super.onResume();
 	}
 
@@ -303,6 +331,9 @@ public class MainActivity extends ListActivity implements LocationListener{
 		if (locationManager != null){
 			locationManager.removeUpdates(this);
 		}
+
+		unregisterReceiver(mReceiver);
+
 	}
 
 	@Override
@@ -347,7 +378,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 
-			
+
 
 			//Toast.makeText(getApplicationContext(), "BANANAS " +tweet.getLAT(), Toast.LENGTH_LONG).show();
 			if (tweet.hasCoordenates()){
@@ -376,6 +407,69 @@ public class MainActivity extends ListActivity implements LocationListener{
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+
+
+	// Method call to find peers :)
+	public void findPeers(){
+		mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+			@Override
+			public void onSuccess() {
+				//If the discovery process succeeds and detects peers, the system broadcasts
+				//the WIFI_P2P_PEERS_CHANGED_ACTION intent, which you can listen for in a 
+				//broadcast receiver to obtain a list of peers.
+			}
+
+			@Override
+			public void onFailure(int reasonCode) {
+				//...
+			}
+		});
+	}
+
+
+	// Este método é chamado quando recebemos um connect e tem a informação do peer que se ligou a nós =)
+	@Override
+	public void onConnectionInfoAvailable(WifiP2pInfo info) {
+		
+		Log.e("ServiceP", "Info Receved");
+		Log.e("ServiceP", "MY IP IS " + new String(info.groupOwnerAddress.getAddress()));
+		
+		// TODO Auto-generated method stub
+		Toast.makeText(getApplicationContext(), "Peer connection to me is: " + info.groupOwnerAddress.getAddress(), Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(), "Peer connection to me is(IN STRING): " + (new String(info.groupOwnerAddress.getAddress())), Toast.LENGTH_LONG).show();
+
+		// Espera que se ligue ao serviço
+		while(mService == null){
+			Log.e("ServiceP", "sleeping...");
+			try { Thread.sleep(1000); } catch (InterruptedException e) {}
+		}
+
+		//if Server
+		if(info.isGroupOwner){
+			
+			Log.e("ServiceP", "I AM GO");
+			this.isGO = true;
+			this.mService.StartGOServer();
+			try {
+				Thread.sleep(3500);
+			} catch (InterruptedException e) {}
+
+			this.mService.startClient(new String(info.groupOwnerAddress.getAddress()));
+		}
+
+		// is Client
+		else{
+			
+			Log.e("ServiceP", "I AM CLIENT");
+			
+			try {
+				Thread.sleep(3500);
+			} catch (InterruptedException e) {}
+			this.mService.startClient(new String(info.groupOwnerAddress.getAddress()));
+		}
+
+
 	}
 
 
@@ -417,12 +511,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
-			
-		
+
+
 			newTweetIntent.putExtra("gps_location_lng", ((Double)lng).toString());
 			newTweetIntent.putExtra("gps_location_lat",((Double)lat).toString());
 			//Toast.makeText(getApplicationContext(), "LAT: " + lat + " LNG: " + lng, Toast.LENGTH_LONG).show();
-			
+
 			newTweetIntent.putExtra("username", mUsername);
 			startActivity(newTweetIntent);
 			return true;
@@ -475,12 +569,12 @@ public class MainActivity extends ListActivity implements LocationListener{
 				tweetInterface.put(KEY_TEXT,text);
 				tweetInterface.put(KEY_TWEETER,userId);
 				tweets.add(tweetInterface);
-				
-				
+
+
 				//---------------------------------------
 				//AQUI TEMOS DE POR LÁ TAMBEM AS COORDENADAS SE NÃO, NÃO
 				//HÁ GPS PARA NINGUÉM)
-				
+
 				//---------------------------------------
 			}
 
@@ -540,7 +634,8 @@ public class MainActivity extends ListActivity implements LocationListener{
 
 			// vamos efectuar uma ligação com o servidor
 			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-
+			
+			Log.e("ServiceP", "Will bind with service");
 
 			// Espera que se ligue ao server
 			while(running){
@@ -553,6 +648,7 @@ public class MainActivity extends ListActivity implements LocationListener{
 				}
 			}
 
+			Log.e("ServiceP", "Bound with Service");
 
 			while(running){
 				if(mService != null){

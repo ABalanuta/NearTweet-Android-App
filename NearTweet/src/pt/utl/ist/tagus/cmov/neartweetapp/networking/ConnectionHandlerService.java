@@ -45,9 +45,10 @@ public class ConnectionHandlerService extends Service {
 	public void onCreate() {
 		super.onCreate();
 
-		this.mConectionHandler = new ConnectionHandler(this);
-		mConectionHandler.start();
-		
+		//before wifidirect
+		//this.mConectionHandler = new ConnectionHandler(this);
+		//mConectionHandler.start();
+
 		deviceID = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
 		if(deviceID == null){
 			deviceID = "BogusID"+(new Random()).nextLong();
@@ -57,10 +58,10 @@ public class ConnectionHandlerService extends Service {
 			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
 		}
 
-		mConectionHandler.send(new IdentityDTO(deviceID));
+		//mConectionHandler.send(new IdentityDTO(deviceID));
 
-		searcher = new SearchingForTweets();
-		searcher.start();
+		//searcher = new SearchingForTweets();
+		//searcher.start();
 
 
 		Log.e("ServiceP", "MyDeviceID is " + deviceID);
@@ -79,7 +80,7 @@ public class ConnectionHandlerService extends Service {
 
 	@Override
 	public IBinder onBind(Intent arg0) {
-		Log.e("ServiceP", "TCP Service Binded, now " + (Clients+1) + " are binded################################");
+		Log.e("ServiceP", "TCP Service Binded, now " + (Clients+1) + " are binded");
 		Clients++;
 		return mBinder;
 	}
@@ -498,6 +499,27 @@ public class ConnectionHandlerService extends Service {
 
 			}
 		}
+	}
+
+
+
+	public void startClient(String ip) {
+
+
+		this.mConectionHandler = new ConnectionHandler(this);
+		this.mConectionHandler.setServerIP(ip);
+		mConectionHandler.start();
+
+
+		while(!this.isConnected()){
+			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
+		}
+
+		mConectionHandler.send(new IdentityDTO(deviceID));
+
+		searcher = new SearchingForTweets();
+		searcher.start();
+
 	}
 
 }

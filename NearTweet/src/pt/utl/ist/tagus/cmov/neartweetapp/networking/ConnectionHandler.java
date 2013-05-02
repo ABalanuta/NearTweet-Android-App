@@ -99,14 +99,14 @@ public class ConnectionHandler extends Thread{
 				System.out.println(e.toString());
 				try {
 
-					if(secondsBeforeServer <= 0){
-						this.running = false;
-						this.mService.StartGOServer();
-						return;
-					}
+//					if(secondsBeforeServer <= 0){
+//						this.running = false;
+//						this.mService.StartGOServer();
+//						return;
+//					}
 
 					Thread.sleep(5000);
-					secondsBeforeServer -= 5;
+					//secondsBeforeServer -= 5;
 
 				} catch (InterruptedException e1) {}
 			}
