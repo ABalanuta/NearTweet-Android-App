@@ -1,4 +1,4 @@
-package pt.utl.ist.tagus.cmov.neatweet;
+package pt.utl.ist.tagus.cmov.neartweetapp.networking.goserver;
 
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.*;
 
@@ -8,15 +8,44 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 
-public class CentralizedServer{
+public class GOServer extends Thread {
 
-	private static ArrayList<ConnectionHandler> connections = new ArrayList<ConnectionHandler>();
+
+	private static ArrayList<GOConnectionHandler> connections = new ArrayList<GOConnectionHandler>();
 	private static ArrayList<BasicDTO> objects = new  ArrayList<BasicDTO>();
 	private static ArrayList<BasicDTO> sentObjects = new  ArrayList<BasicDTO>();
+	private boolean running = false;
+	private static ConnectionInicializer conHandler = null;
+	private static SwitchingHandler sHandler = null;
 
-	public static void main(String[] args) {
-		ConnectionInicializer conHandler = new ConnectionInicializer(connections, objects, sentObjects);
-		SwitchingHandler sHandler = new SwitchingHandler(connections, objects, sentObjects);
+	@Override
+	public void run() {
+		running = true;
+
+		StartServer();
+
+		while (running){
+
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+
+	public void kill(){
+
+		running = false;
+		sHandler.stopSwiching();
+		conHandler.stopRunning();
+	}
+
+	public static void StartServer() {
+		conHandler = new ConnectionInicializer(connections, objects, sentObjects);
+		sHandler = new SwitchingHandler(connections, objects, sentObjects);
 
 		sHandler.start();
 		conHandler.start();
@@ -24,19 +53,31 @@ public class CentralizedServer{
 }
 
 
+
+
 class ConnectionInicializer extends Thread{
 	public static final int SERVERPORT = 4444;
 	private boolean running = false;
-	private ArrayList<ConnectionHandler> connections = null;
+	private ArrayList<GOConnectionHandler> connections = null;
 	ArrayList<BasicDTO> objects = null;
 	private ServerSocket serverSocket = null;
 	private ArrayList<BasicDTO> sentObjects = null;
 
-	public ConnectionInicializer(ArrayList<ConnectionHandler> connections, ArrayList<BasicDTO> objects,
+	public ConnectionInicializer(ArrayList<GOConnectionHandler> connections, ArrayList<BasicDTO> objects,
 			ArrayList<BasicDTO> sentObjects) {
 		this.connections = connections;
 		this.objects = objects;
 		this.sentObjects = sentObjects;
+	}
+
+	public void stopRunning(){
+		this.running = false;
+		for(GOConnectionHandler c : connections){
+			c.close();
+		}
+		try{
+			this.stop();
+		}catch(Exception e){}
 	}
 
 	@Override
@@ -47,19 +88,18 @@ class ConnectionInicializer extends Thread{
 			serverSocket = new ServerSocket(SERVERPORT);
 			System.out.println("S: Listening...");
 
-			while(true){
+			while(this.running){
 				// Cria um socket novo por cada pedido
 				Socket sock = serverSocket.accept();
 				System.out.println("New Client Request");
-				ConnectionHandler ch = new ConnectionHandler(sock, objects, connections, sentObjects);
+				GOConnectionHandler ch = new GOConnectionHandler(sock, objects, connections, sentObjects);
 				ch.start();
 				synchronized (connections) { connections.add(ch); }
 				System.out.println("Listening Again...");
 			}
 		} catch (Exception e) {
 			System.out.println("S: Error");
-			e.printStackTrace();
-		} finally{ try { serverSocket.close(); } catch (IOException e) { e.printStackTrace(); } }
+		} finally{ try { serverSocket.close(); } catch (IOException e) { } }
 
 	}
 
@@ -67,12 +107,12 @@ class ConnectionInicializer extends Thread{
 
 class SwitchingHandler extends Thread{
 
-	private ArrayList<ConnectionHandler> connections = null;
+	private ArrayList<GOConnectionHandler> connections = null;
 	private ArrayList<BasicDTO> objects = null;
 	private ArrayList<BasicDTO> sentObjects = null;
 	private boolean running = false;
 
-	public SwitchingHandler(ArrayList<ConnectionHandler> conn, ArrayList<BasicDTO> obj, ArrayList<BasicDTO> sentObjects) {
+	public SwitchingHandler(ArrayList<GOConnectionHandler> conn, ArrayList<BasicDTO> obj, ArrayList<BasicDTO> sentObjects) {
 		this.connections = conn;
 		this.objects = obj;
 		this.sentObjects = sentObjects;
@@ -104,7 +144,7 @@ class SwitchingHandler extends Thread{
 				for(BasicDTO oo : objclone){
 
 					synchronized (connections) {
-						for(ConnectionHandler ch : connections){
+						for(GOConnectionHandler ch : connections){
 
 							System.out.println("Swiching to " + ch.getId());
 							if(ch.isRunning()){

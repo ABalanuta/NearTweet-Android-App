@@ -9,6 +9,7 @@ import java.util.Random;
 
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
+import pt.utl.ist.tagus.cmov.neartweetapp.networking.goserver.GOServer;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.BasicDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.IdentityDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.PollDTO;
@@ -18,6 +19,7 @@ import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
 import android.app.Service;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,6 +31,7 @@ import android.util.Log;
 public class ConnectionHandlerService extends Service {
 
 	private ConnectionHandler mConectionHandler = null;
+	private GOServer mGOServer= null;
 	private final IBinder mBinder = new LocalBinder();
 	private int Clients = 0;
 	public static String deviceID = null;
@@ -37,15 +40,29 @@ public class ConnectionHandlerService extends Service {
 	private boolean hasPostUpdates = false;
 	private boolean hasResponseUpdates = false;
 	private SearchingForTweets searcher = null;
+	private CountingSheep sheep = null;
 
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 
-		this.mConectionHandler = new ConnectionHandler();
+		
+		StartGOServer();
+		
+		
+		
+		//before wifidirect
+		this.mConectionHandler = new ConnectionHandler(this);
 		mConectionHandler.start();
+		
+		
+		// para nao matar o Service
+		//sheep = new CountingSheep();
+		//sheep.start();
 
+		
+		
 		deviceID = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
 		if(deviceID == null){
 			deviceID = "BogusID"+(new Random()).nextLong();
@@ -90,6 +107,7 @@ public class ConnectionHandlerService extends Service {
 		if(Clients == 0){
 			Log.e("ServiceP", "No Clients Binded to Service Killing Service");
 			this.stopSelf();
+
 		}
 		return 	true;
 	}
@@ -98,30 +116,12 @@ public class ConnectionHandlerService extends Service {
 	@Override
 	public void onDestroy() {
 
-
-		// Mais Eficiente
-		//		Log.e("ServiceP", "Waiting for Clients for 60s ");
-		//		
-		//		int x = 60;
-		//		
-		//		while(x > 0){
-		//			
-		//			if(Clients > 0){
-		//				Log.e("ServiceP", "Client Entered, Destroy Aborted");
-		//			}
-		//			
-		//			try {
-		//				Thread.sleep(1000);
-		//				x--;
-		//			} catch (InterruptedException e) {
-		//				e.printStackTrace();
-		//			}
-
-
-
 		Log.e("ServiceP", "TCP Service Destroy");
 
 		this.mConectionHandler.close();
+		if(mGOServer != null){
+			this.mGOServer.kill();
+		}
 
 		super.onDestroy();
 
@@ -134,6 +134,32 @@ public class ConnectionHandlerService extends Service {
 			return ConnectionHandlerService.this;
 		}
 	}
+
+
+
+	//LOCAL METHODS
+	//------------------------------------------------------------------------------------
+
+
+	public void StartGOServer(){
+		this.mGOServer = new GOServer();
+		this.mGOServer.start();
+
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		//this.mConectionHandler = new ConnectionHandler(this);
+		//mConectionHandler.setServerIP("localhost");
+		//mConectionHandler.start();
+
+	}
+
+
+
 
 	public void reportSpammer(String destDeviceID, long tweetID){
 		if(mConectionHandler != null){
@@ -325,6 +351,35 @@ public class ConnectionHandlerService extends Service {
 		return BitmapFactory.decodeStream(is);
 	}
 
+	class CountingSheep extends Thread{
+		
+		private boolean running = false;
+		
+		public void kill(){
+			this.running = false;
+		}
+		
+		
+		
+		@Override
+		public void run() {
+			
+			this.running = true;
+			while(running){
+				try {
+					Thread.yield();
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {}
+				
+			}
+			
+			
+		}
+		
+	}
+	
+	
+	
 	class SearchingForTweets extends Thread{
 
 		private boolean running = false;
@@ -454,7 +509,7 @@ public class ConnectionHandlerService extends Service {
 							synchronized (mTweetsArray) {
 
 								for(Tweet t : mTweetsArray){
-									
+
 									if(t.getDeviceID().equals(rsp.getDesDeviceID())){
 										if(rsp.getTweetID() == t.getTweetId()){
 
@@ -490,13 +545,29 @@ public class ConnectionHandlerService extends Service {
 	}
 
 
+
+	public void startClient(String ip) {
+
+		if(this.mConectionHandler != null){
+			this.mConectionHandler.kill();
+			this.mConectionHandler = null;
+		}
+		
+		
+		this.mConectionHandler = new ConnectionHandler(this);
+		this.mConectionHandler.setServerIP(ip);
+		mConectionHandler.start();
+
+
+		while(!this.isConnected()){
+			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
+		}
+
+		mConectionHandler.send(new IdentityDTO(deviceID));
+
+	}
+
 }
 
 
 
-//class WaitingToDie extends Thread{
-//	@Override
-//	public void run() {
-//
-//	}
-//}
