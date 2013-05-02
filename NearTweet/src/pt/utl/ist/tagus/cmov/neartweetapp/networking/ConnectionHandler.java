@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class ConnectionHandler extends Thread{
 
 	//private String serverIP = "10.0.2.2";
-	private String serverIP = "172.20.41.19";
+	private String serverIP = "localhost";
 
 	private	final int serverPort = 4444;
 	private Socket localSock = null;
@@ -86,7 +86,7 @@ public class ConnectionHandler extends Thread{
 
 		this.running = true;
 
-		int secondsBeforeServer = 0;
+		//int secondsBeforeServer = 0;
 
 		// Contacting the Server , Retry if error
 		while(running){
@@ -99,11 +99,11 @@ public class ConnectionHandler extends Thread{
 				System.out.println(e.toString());
 				try {
 
-//					if(secondsBeforeServer <= 0){
-//						this.running = false;
-//						this.mService.StartGOServer();
-//						return;
-//					}
+					//if(secondsBeforeServer <= 0){
+					//	this.running = false;
+						//this.mService.StartGOServer();
+					//	return;
+					//}
 
 					Thread.sleep(5000);
 					//secondsBeforeServer -= 5;
