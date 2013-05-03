@@ -1,10 +1,11 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/detailsauxid"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
     <LinearLayout
+        android:id="@+id/linearLayoutTweetDetails23"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
@@ -87,7 +88,8 @@
         android:scaleType="centerCrop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayoutTweetDetails23"
         android:src="@android:drawable/ic_menu_gallery"
         android:visibility="gone" />
 
-</LinearLayout>
+</RelativeLayout>
