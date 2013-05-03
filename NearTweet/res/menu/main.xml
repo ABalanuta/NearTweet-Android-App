@@ -2,13 +2,13 @@
 
     <item android:id="@+id/new_tweet_pool"
           android:icon="@drawable/content_new_event"
-          android:title="@string/hello_world"
-          android:showAsAction="ifRoom"/>
+          android:title="@string/criar_novo_tweet"
+          android:showAsAction="ifRoom|withText"/>
   
     
     <item android:id="@+id/new_tweet"
           android:icon="@drawable/ic_action_mail_add"
-          android:title="@string/hello_world"
-          android:showAsAction="ifRoom"/>
+          android:title="@string/criar_novo_tweet_pool"
+          android:showAsAction="ifRoom|withText"/>
   
 </menu>
