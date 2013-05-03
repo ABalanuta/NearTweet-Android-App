@@ -464,9 +464,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		//if Server
 		if(info.isGroupOwner){
 
-			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
-			
-			
 			Log.e("ServiceP", "I AM GO");
 			Toast.makeText(this, "I AM GO, MY IP IS " + info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG).show();
 			this.isGO = true;
@@ -483,6 +480,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			Log.e("ServiceP", "I AM CLIENT");
 			Toast.makeText(this, "I AM CLIENT MY IP IS " + info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG).show();
+
 			try {
 				Thread.sleep(3500);
 			} catch (InterruptedException e) {}
