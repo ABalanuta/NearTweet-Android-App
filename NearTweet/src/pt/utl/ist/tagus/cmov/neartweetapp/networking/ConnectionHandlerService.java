@@ -41,38 +41,38 @@ public class ConnectionHandlerService extends Service {
 	private boolean hasResponseUpdates = false;
 	private SearchingForTweets searcher = null;
 	private CountingSheep sheep = null;
+	private boolean goStatus = false;
+	private boolean clientStatus = false;
 
 
 	@Override
 	public void onCreate() {
-		super.onCreate();
 
-		
-		StartGOServer();
-		
-		
-		
+
+		//StartGOServer();
+
+
 		//before wifidirect
-		this.mConectionHandler = new ConnectionHandler(this);
-		mConectionHandler.start();
-		
-		
+		//this.mConectionHandler = new ConnectionHandler(this);
+		//mConectionHandler.start();
+
+
 		// para nao matar o Service
 		//sheep = new CountingSheep();
 		//sheep.start();
 
-		
-		
+
+
 		deviceID = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
 		if(deviceID == null){
 			deviceID = "BogusID"+(new Random()).nextLong();
 		}
 
-		while(!this.isConnected()){
-			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
-		}
+		//while(!this.isConnected()){
+		//	try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
+		//}
 
-		mConectionHandler.send(new IdentityDTO(deviceID));
+		//mConectionHandler.send(new IdentityDTO(deviceID));
 
 		searcher = new SearchingForTweets();
 		searcher.start();
@@ -81,6 +81,7 @@ public class ConnectionHandlerService extends Service {
 		Log.e("ServiceP", "MyDeviceID is " + deviceID);
 		Log.e("ServiceP", "TCP Service Created");
 
+		super.onCreate();
 	}
 
 	@Override
@@ -89,7 +90,7 @@ public class ConnectionHandlerService extends Service {
 		Log.e("ServiceP", "TCP Service Started");
 
 		// If we get killed, after returning from here, restart
-		return START_NOT_STICKY;
+		return START_STICKY;
 	}
 
 	@Override
@@ -142,6 +143,9 @@ public class ConnectionHandlerService extends Service {
 
 
 	public void StartGOServer(){
+
+
+
 		this.mGOServer = new GOServer();
 		this.mGOServer.start();
 
@@ -352,34 +356,34 @@ public class ConnectionHandlerService extends Service {
 	}
 
 	class CountingSheep extends Thread{
-		
+
 		private boolean running = false;
-		
+
 		public void kill(){
 			this.running = false;
 		}
-		
-		
-		
+
+
+
 		@Override
 		public void run() {
-			
+
 			this.running = true;
 			while(running){
 				try {
 					Thread.yield();
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {}
-				
+
 			}
-			
-			
+
+
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 	class SearchingForTweets extends Thread{
 
 		private boolean running = false;
@@ -552,8 +556,8 @@ public class ConnectionHandlerService extends Service {
 			this.mConectionHandler.kill();
 			this.mConectionHandler = null;
 		}
-		
-		
+
+
 		this.mConectionHandler = new ConnectionHandler(this);
 		this.mConectionHandler.setServerIP(ip);
 		mConectionHandler.start();
@@ -562,11 +566,33 @@ public class ConnectionHandlerService extends Service {
 		while(!this.isConnected()){
 			try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
 		}
+		Log.e("ServiceP", "Connected With Server "+ ip);	
+
 
 		mConectionHandler.send(new IdentityDTO(deviceID));
 
 	}
 
+	public void setGOStatus(boolean b) {
+		this.goStatus = b;
+
+	}
+
+	public boolean getGOStatus(){
+		return this.goStatus;
+	}
+
+	public void cleanOldTweets() {
+		this.mTweetsArray = new ArrayList<Tweet>();
+	}
+
+	public boolean getClientStatus() {
+		return this.clientStatus;
+	}
+	
+	public void setClientStatus(boolean b) {
+		this.clientStatus = b;
+	}
 }
 
 

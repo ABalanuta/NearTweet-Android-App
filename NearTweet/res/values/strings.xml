@@ -33,4 +33,10 @@
 	<string name="toggle_gps_id">id</string>
 	<string name="toggle_gps">Partilhar Localização</string>
 	<string name="attach_url">Adiciar Foto Url</string>
+	<string name="enviar_comentario">Enviar Comentário</string>
+	<string name="criar_novo_tweet">Criar Novo Tweet</string>
+	<string name="criar_novo_tweet_pool">Criar Votações</string>
+	<string name="enviar_resposta">Responder</string>
+	<string name="enviar_resposta_todos">Responder a Todos</string>
+	<string name="partilhar_tweet">Partilhar Twitter</string>
 </resources>

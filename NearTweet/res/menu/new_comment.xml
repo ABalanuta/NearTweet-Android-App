@@ -2,13 +2,8 @@
 
     <item android:id="@+id/send_response"
           android:icon="@android:drawable/ic_menu_send"
-          android:title="@string/hello_world"
-          android:showAsAction="ifRoom"/>
-<!--     <item -->
-<!--         android:id="@+id/action_settings" -->
-<!--         android:orderInCategory="100" -->
-<!--         android:showAsAction="never" -->
-<!--         android:title="@string/action_settings"/> -->
+          android:title="@string/enviar_comentario"
+          android:showAsAction="ifRoom|withText"/>
 
 
 </menu>

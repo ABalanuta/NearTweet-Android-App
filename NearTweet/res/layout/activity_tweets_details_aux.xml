@@ -80,15 +80,13 @@
 
     <ImageView
         android:id="@+id/imageViewTweetImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="5dp"
         android:clickable="false"
         android:contentDescription="@string/iamegemTweet"
-        android:maxHeight="100dp"
-        android:maxWidth="200dp"
-        android:scaleType="center"
+        android:scaleType="centerCrop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:src="@android:drawable/ic_menu_gallery"
         android:visibility="gone" />
 
