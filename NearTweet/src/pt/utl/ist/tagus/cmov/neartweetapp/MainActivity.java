@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
 
-import pt.ist.utl.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
+import pt.utl.ist.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;

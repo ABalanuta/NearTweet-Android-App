@@ -1,4 +1,4 @@
-package pt.ist.utl.cmov.neartweet.wifidirect;
+package pt.utl.ist.cmov.neartweet.wifidirect;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
