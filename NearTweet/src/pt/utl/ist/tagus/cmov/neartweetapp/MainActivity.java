@@ -114,6 +114,9 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	public boolean mBound = false;
 	private Intent service;
 	public ConnectionHandlerService mService;
+	
+	
+	private static boolean LOCAL_SERVER__ENVYROMENT = true;
 
 
 	/***************************************************************************************
@@ -180,9 +183,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			}
 		});
-
-
-
 
 
 		Log.e("ServiceP", "1");
@@ -292,13 +292,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		connectionHandlerTask = new ConnectionHandlerTask();
 		connectionHandlerTask.execute();
 
-
-
-		// todo reformular wifi dirrect
-		//if (isNetworkAvailable()){
-		//	// Inicia threa	d que actualiza as messagens
-		//	connectionHandlerTask = new ConnectionHandlerTask();
-		//	connectionHandlerTask.execute();
 
 		/**
 		 * offline dummies: NAO APAGAR	
@@ -455,17 +448,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		Log.e("ServiceP", "Info Receved");
 		Log.e("ServiceP", "GO IP is " + info.groupOwnerAddress.getHostAddress());
 
-		// TODO Auto-generated method stub
-		//Toast.makeText(getApplicationContext(), "Peer connection to me is: " + info.groupOwnerAddress.getAddress(), Toast.LENGTH_LONG).show();
-		//Toast.makeText(getApplicationContext(), "Peer connection to me is(IN STRING): " + (new String(info.groupOwnerAddress.getAddress())), Toast.LENGTH_LONG).show();
-
-		// Espera que se ligue ao serviço
-		//while(mService == null){
-		//	Log.e("ServiceP", "sleeping...");
-		//	try { Thread.sleep(1000); } catch (InterruptedException e) {}
-		//}
-
-
 
 		//if Server
 		if(info.isGroupOwner){
@@ -473,12 +455,12 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			// verifica se se já era server
 			if(this.mService.getGOStatus() == false){
 				this.mService.setGOStatus(true);
-				
+
 				Log.e("ServiceP", "I am Server");
 				Toast t = Toast.makeText(this, "You are SERVER", Toast.LENGTH_LONG);
 				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
 				t.show();
-				
+
 				this.mService.StartGOServer();
 				try {
 					Thread.sleep(1000);
@@ -490,14 +472,15 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 		// is Client
 		else{
-			//verifica se já era cliente
+			// verifica se já era cliente
+			// caso não estabelece uma coneccao
 			if(this.mService.getClientStatus() == false){
 				this.mService.setClientStatus(true);
-				
+
 				//mService.cleanOldTweets();
 
 				Log.e("ServiceP", "I am Client");
-				Toast t = Toast.makeText(this, "You are CLIENT" + info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG);
+				Toast t = Toast.makeText(this, "You are CLIENT", Toast.LENGTH_LONG);
 				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
 				t.show();
 
@@ -505,11 +488,25 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {}
 				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
+
+
+				// Caso falha da ligaçcao/Servidor 
+			}else if(!this.mService.isConnected()){
+				Log.e("ServiceP", "Server Probabily Failed");
+				Toast t = Toast.makeText(this, "Server Recovered", Toast.LENGTH_LONG);
+				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+				t.show();
+
+				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
+
 			}
 		}
 
 
 	}
+
+
+
 
 
 
@@ -677,11 +674,31 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			Log.e("ServiceP", "Assync Started");
 			publishProgress("Waiting...");
 
+			
+			// For local Server Testing
+			while(running){
+				if(mService != null){
+					if(MainActivity.LOCAL_SERVER__ENVYROMENT){
+						//Start Server
+						mService.StartGOServer();
+
+						//Start Client
+						mService.startClient("localhost");
+					}
+					break;
+				}
+				else{
+					try { Thread.sleep(250); } catch (InterruptedException e) {}
+				}
+			}
+			
+			
+			
+			
 			// Espera que se ligue ao server
 			while(running){
 				if(mService != null && mService.isConnected()){
 					publishProgress("Connected");
-					mProgressBar.setVisibility(View.INVISIBLE);
 					break;
 				}
 				else{
@@ -726,6 +743,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 				if(updadeCommand.equals("Connected")){
 
 					Toast.makeText(getApplicationContext(), "Connected", Toast.LENGTH_LONG).show();
+					mProgressBar.setVisibility(View.INVISIBLE);
 					return;
 				}
 				else if(updadeCommand.equals("Waiting...")){

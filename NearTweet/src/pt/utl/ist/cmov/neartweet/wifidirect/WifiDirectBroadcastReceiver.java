@@ -13,6 +13,7 @@ import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.util.Log;
 import android.widget.Toast;
 
 public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
@@ -20,7 +21,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 	private WifiP2pManager mManager;
 	private Channel mChannel;
 	private Activity mActivity;
-	
+
 
 
 
@@ -40,13 +41,14 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		String action = intent.getAction();
 
+		Log.e("ServiceP", "epsylon");
 
 		PeerListListener myPeerListListener = new PeerListListener() {			
 			@Override
 			public void onPeersAvailable(WifiP2pDeviceList peers) { //este callback é chamado quando o requestPeers é chamado
 				// WifiP2pDeviceList peers - contém todos os peers que encontrar :)
 				Toast.makeText(mActivity.getApplicationContext(), "*There are peers available", Toast.LENGTH_LONG).show();
-				
+				Log.e("ServiceP", "e1");
 
 				//Iterar e ligar-me a todos os peers que encontrar :)
 				for (WifiP2pDevice d : peers.getDeviceList()){
@@ -59,20 +61,22 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 						public void onSuccess() {
 							//success logic
 							Toast.makeText(mActivity.getApplicationContext(), "*Connected to a Peer", Toast.LENGTH_LONG).show();
-			        		
+							Log.e("ServiceP", "e2");
 						}
 
 						@Override
 						public void onFailure(int reason) {
+							Log.e("ServiceP", "efailure");
 							//failure logic
 						}
 					});
+					break;
 				}
 			}
 		};
-		
-		
-		
+
+
+
 
 
 		if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
@@ -91,6 +95,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 			// request available peers from the wifi p2p manager. This is an
 			// asynchronous call and the calling activity is notified with a
 			// callback on PeerListListener.onPeersAvailable()
+			Log.e("ServiceP", "WIFI_P2P_PEERS_CHANGED_ACTION");
 			//if (mManager != null) {
 			//	mManager.requestPeers(mChannel, myPeerListListener);
 			//}
@@ -100,8 +105,8 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 		} else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
 			// Respond to new connection or disconnections
 
-			//Toast.makeText(mActivity.getApplicationContext(), "Received Connection Request", Toast.LENGTH_LONG).show();
-    		
+			Toast.makeText(mActivity.getApplicationContext(), "Received Connection Request", Toast.LENGTH_LONG).show();
+			Log.e("ServiceP", "WIFI_P2P_CONNECTION_CHANGED_ACTION");
 			// HERE IS WHERE WE GET NOTIFIED THAT THERE WAS NEW CONNECTIONS TO US :)
 			if (mManager == null) {
 				return;
@@ -112,9 +117,11 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 			if (networkInfo.isConnected()) {
 				// we are connected with the other device, request connection
 				// info to find group owner IP
+				Log.e("ServiceP", "networkInfo.isConnected()");
 				mManager.requestConnectionInfo(mChannel,(ConnectionInfoListener) mActivity);
 			} else {
 				// It's a disconnect
+				Log.e("ServiceP", "It's a disconnect");
 			}
 
 
@@ -123,7 +130,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 
 		} else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
 			// Respond to this device's wifi state changing
-			
+			Log.e("ServiceP", "WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.");
 			//Isto é se o Wifi for com os porcos
 		}
 	}
