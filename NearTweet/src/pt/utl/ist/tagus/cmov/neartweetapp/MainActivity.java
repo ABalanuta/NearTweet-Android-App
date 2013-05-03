@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
 
-import pt.ist.utl.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
+import pt.utl.ist.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
@@ -100,7 +100,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 	private boolean isGO = false;
 	private boolean isClient = false;
-	private boolean inGroup = false;
 
 
 	Executor executor = null;
@@ -138,6 +137,9 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		mImageLock = (ImageView) findViewById(R.id.imageViewMainLockBan);
 		myPreferences = new CmovPreferences(getApplicationContext());
 
+		mProgressBar.setVisibility(View.INVISIBLE);
+		
+		
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
@@ -462,7 +464,11 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		//if Server
 		if(info.isGroupOwner){
 
+			MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+			
+			
 			Log.e("ServiceP", "I AM GO");
+			Toast.makeText(this, "I AM GO, MY IP IS " + info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG).show();
 			this.isGO = true;
 			//this.mService.StartGOServer();
 			//try {
@@ -476,7 +482,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		else{
 
 			Log.e("ServiceP", "I AM CLIENT");
-
+			Toast.makeText(this, "I AM CLIENT MY IP IS " + info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG).show();
 			try {
 				Thread.sleep(3500);
 			} catch (InterruptedException e) {}
@@ -640,7 +646,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		protected String doInBackground(String... message) {
 
 			running = true;
-			mProgressBar.setVisibility(View.VISIBLE);
+			//mProgressBar.setVisibility(View.VISIBLE);
 
 			Log.e("ServiceP", "ConnectionHandlerTask Created");
 
