@@ -45,7 +45,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 			@Override
 			public void onPeersAvailable(WifiP2pDeviceList peers) { //este callback é chamado quando o requestPeers é chamado
 				// WifiP2pDeviceList peers - contém todos os peers que encontrar :)
-				Toast.makeText(mActivity.getApplicationContext(), "There are peers available", Toast.LENGTH_LONG).show();
+				Toast.makeText(mActivity.getApplicationContext(), "*There are peers available", Toast.LENGTH_LONG).show();
 				
 
 				//Iterar e ligar-me a todos os peers que encontrar :)
@@ -58,7 +58,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 						@Override
 						public void onSuccess() {
 							//success logic
-							Toast.makeText(mActivity.getApplicationContext(), "Connected to a Peer", Toast.LENGTH_LONG).show();
+							Toast.makeText(mActivity.getApplicationContext(), "*Connected to a Peer", Toast.LENGTH_LONG).show();
 			        		
 						}
 
@@ -100,7 +100,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 		} else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
 			// Respond to new connection or disconnections
 
-			Toast.makeText(mActivity.getApplicationContext(), "Received Connection Request", Toast.LENGTH_LONG).show();
+			//Toast.makeText(mActivity.getApplicationContext(), "Received Connection Request", Toast.LENGTH_LONG).show();
     		
 			// HERE IS WHERE WE GET NOTIFIED THAT THERE WAS NEW CONNECTIONS TO US :)
 			if (mManager == null) {

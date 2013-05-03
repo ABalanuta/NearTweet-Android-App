@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class ConnectionHandler extends Thread{
 
 	//private String serverIP = "10.0.2.2";
-	private String serverIP = "localhost";
+	private String serverIP = "6.6.6.6";
 
 	private	final int serverPort = 4444;
 	private Socket localSock = null;
@@ -27,6 +27,7 @@ public class ConnectionHandler extends Thread{
 	private ArrayList<BasicDTO> objects = new ArrayList<BasicDTO>();
 	private boolean isConnectedToServer = false;
 	private ConnectionHandlerService mService = null;
+	private boolean sleping = true;
 
 
 	public ConnectionHandler(ConnectionHandlerService connectionHandlerService) {
@@ -81,12 +82,15 @@ public class ConnectionHandler extends Thread{
 		return this.isConnectedToServer;
 	}
 
+	public void connect(){
+		this.sleping = false;
+	}
+
+
 	@Override
 	public void run() {
 
 		this.running = true;
-
-		//int secondsBeforeServer = 0;
 
 		// Contacting the Server , Retry if error
 		while(running){
@@ -95,18 +99,11 @@ public class ConnectionHandler extends Thread{
 				this.localSock = new Socket(this.serverIP, this.serverPort);
 				break;
 			}catch(Exception e){
-				System.out.println("Cannot Reach the Server " +this.serverIP + ":"+this.serverPort+"   Sleeping for 5s");
+				System.out.println("Cannot Reach the Server " +this.serverIP + ":"+this.serverPort+"   Sleeping for 1s");
 				System.out.println(e.toString());
 				try {
 
-					//if(secondsBeforeServer <= 0){
-					//	this.running = false;
-						//this.mService.StartGOServer();
-					//	return;
-					//}
-
-					Thread.sleep(5000);
-					//secondsBeforeServer -= 5;
+					Thread.sleep(1000);
 
 				} catch (InterruptedException e1) {}
 			}
