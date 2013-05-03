@@ -39,6 +39,7 @@ import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -129,7 +130,11 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		setContentView(R.layout.activity_main);
 		getActionBar().setHomeButtonEnabled(true);
 
-
+		// Ligar Serviço
+		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+		//startService(service);
+		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+		Log.e("ServiceP", "Binding...");
 
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
@@ -137,9 +142,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		mImageLock = (ImageView) findViewById(R.id.imageViewMainLockBan);
 		myPreferences = new CmovPreferences(getApplicationContext());
 
-		mProgressBar.setVisibility(View.INVISIBLE);
-		
-		
+
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
@@ -147,6 +150,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 			StrictMode.setThreadPolicy(policy);
 		}
+
 		//if (myPreferences.isUserTwittLoggin()){
 		String picture_location = myPreferences.getProfilePictureLocation();
 		ImageView userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
@@ -177,16 +181,11 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			}
 		});
 
-		
-		
-		// LIgar Serviço
-		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-		Log.e("ServiceP", "Bind to Service Send");
 
 
 
-		Log.e("ServiceP", "-*-*");
+
+		Log.e("ServiceP", "1");
 
 		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
 		mChannel = mManager.initialize(this, getMainLooper(), null);
@@ -198,7 +197,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
 		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
-		Log.e("ServiceP", "-*-*");
+		Log.e("ServiceP", "2");
 
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 			int calledPosition = -1;
@@ -241,7 +240,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 				}
 
 
-
 			}
 
 			@Override
@@ -266,6 +264,8 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			}
 		});
 
+		Log.e("ServiceP", "3");
+
 		lat = 0;
 		lng = 0;
 
@@ -287,23 +287,29 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			onLocationChanged(location);
 		} else { }
 
+		Log.e("ServiceP", "4 -Assync Task Execute");
+
+		connectionHandlerTask = new ConnectionHandlerTask();
+		connectionHandlerTask.execute();
 
 
-		if (isNetworkAvailable()){
-			// Inicia thread que actualiza as messagens
-			connectionHandlerTask = new ConnectionHandlerTask();
-			connectionHandlerTask.execute();
 
-			/**
-			 * offline dummies: NAO APAGAR	
-			 */
-			//Tweet tweetGenerator = new Tweet();
-			//mTweetsArray = tweetGenerator.generateTweets();
-			//handleServerResponse();
-		}
-		else{
-			Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
-		}
+		// todo reformular wifi dirrect
+		//if (isNetworkAvailable()){
+		//	// Inicia threa	d que actualiza as messagens
+		//	connectionHandlerTask = new ConnectionHandlerTask();
+		//	connectionHandlerTask.execute();
+
+		/**
+		 * offline dummies: NAO APAGAR	
+		 */
+		//Tweet tweetGenerator = new Tweet();
+		//mTweetsArray = tweetGenerator.generateTweets();
+		//handleServerResponse();
+		//}
+		//else{
+		//Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
+		//}
 
 	}
 
@@ -447,44 +453,59 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	public void onConnectionInfoAvailable(WifiP2pInfo info) {
 
 		Log.e("ServiceP", "Info Receved");
-		Log.e("ServiceP", "MY IP IS " + info.groupOwnerAddress.getHostAddress());
+		Log.e("ServiceP", "GO IP is " + info.groupOwnerAddress.getHostAddress());
 
 		// TODO Auto-generated method stub
 		//Toast.makeText(getApplicationContext(), "Peer connection to me is: " + info.groupOwnerAddress.getAddress(), Toast.LENGTH_LONG).show();
 		//Toast.makeText(getApplicationContext(), "Peer connection to me is(IN STRING): " + (new String(info.groupOwnerAddress.getAddress())), Toast.LENGTH_LONG).show();
 
 		// Espera que se ligue ao serviço
-		while(mService == null){
-			Log.e("ServiceP", "sleeping...");
-			try { Thread.sleep(1000); } catch (InterruptedException e) {}
-		}
+		//while(mService == null){
+		//	Log.e("ServiceP", "sleeping...");
+		//	try { Thread.sleep(1000); } catch (InterruptedException e) {}
+		//}
 
 
 
 		//if Server
 		if(info.isGroupOwner){
 
-			Log.e("ServiceP", "I AM GO");
-			Toast.makeText(this, "I AM GO, MY IP IS " + info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG).show();
-			this.isGO = true;
-			//this.mService.StartGOServer();
-			//try {
-			//	Thread.sleep(3500);
-			//} catch (InterruptedException e) {}
+			// verifica se se já era server
+			if(this.mService.getGOStatus() == false){
+				this.mService.setGOStatus(true);
+				
+				Log.e("ServiceP", "I am Server");
+				Toast t = Toast.makeText(this, "You are SERVER", Toast.LENGTH_LONG);
+				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+				t.show();
+				
+				this.mService.StartGOServer();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {}
 
-			this.mService.startClient("localhost");
+				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
+			}
 		}
 
 		// is Client
 		else{
+			//verifica se já era cliente
+			if(this.mService.getClientStatus() == false){
+				this.mService.setClientStatus(true);
+				
+				//mService.cleanOldTweets();
 
-			Log.e("ServiceP", "I AM CLIENT");
-			Toast.makeText(this, "I AM CLIENT MY IP IS " + info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG).show();
+				Log.e("ServiceP", "I am Client");
+				Toast t = Toast.makeText(this, "You are CLIENT" + info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG);
+				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+				t.show();
 
-			try {
-				Thread.sleep(3500);
-			} catch (InterruptedException e) {}
-			this.mService.startClient(info.groupOwnerAddress.getHostAddress());
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {}
+				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
+			}
 		}
 
 
@@ -529,7 +550,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
-
 
 			newTweetIntent.putExtra("gps_location_lng", ((Double)lng).toString());
 			newTweetIntent.putExtra("gps_location_lat",((Double)lat).toString());
@@ -643,29 +663,39 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		@Override
 		protected String doInBackground(String... message) {
 
-			running = true;
-			//mProgressBar.setVisibility(View.VISIBLE);
+			Log.e("ServiceP", "do 1");
 
-			Log.e("ServiceP", "ConnectionHandlerTask Created");
+			running = true;
+			mProgressBar.setVisibility(View.VISIBLE);
+
+			// LIgar Serviço
+			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
+			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
+			Log.e("ServiceP", "do 2");
+			Thread.yield();
+
+			Log.e("ServiceP", "Assync Started");
+			publishProgress("Waiting...");
 
 			// Espera que se ligue ao server
 			while(running){
 				if(mService != null && mService.isConnected()){
 					publishProgress("Connected");
-					Log.e("ServiceP", "Connected");
+					mProgressBar.setVisibility(View.INVISIBLE);
 					break;
 				}
 				else{
-					try { Thread.sleep(1000); } catch (InterruptedException e) {}
+					try { Thread.sleep(250); } catch (InterruptedException e) {}
 				}
 			}
-
+			Log.e("ServiceP", "do 3");
 			Log.e("ServiceP", "Bound with Service");
 
 			while(running){
 				if(mService != null){
+					Log.e("ServiceP", "Loop Receve1");
 					if(mService.hasUpdates()){
-						Log.e("ServiceP", "Loop Receve");
+						Log.e("ServiceP", "Loop Receve2");
 						mTweetsArray = mService.getAllTweets();
 						mService.setNoUpdates();
 
@@ -677,10 +707,10 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 						}
 						publishProgress("Reload_Screen");
 					}else{
-						try { Thread.sleep(250); } catch (InterruptedException e) {}
+						try { Thread.sleep(2000); } catch (InterruptedException e) {}
 					}
 				}else{
-					try { Thread.sleep(250); } catch (InterruptedException e) {}
+					try { Thread.sleep(2000); } catch (InterruptedException e) {}
 				}
 			}
 			return "";
@@ -694,8 +724,13 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 				String updadeCommand = (String)values[0];
 
 				if(updadeCommand.equals("Connected")){
-					MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+
 					Toast.makeText(getApplicationContext(), "Connected", Toast.LENGTH_LONG).show();
+					return;
+				}
+				else if(updadeCommand.equals("Waiting...")){
+
+					Toast.makeText(getApplicationContext(), "Waiting Connections", Toast.LENGTH_LONG).show();
 					return;
 				}
 				else if(updadeCommand.equals("Reload_Screen")){
