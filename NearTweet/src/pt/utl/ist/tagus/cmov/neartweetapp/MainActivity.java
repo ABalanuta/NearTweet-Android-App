@@ -710,9 +710,11 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			while(running){
 				if(mService != null){
-					Log.e("ServiceP", "Loop Receve1");
+					// Apagado por tufa Ž bue verboso
+					//Log.e("ServiceP", "Loop Receve1");
 					if(mService.hasUpdates()){
-						Log.e("ServiceP", "Loop Receve2");
+					// Apagado por tufa Ž bue verboso
+					//	Log.e("ServiceP", "Loop Receve2");
 						mTweetsArray = mService.getAllTweets();
 						mService.setNoUpdates();
 
@@ -883,18 +885,18 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 
 			//TODO add images
-			//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
-			//
-			//				Log.v("tweet_username: ", tweet.getUsername());
-			//				Log.v("user_username: ", myPreferences.getUsername());
-			//				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
-			//					if (tweet.getUsername().equals(myPreferences.getUsername())){
-			//							String picture_location = myPreferences.getProfilePictureLocation();
-			//							BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-			//							twitUserImg.setImageDrawable(d);
-			//					}
-			//				}
-			//			}
+						if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
+			
+							Log.v("tweet_username: ", tweet.getUsername());
+							Log.v("user_username: ", myPreferences.getUsername());
+							if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
+								if (tweet.getUsername().equals(myPreferences.getUsername())){
+										String picture_location = myPreferences.getProfilePictureLocation();
+										BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+										twitUserImg.setImageDrawable(d);
+								}
+							}
+						}
 
 
 			if(tweet instanceof TweetPoll){

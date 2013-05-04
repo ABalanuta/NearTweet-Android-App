@@ -337,6 +337,11 @@ public class TweetDetailsActivity extends ListActivity {
 				try {Thread.sleep(25);} catch (InterruptedException e) {}
 				rut.cancel(true);
 			}
+			pDialog = new ProgressDialog(TweetDetailsActivity.this);
+			pDialog.setMessage("Retwiting...");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(false);
+			//pDialog.show();
 			rut2 = (UpdateTwitterStatus) new UpdateTwitterStatus().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tweet_text);
 		}
 	}
@@ -399,11 +404,7 @@ public class TweetDetailsActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(TweetDetailsActivity.this);
-			pDialog.setMessage("Retwiting...");
-			pDialog.setIndeterminate(false);
-			pDialog.setCancelable(false);
-			//pDialog.show();
+
 		}
 
 		/**
