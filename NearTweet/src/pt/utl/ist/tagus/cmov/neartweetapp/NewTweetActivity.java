@@ -25,6 +25,7 @@ import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -51,6 +52,7 @@ public class NewTweetActivity extends Activity{
 	private String mUsername = null;
 
 	public static ImageView imgChoosen;
+	public static ImageView userImage;
 	public static Button btnGetUrl;
 	public static EditText addUrlField;
 	public static LinearLayout add_url_layout;
@@ -82,6 +84,7 @@ public class NewTweetActivity extends Activity{
 		btnGetUrl = (Button) findViewById(R.id.btnGetUrl);
 		addUrlField = (EditText) findViewById(R.id.addUrlField);
 		add_url_layout = (LinearLayout) findViewById(R.id.addUrlLayout);
+		userImage = (ImageView) findViewById(R.id.newCommentImageViewUserPicTweet);
 
 		Bundle bundle = getIntent().getExtras();
 		lat = bundle.getString("gps_location_lat");
@@ -93,6 +96,9 @@ public class NewTweetActivity extends Activity{
 		Toast.makeText(getApplicationContext(), mUsername + lat +lng, Toast.LENGTH_LONG).show();
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
 
+		BitmapDrawable d = new BitmapDrawable(getResources(), myPreferences.getProfilePictureLocation());
+		userImage.setImageDrawable(d);
+		
 		// Conect with the Service
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
