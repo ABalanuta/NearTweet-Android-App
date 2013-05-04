@@ -85,6 +85,7 @@ public class TweetDetailsActivity extends ListActivity {
 	private static RequestToken requestToken;
 	private CmovPreferences myPreferences;
 	private ResponseUpdaterTask rut = null;
+	private UpdateTwitterStatus rut2 = null;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
@@ -109,7 +110,6 @@ public class TweetDetailsActivity extends ListActivity {
 	public static  ListView listView;
 
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -187,8 +187,8 @@ public class TweetDetailsActivity extends ListActivity {
 			}
 		});
 
-		//OFFLINE 
-		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		//OFFLINE mudado para o onresume
+		//rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 		//rut.execute();
 
 		//		// Send Reply
@@ -265,14 +265,35 @@ public class TweetDetailsActivity extends ListActivity {
 		}
 
 	}
+	@Override
+	protected void onResume(){
+		super.onResume();
+		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+	}
 
+	
+//	@Override
+//	protected void onPause(){
+//		super.onPause();
+//		Log.e("ServiceP", "Killing Details Activity");		
+//		rut.kill(); // Stops the assync thread gently the kills it 
+//		try {Thread.sleep(25);} catch (InterruptedException e) {}
+//		rut.cancel(true);
+//
+//		//unbinding from the Service
+//		if(mBound){ unbindService(mConnection); }
+//
+//		comments = new ArrayList<Comment>();
+//	}
+	
 	@Override
 	protected void onDestroy() {
-		Log.e("ServiceP", "Killing Details Activity");		
-		rut.kill(); // Stops the assync thread gently the kills it 
-		try {Thread.sleep(25);} catch (InterruptedException e) {}
-		rut.cancel(true);
-
+		Log.e("ServiceP", "Killing Details Activity");
+		if (rut!=null){
+			rut.kill(); // Stops the assync thread gently the kills it 
+			try {Thread.sleep(25);} catch (InterruptedException e) {}
+			rut.cancel(true);
+		}
 		//unbinding from the Service
 		if(mBound){ unbindService(mConnection); }
 
@@ -309,7 +330,14 @@ public class TweetDetailsActivity extends ListActivity {
 		else{
 			Toast.makeText(getApplicationContext(),
 					"Already Logged into twitter", Toast.LENGTH_LONG).show();
-			new updateTwitterStatus().execute(tweet_text);
+			//new UpdateTwitterStatus().execute(tweet_text);
+			//desligar o rut do artur :P
+			if (rut!=null){
+				rut.kill(); // Stops the assync thread gently the kills it 
+				try {Thread.sleep(25);} catch (InterruptedException e) {}
+				rut.cancel(true);
+			}
+			rut2 = (UpdateTwitterStatus) new UpdateTwitterStatus().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tweet_text);
 		}
 	}
 
@@ -363,7 +391,7 @@ public class TweetDetailsActivity extends ListActivity {
 	/**
 	 * Function to update status
 	 * */
-	class updateTwitterStatus extends AsyncTask<String, String, String> {
+	class UpdateTwitterStatus extends AsyncTask<String, String, String> {
 
 		/**
 		 * Before starting background thread Show Progress Dialog
@@ -375,7 +403,7 @@ public class TweetDetailsActivity extends ListActivity {
 			pDialog.setMessage("Retwiting...");
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(false);
-			pDialog.show();
+			//pDialog.show();
 		}
 
 		/**
@@ -415,6 +443,7 @@ public class TweetDetailsActivity extends ListActivity {
 		 * **/
 		protected void onPostExecute(String file_url) {
 			pDialog.dismiss(); // dismiss the dialog after getting all products
+			rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 			runOnUiThread(new Runnable() { // updating UI from Background Thread
 				@Override
 				public void run() {
