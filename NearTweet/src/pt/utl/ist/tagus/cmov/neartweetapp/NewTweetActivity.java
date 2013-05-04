@@ -65,6 +65,8 @@ public class NewTweetActivity extends Activity{
 	private Bitmap bitmap = null;
 	private static String lat;
 	private static String lng;
+	private static String location;
+	private static Boolean share_location;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
@@ -87,8 +89,14 @@ public class NewTweetActivity extends Activity{
 		userImage = (ImageView) findViewById(R.id.newCommentImageViewUserPicTweet);
 
 		Bundle bundle = getIntent().getExtras();
-		lat = bundle.getString("gps_location_lat");
-		lng = bundle.getString("gps_location_lng");
+		share_location = bundle.getBoolean("share_location");
+		//if true user wants to share his location
+		if(share_location){
+			lat = bundle.getString("gps_location_lat");
+			lng = bundle.getString("gps_location_lng");
+		}
+		
+		location = bundle.getString("location");
 		//Toast.makeText(getApplicationContext(), "I WANT THE LOCATION " + lat + " " + lng, Toast.LENGTH_LONG).show();
 		
 		CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());

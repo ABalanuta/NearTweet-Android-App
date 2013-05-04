@@ -1,7 +1,9 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 
 import pt.utl.ist.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
@@ -23,6 +25,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -90,12 +93,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 	private String provider;// location stuff
 	public Location location;
-	private static SharedPreferences mSharedPreferences;
-
-
-	private int REL_SWIPE_MIN_DISTANCE; 
-	private int REL_SWIPE_MAX_OFF_PATH;
-	private int REL_SWIPE_THRESHOLD_VELOCITY;
+	public Geocoder geo;
 	public static double lat;
 	public static double lng;
 
@@ -178,8 +176,10 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if(isChecked) {
 					myPreferences.setShareMyLocationTrue();
+					//Toast.makeText(getApplicationContext(), "GPS esta: " + String.valueOf(myPreferences.getShareMyLocation()), Toast.LENGTH_LONG).show();
 				} else {
 					myPreferences.setShareMyLocationFalse();
+					//Toast.makeText(getApplicationContext(), "GPS esta: " + String.valueOf(myPreferences.getShareMyLocation()), Toast.LENGTH_LONG).show();
 				}
 
 			}
@@ -278,10 +278,20 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			startActivity(intent);
 		} 
 		location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		Log.v("location: ", location.toString());
+		Log.v("location coordinates: ", location.toString());
 
 		lat = location.getLatitude();
 		lng = location.getLongitude();
+		
+		geo = new Geocoder(getApplicationContext(), Locale.getDefault());
+		try {
+			Log.v("location geostuffed: ", geo.getFromLocation(lat, lng, 1).toString());
+			Log.v("location amadora: ", geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea().toString());
+			Log.v("location Country: ", geo.getFromLocation(lat, lng, 1).get(0).getCountryName().toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		if (location != null) {
 			System.out.println("Provider " + provider + " has been selected.");
@@ -391,8 +401,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
-
-
 
 			//Toast.makeText(getApplicationContext(), "BANANAS " +tweet.getLAT(), Toast.LENGTH_LONG).show();
 			if (tweet.hasCoordenates()){
@@ -551,9 +559,26 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			newTweetIntent.putExtra("gps_location_lng", ((Double)lng).toString());
 			newTweetIntent.putExtra("gps_location_lat",((Double)lat).toString());
+			String subadminarea = new String();
+			try {
+				if(geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea()!=null){
+				 try {
+					subadminarea = geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea().toString();
+					newTweetIntent.putExtra("location", subadminarea);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			//Toast.makeText(getApplicationContext(), "LAT: " + lat + " LNG: " + lng, Toast.LENGTH_LONG).show();
 
 			newTweetIntent.putExtra("username", mUsername);
+			newTweetIntent.putExtra("share_location", myPreferences.getShareMyLocation());
 			startActivity(newTweetIntent);
 			return true;
 		case R.id.new_tweet_pool:
@@ -886,25 +911,32 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 
 			//TODO add images
-						if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
-			
-							Log.v("tweet_username: ", tweet.getUsername());
-							Log.v("user_username: ", myPreferences.getUsername());
-							if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
-								if (tweet.getUsername().equals(myPreferences.getUsername())){
-										String picture_location = myPreferences.getProfilePictureLocation();
-										BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-										twitUserImg.setImageDrawable(d);
-								}
-							}
-						}
+			Log.v("twitter login: ",String.valueOf(myPreferences.isUserTwittLoggin()));
+			Log.v("my user name: ", String.valueOf(myPreferences.hasUserName()));
+			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
+
+				Log.v("tweet_username: ", tweet.getUsername());
+				Log.v("user_username: ", myPreferences.getUsername());
+				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
+					if (tweet.getUsername().equals(myPreferences.getUsername())){
+							String picture_location = myPreferences.getProfilePictureLocation();
+							BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+							twitUserImg.setImageDrawable(d);
+					}
+				}
+			}
 
 
 			if(tweet instanceof TweetPoll){
 				pollImg.setVisibility(ImageView.VISIBLE);
 			}
 			else{
+				//TODO tweets nao teem coordenadas apesar de la serem enfiadas
+//				Log.e("tweet coordenate details lat:","lat: " + tweet.getLAT().toString());
+//				Log.e("tweet coordenate details lng:","long: " + tweet.getLNG().toString());
+//				Log.e("tweet coordenate details:", String.valueOf(tweet.hasCoordenates()));
 				if (tweet.hasCoordenates()){
+
 					gpsImg.setVisibility(ImageView.VISIBLE);
 				}
 				if (tweet.hasImage()){

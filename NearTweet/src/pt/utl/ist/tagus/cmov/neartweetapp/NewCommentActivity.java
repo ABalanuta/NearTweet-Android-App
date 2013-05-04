@@ -82,10 +82,13 @@ public class NewCommentActivity extends Activity {
 		setContentView(R.layout.activity_new_comment);
 		personImage = (ImageView) findViewById(R.id.david);
 		responseText = (EditText) findViewById(R.id.editTextAddComment);
-		typeOfResponse = (TextView) findViewById(R.id.textTypeOfResponse);
 		personImage.setVisibility(ImageView.VISIBLE);
-
+		
 		myPreferences = new CmovPreferences(getApplicationContext());
+		
+		BitmapDrawable db = new BitmapDrawable(getResources(), myPreferences.getProfilePictureLocation());
+		personImage.setImageDrawable(db);
+
 
 		if (android.os.Build.VERSION.SDK_INT > 9) {
 			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -109,9 +112,9 @@ public class NewCommentActivity extends Activity {
 		
 		
 		if(toAll){
-			typeOfResponse.setText("Public Response");
+			responseText.setHint("Responde para todos");
 		}else{
-			typeOfResponse.setText("Private Response");
+			responseText.setHint("Responde privado");
 		}
 
 		String url = new String();

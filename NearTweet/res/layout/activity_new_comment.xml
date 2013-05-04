@@ -8,36 +8,41 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".NewCommentActivity" >
 
-    <TextView
-        android:id="@+id/textTypeOfResponse"
-        android:layout_width="wrap_content"
+    <ScrollView
+        android:id="@+id/scroll_textbox_comment"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="14dp"
-        android:text="[Type] Response"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="0dp"
+        android:background="#e8e8e8" >
 
-    <ImageView
-        android:id="@+id/david"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textView1"
-        android:layout_marginLeft="18dp"
-        android:layout_marginTop="43dp"
-        android:src="@drawable/social_person" />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
 
-    <EditText
-        android:id="@+id/editTextAddComment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/david"
-        android:layout_toRightOf="@+id/david"
-        android:ems="10"
-        android:inputType="textMultiLine" >
+            <ImageView
+                android:id="@+id/david"
+		        android:layout_width="45dp"
+		        android:layout_height="45dp"
+		        android:layout_marginLeft="13dp"
+		        android:layout_marginRight="13dp"
+		        android:layout_marginTop="13dp"
+		        android:src="@drawable/social_person" />
 
-        <requestFocus />
-    </EditText>
+            <EditText
+                android:id="@+id/editTextAddComment"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_marginTop="12dp"
+	            android:layout_marginBottom="0dp"
+	            android:ems="10"
+	            android:hint="O que queres partilhar?"
+	            android:inputType="textMultiLine" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>
