@@ -51,9 +51,10 @@
 	            android:text="@string/localizacao" />
 
             <Button
+                android:id="@+id/btnLoginTwitter"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Bla" />
+                android:text="Login Twitter" />
         </LinearLayout>
     </ScrollView>
 

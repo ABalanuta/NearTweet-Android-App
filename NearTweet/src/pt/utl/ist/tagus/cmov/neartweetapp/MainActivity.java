@@ -89,6 +89,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	protected final String KEY_TWEETER = "utilizador";
 
 	private String provider;// location stuff
+	public Location location;
 	private static SharedPreferences mSharedPreferences;
 
 
@@ -266,8 +267,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 		Log.e("ServiceP", "3");
 
-		lat = 0;
-		lng = 0;
 
 		/* Location stuff */
 		// Acquire a reference to the system Location Manager
@@ -278,10 +277,12 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			startActivity(intent);
 		} 
-		Criteria criteria = new Criteria();
-		provider = locationManager.getBestProvider(criteria, false);
-		Location location = locationManager.getLastKnownLocation(provider);
+		location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		Log.v("location: ", location.toString());
 
+		lat = location.getLatitude();
+		lng = location.getLongitude();
+		
 		if (location != null) {
 			System.out.println("Provider " + provider + " has been selected.");
 			onLocationChanged(location);
