@@ -91,6 +91,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 	private String mUsername = null;
 	private int REQUEST_CODE = 42424242; //Used for Login
+	private int REQUEST_CODE_TWITTER = 42424243; //Used for Login in twitter
 	public CmovPreferences myPreferences;
 
 	private SlideHolder mSlideHolder;
@@ -113,8 +114,8 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
     static final String URL_TWITTER_AUTH = "auth_url";
     static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
     static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
-    RequestToken requestToken;
-    Twitter twitter;
+    public static RequestToken requestToken;
+    public static Twitter twitter;
 
 	private boolean isGO = false;
 	private boolean isClient = false;
@@ -295,6 +296,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			@Override
 			public void onClick(View v) {
 				loginToTwitter();
+				mBtnLoginTwitter.setVisibility(Button.INVISIBLE);
 			}
 		});
 
@@ -359,10 +361,15 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
 				String verifier = uri
 						.getQueryParameter(URL_TWITTER_OAUTH_VERIFIER);
+				Log.v("twitter login:"," estou na maicActivity a sacar cenas do inetent");
+				Log.v("twitter login uri:",uri.toString());
+				Log.v("twitter login verifier:",verifier.toString());
+				Log.v("twitter login requestToken:",requestToken.toString());
 				try {
 					// Get the access token
 					AccessToken accessToken = twitter.getOAuthAccessToken(
 							requestToken, verifier);
+					Log.v("twitter login accessToken: ",accessToken.toString());
 
 					// Shared Preferences
 					//	Editor e = mSharedPreferences.edit();
@@ -371,6 +378,8 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 					// store them in application preferences
 					myPreferences.setTwitOautScrt(accessToken.getTokenSecret());
 					myPreferences.setTwitOautTkn(accessToken.getToken());
+					Log.v("twitter login oauth secret: ",accessToken.getTokenSecret().toString());
+					Log.v("twitter login oauth token: ",accessToken.getToken().toString());
 					//e.putString(PREF_KEY_OAUTH_TOKEN, accessToken.getToken());
 					//					e.putString(PREF_KEY_OAUTH_SECRET,
 					//							accessToken.getTokenSecret());
@@ -389,7 +398,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 				} catch (Exception e) {
 					// Check log for login errors
-					Log.e("Twitter Login Error", "> " + e.getMessage());
+					Log.e("Twitter Login Error", "> " + e.toString());
 				}
 			}
 		}
@@ -609,6 +618,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	//This method is called when the child activity finishes 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.v("twitter login:"," estou no onActivity result ");
 		if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
 			mUsername = data.getExtras().getString("username");		
 		}
@@ -947,6 +957,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			try {
 				requestToken = twitter.getOAuthRequestToken(TWITTER_CALLBACK_URL);
+				Log.v("twitter login: request token",requestToken.toString());
 				this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requestToken.getAuthenticationURL())));
 			} catch (TwitterException e) { e.printStackTrace(); }
 		}

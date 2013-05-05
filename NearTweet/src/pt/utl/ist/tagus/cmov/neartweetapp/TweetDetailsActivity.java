@@ -309,7 +309,12 @@ public class TweetDetailsActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.tweet_details, menu);
+		if(myPreferences.isUserTwittLoggin()){
+			getMenuInflater().inflate(R.menu.tweet_details, menu);
+		}
+		else{
+			getMenuInflater().inflate(R.menu.tweet_details_no_twitter, menu);
+		}
 		return true;
 	}
 
@@ -328,6 +333,7 @@ public class TweetDetailsActivity extends ListActivity {
 
 			try {
 				requestToken = twitter.getOAuthRequestToken(TWITTER_CALLBACK_URL);
+				Log.v("twitter login: request token tweet details",requestToken.toString());
 				this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requestToken.getAuthenticationURL())));
 			} catch (TwitterException e) { e.printStackTrace(); }
 		}
