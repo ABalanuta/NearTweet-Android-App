@@ -35,11 +35,12 @@
                 <TextView
                     android:id="@+id/textViewUsername"
 					android:layout_width="fill_parent"
+					android:textSize="12sp"
 					android:layout_height="40dp"
                     android:layout_marginBottom="4dp"
                     android:layout_marginLeft="4dp"
                     android:layout_marginRight="8dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="16dp"
                     android:textColor="#FFFFFF"
                     android:text="username"
                     android:textAppearance="?android:attr/textAppearanceMedium" />

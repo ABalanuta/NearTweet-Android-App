@@ -91,7 +91,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 	private String mUsername = null;
 	private int REQUEST_CODE = 42424242; //Used for Login
-	private int REQUEST_CODE_TWITTER = 42424243; //Used for Login in twitter
 	public CmovPreferences myPreferences;
 
 	private SlideHolder mSlideHolder;
@@ -99,6 +98,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	public static Button mBtnLoginTwitter;
 	public static EditText mSendTextBox;
 	public static ImageView mImageLock;
+	public static TextView myUserName;
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
@@ -180,7 +180,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		userImg.setImageDrawable(d);
 		//}
 
-		TextView myUserName = (TextView) findViewById(R.id.textViewUsername);
+		myUserName = (TextView) findViewById(R.id.textViewUsername);
 		myUserName.setText(myPreferences.getUsername());
 
 		Switch toggle_gps = (Switch) findViewById(R.id.switchGps);
@@ -356,9 +356,9 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 		if (!myPreferences.isUserTwittLoggin()) {
 			
-			
 			Uri uri = getIntent().getData();
 			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
+
 				String verifier = uri
 						.getQueryParameter(URL_TWITTER_OAUTH_VERIFIER);
 				Log.v("twitter login:"," estou na maicActivity a sacar cenas do inetent");
@@ -421,7 +421,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		//Toast.makeText(getApplicationContext(), String.valueOf((myPreferences.hasUserName())), Toast.LENGTH_LONG).show();
 		if (!myPreferences.hasUserName()){
 
-			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+			Intent i = new Intent(getApplicationContext(), LoginActivity.class);			
 			startActivityForResult(i, REQUEST_CODE);		
 		}
 
@@ -621,6 +621,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		Log.v("twitter login:"," estou no onActivity result ");
 		if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
 			mUsername = data.getExtras().getString("username");		
+			myUserName.setText(myPreferences.getUsername());
 		}
 	} 
 

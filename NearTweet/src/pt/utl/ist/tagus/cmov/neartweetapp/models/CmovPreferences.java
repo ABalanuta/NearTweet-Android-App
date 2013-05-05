@@ -27,6 +27,7 @@ import android.util.Log;
 public class CmovPreferences {
 	SharedPreferences mSharedPreferences;
 	public final String USERNAME = "USERNAME";
+	public final String REQUEST_TOKEN = "REQUEST_TOKEN";
 	public final String DEVICE_ID = "DEVICE_ID";
 	public final String IS_TWITTER_LOGGEDIN = "IS_TWITTER_LOGGEDIN";
 	public final String PROFILE_IMG_URL = "PROFILE_IMG_URL";
@@ -151,6 +152,11 @@ public class CmovPreferences {
 		e.putString(USERNAME, username);
 		e.commit();
 	}
+	public void setRequestToken(String request_token){
+		Editor e = mSharedPreferences.edit();
+		e.putString(REQUEST_TOKEN, request_token);
+		e.commit();
+	}
 	public void setShareMyLocationTrue(){
 		Editor e = mSharedPreferences.edit();
 		e.putBoolean(SHARE_MY_LOCATION, true);
@@ -193,6 +199,10 @@ public class CmovPreferences {
 
 	public String getTwitOautScrt(){
 		return mSharedPreferences.getString(PREF_KEY_OAUTH_SECRET,"");
+
+	}
+	public String getRequestToken(){
+		return mSharedPreferences.getString(REQUEST_TOKEN,"");
 
 	}
 	public String getTwitOautTkn(){
