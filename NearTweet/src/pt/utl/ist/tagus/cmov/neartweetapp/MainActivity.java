@@ -114,8 +114,8 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	public boolean mBound = false;
 	private Intent service;
 	public ConnectionHandlerService mService;
-	
-	
+
+
 	private static boolean LOCAL_SERVER__ENVYROMENT = true;
 
 
@@ -674,16 +674,23 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			Log.e("ServiceP", "Assync Started");
 			publishProgress("Waiting...");
 
-			
+
 			// For local Server Testing
 			while(running){
 				if(mService != null){
 					if(MainActivity.LOCAL_SERVER__ENVYROMENT){
-						//Start Server
-						mService.StartGOServer();
 
-						//Start Client
-						mService.startClient("localhost");
+						if(mService.getGOStatus() == false){
+							//Start Server
+							mService.StartGOServer();
+							mService.setGOStatus(true);
+						}
+
+						if(mService.getClientStatus() == false){
+							//Start Client
+							mService.startClient("localhost");
+							mService.setClientStatus(true);
+						}
 					}
 					break;
 				}
@@ -691,10 +698,10 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 					try { Thread.sleep(250); } catch (InterruptedException e) {}
 				}
 			}
-			
-			
-			
-			
+
+
+
+
 			// Espera que se ligue ao server
 			while(running){
 				if(mService != null && mService.isConnected()){
