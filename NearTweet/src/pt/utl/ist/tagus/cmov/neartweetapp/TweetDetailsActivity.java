@@ -74,7 +74,7 @@ public class TweetDetailsActivity extends ListActivity {
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
 	public String tweet_text;
 
-	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
+	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample_details";
 
 	// Twitter oauth urls
 	static final String URL_TWITTER_AUTH = "auth_url";
