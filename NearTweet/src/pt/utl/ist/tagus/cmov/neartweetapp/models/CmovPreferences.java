@@ -27,6 +27,7 @@ import android.util.Log;
 public class CmovPreferences {
 	SharedPreferences mSharedPreferences;
 	public final String USERNAME = "USERNAME";
+	public final String REQUEST_TOKEN = "REQUEST_TOKEN";
 	public final String DEVICE_ID = "DEVICE_ID";
 	public final String IS_TWITTER_LOGGEDIN = "IS_TWITTER_LOGGEDIN";
 	public final String PROFILE_IMG_URL = "PROFILE_IMG_URL";
@@ -63,7 +64,7 @@ public class CmovPreferences {
 
 			//foto nao existe
 			File sdCardDirectory = Environment.getExternalStorageDirectory();
-			File file = new File("/sdcard/neartweet/me.jpg");
+			File file = new File("/sdcard/neartweet/me.png");
 
 			if(!file.exists()){
 
@@ -78,6 +79,7 @@ public class CmovPreferences {
 				try {
 					user = twitter.showUser(twitter.getId());
 					image_url = user.getProfileImageURL();
+					Log.v("twitter_image_url: ",image_url);
 				} catch (IllegalStateException e1) {
 					e1.printStackTrace();
 				} catch (TwitterException e1) {
@@ -88,8 +90,9 @@ public class CmovPreferences {
 				URL newurl;
 				Bitmap mIcon_val=null;
 				try {
+					Log.v("twitter_image_url: ",image_url);
 					newurl = new URL(image_url);
-					mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
+					mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream()); 
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -100,7 +103,7 @@ public class CmovPreferences {
 				File filename=null;
 				FileOutputStream outStream=null;
 				try {
-					filename = new File(Environment.getExternalStorageDirectory().toString() + "/neartweet/me.jpg");
+					filename = new File(Environment.getExternalStorageDirectory().toString() + "/neartweet/me.png");
 					
 					outStream = new FileOutputStream(filename);
 					
@@ -121,12 +124,12 @@ public class CmovPreferences {
 				e.putString(USER_PROFILE_PICTURE_LOCATION_IMAGE_NAME, "me.png");
 				e.commit();
 
-				return "/sdcard/neartweet/me.jpg";
+				return "/sdcard/neartweet/me.png";
 			}
 
 			//foto ja existe
 			else{
-				return "/sdcard/neartweet/me.jpg";
+				return "/sdcard/neartweet/me.png";
 			}
 		}
 		return null;
@@ -147,6 +150,11 @@ public class CmovPreferences {
 	public void setUsernam(String username){
 		Editor e = mSharedPreferences.edit();
 		e.putString(USERNAME, username);
+		e.commit();
+	}
+	public void setRequestToken(String request_token){
+		Editor e = mSharedPreferences.edit();
+		e.putString(REQUEST_TOKEN, request_token);
 		e.commit();
 	}
 	public void setShareMyLocationTrue(){
@@ -191,6 +199,10 @@ public class CmovPreferences {
 
 	public String getTwitOautScrt(){
 		return mSharedPreferences.getString(PREF_KEY_OAUTH_SECRET,"");
+
+	}
+	public String getRequestToken(){
+		return mSharedPreferences.getString(REQUEST_TOKEN,"");
 
 	}
 	public String getTwitOautTkn(){

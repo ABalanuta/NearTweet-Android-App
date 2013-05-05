@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:id="@+id/send_response"
+          android:icon="@drawable/social_reply"
+          android:title="@string/enviar_resposta"
+          android:showAsAction="ifRoom|withText"/>
+    
+    <item android:id="@+id/send_response_all"
+          android:icon="@drawable/social_reply_all"
+          android:title="@string/enviar_resposta_todos"
+          android:showAsAction="ifRoom|withText"/>
+
+</menu>

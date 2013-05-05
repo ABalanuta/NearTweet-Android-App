@@ -49,16 +49,32 @@
                 android:maxLines="1"
                 android:singleLine="true" />
 
-            <Button
-                android:id="@+id/sign_in_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginTop="16dp"
-                android:paddingLeft="32dp"
-                android:paddingRight="32dp"
-                android:text="Sign in" />
+            <LinearLayout
+                style="@style/LoginFormContainer"
+                android:orientation="vertical" >
 
+                <Button
+                    android:id="@+id/sign_in_button"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginTop="16dp"
+                    android:paddingLeft="32dp"
+                    android:paddingRight="32dp"
+                    android:text="Sign in local" />
+
+                <Button
+                    android:id="@+id/sign_in_button_twitter"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginTop="16dp"
+                    android:background="#2daae2"
+                    android:paddingLeft="32dp"
+                    android:paddingRight="32dp"
+                    android:text="Sign in Twitter"
+                    android:textColor="#FFFFFF" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

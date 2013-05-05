@@ -1,7 +1,9 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 
 import pt.utl.ist.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
@@ -12,6 +14,14 @@ import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.Encoding;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.User;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
@@ -23,11 +33,13 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
@@ -39,6 +51,7 @@ import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.View.OnClickListener;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -82,22 +95,27 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 	private SlideHolder mSlideHolder;
 	public static Button mSendButton;
+	public static Button mBtnLoginTwitter;
 	public static EditText mSendTextBox;
 	public static ImageView mImageLock;
+	public static TextView myUserName;
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
 
 	private String provider;// location stuff
-	private static SharedPreferences mSharedPreferences;
-
-
-	private int REL_SWIPE_MIN_DISTANCE; 
-	private int REL_SWIPE_MAX_OFF_PATH;
-	private int REL_SWIPE_THRESHOLD_VELOCITY;
+	public Location location;
+	public Geocoder geo;
 	public static double lat;
 	public static double lng;
 
+	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
+	   // Twitter oauth urls
+    static final String URL_TWITTER_AUTH = "auth_url";
+    static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
+    static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
+    public static RequestToken requestToken;
+    public static Twitter twitter;
 
 	private boolean isGO = false;
 	private boolean isClient = false;
@@ -143,6 +161,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
 		mListView = (ListView) findViewById(android.R.id.list);
 		mImageLock = (ImageView) findViewById(R.id.imageViewMainLockBan);
+		mBtnLoginTwitter = (Button) findViewById(R.id.btnLoginTwitter);
 		myPreferences = new CmovPreferences(getApplicationContext());
 
 
@@ -161,10 +180,14 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		userImg.setImageDrawable(d);
 		//}
 
-		TextView myUserName = (TextView) findViewById(R.id.textViewUsername);
+		myUserName = (TextView) findViewById(R.id.textViewUsername);
 		myUserName.setText(myPreferences.getUsername());
 
 		Switch toggle_gps = (Switch) findViewById(R.id.switchGps);
+
+		if(myPreferences.isUserTwittLoggin()){
+			mBtnLoginTwitter.setVisibility(Button.INVISIBLE);
+		}
 
 		if(myPreferences.getShareMyLocation())
 			toggle_gps.setChecked(true);
@@ -177,8 +200,10 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if(isChecked) {
 					myPreferences.setShareMyLocationTrue();
+					//Toast.makeText(getApplicationContext(), "GPS esta: " + String.valueOf(myPreferences.getShareMyLocation()), Toast.LENGTH_LONG).show();
 				} else {
 					myPreferences.setShareMyLocationFalse();
+					//Toast.makeText(getApplicationContext(), "GPS esta: " + String.valueOf(myPreferences.getShareMyLocation()), Toast.LENGTH_LONG).show();
 				}
 
 			}
@@ -266,8 +291,14 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 		Log.e("ServiceP", "3");
 
-		lat = 0;
-		lng = 0;
+		mBtnLoginTwitter.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				loginToTwitter();
+				mBtnLoginTwitter.setVisibility(Button.INVISIBLE);
+			}
+		});
 
 		/* Location stuff */
 		// Acquire a reference to the system Location Manager
@@ -278,9 +309,24 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			startActivity(intent);
 		} 
-		Criteria criteria = new Criteria();
-		provider = locationManager.getBestProvider(criteria, false);
-		Location location = locationManager.getLastKnownLocation(provider);
+		location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		if (location!=null){
+			Log.v("location coordinates: ", location.toString());
+	
+			lat = location.getLatitude();
+			lng = location.getLongitude();
+	
+			geo = new Geocoder(getApplicationContext(), Locale.getDefault());
+			try {
+				Log.v("location geostuffed: ", geo.getFromLocation(lat, lng, 1).toString());
+				Log.v("location amadora: ", geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea().toString());
+				Log.v("location Country: ", geo.getFromLocation(lat, lng, 1).get(0).getCountryName().toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 
 		if (location != null) {
 			System.out.println("Provider " + provider + " has been selected.");
@@ -303,6 +349,59 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		//else{
 		//Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
 		//}
+		/**
+		 * Verifies if user is already logedin to twitter
+		 * once redirected form the login page
+		 */
+
+		if (!myPreferences.isUserTwittLoggin()) {
+			
+			Uri uri = getIntent().getData();
+			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
+
+				String verifier = uri
+						.getQueryParameter(URL_TWITTER_OAUTH_VERIFIER);
+				Log.v("twitter login:"," estou na maicActivity a sacar cenas do inetent");
+				Log.v("twitter login uri:",uri.toString());
+				Log.v("twitter login verifier:",verifier.toString());
+				Log.v("twitter login requestToken:",requestToken.toString());
+				try {
+					// Get the access token
+					AccessToken accessToken = twitter.getOAuthAccessToken(
+							requestToken, verifier);
+					Log.v("twitter login accessToken: ",accessToken.toString());
+
+					// Shared Preferences
+					//	Editor e = mSharedPreferences.edit();
+
+					// After getting access token, access token secret
+					// store them in application preferences
+					myPreferences.setTwitOautScrt(accessToken.getTokenSecret());
+					myPreferences.setTwitOautTkn(accessToken.getToken());
+					Log.v("twitter login oauth secret: ",accessToken.getTokenSecret().toString());
+					Log.v("twitter login oauth token: ",accessToken.getToken().toString());
+					//e.putString(PREF_KEY_OAUTH_TOKEN, accessToken.getToken());
+					//					e.putString(PREF_KEY_OAUTH_SECRET,
+					//							accessToken.getTokenSecret());
+					// Store login status - true
+					//					e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
+					//					e.commit(); // save changes
+
+					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
+
+					// Getting user details from twitter
+					// For now i am getting his name only
+					long userID = accessToken.getUserId();
+					User user = twitter.showUser(userID);
+					String username = user.getName();
+
+
+				} catch (Exception e) {
+					// Check log for login errors
+					Log.e("Twitter Login Error", "> " + e.toString());
+				}
+			}
+		}
 
 	}
 
@@ -322,7 +421,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		//Toast.makeText(getApplicationContext(), String.valueOf((myPreferences.hasUserName())), Toast.LENGTH_LONG).show();
 		if (!myPreferences.hasUserName()){
 
-			Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+			Intent i = new Intent(getApplicationContext(), LoginActivity.class);			
 			startActivityForResult(i, REQUEST_CODE);		
 		}
 
@@ -390,8 +489,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			details.putExtra("tweet_uid", tweet.getUsername());
 			details.putExtra("tweet_deviceID", tweet.getDeviceID());
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
-
-
 
 			//Toast.makeText(getApplicationContext(), "BANANAS " +tweet.getLAT(), Toast.LENGTH_LONG).show();
 			if (tweet.hasCoordenates()){
@@ -521,8 +618,10 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	//This method is called when the child activity finishes 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.v("twitter login:"," estou no onActivity result ");
 		if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
 			mUsername = data.getExtras().getString("username");		
+			myUserName.setText(myPreferences.getUsername());
 		}
 	} 
 
@@ -548,11 +647,31 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
 
-			newTweetIntent.putExtra("gps_location_lng", ((Double)lng).toString());
-			newTweetIntent.putExtra("gps_location_lat",((Double)lat).toString());
+			if(location!=null){
+				newTweetIntent.putExtra("gps_location_lng", ((Double)lng).toString());
+				newTweetIntent.putExtra("gps_location_lat",((Double)lat).toString());
+			}
+			String subadminarea = new String();
+			if(location!=null){
+				try {
+					if(geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea()!=null){
+						try {
+							subadminarea = geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea().toString();
+							newTweetIntent.putExtra("location", subadminarea);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			//Toast.makeText(getApplicationContext(), "LAT: " + lat + " LNG: " + lng, Toast.LENGTH_LONG).show();
 
 			newTweetIntent.putExtra("username", mUsername);
+			newTweetIntent.putExtra("share_location", myPreferences.getShareMyLocation());
 			startActivity(newTweetIntent);
 			return true;
 		case R.id.new_tweet_pool:
@@ -717,9 +836,11 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			while(running){
 				if(mService != null){
-					Log.e("ServiceP", "Loop Receve1");
+					// Apagado por tufa Ž bue verboso
+					//Log.e("ServiceP", "Loop Receve1");
 					if(mService.hasUpdates()){
-						Log.e("ServiceP", "Loop Receve2");
+						// Apagado por tufa Ž bue verboso
+						//	Log.e("ServiceP", "Loop Receve2");
 						mTweetsArray = mService.getAllTweets();
 						mService.setNoUpdates();
 
@@ -800,8 +921,10 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 	@Override
 	public void onLocationChanged(Location location) {
-		lat = (double) (location.getLatitude());
-		lng = (double) (location.getLongitude());
+		if(location!=null){
+			lat = (double) (location.getLatitude());
+			lng = (double) (location.getLongitude());
+		}
 		//Toast.makeText(getApplicationContext(), "latitude: "+ String.valueOf(lat)+ " longitude: "+ String.valueOf(lng), Toast.LENGTH_LONG).show();
 	}
 
@@ -829,6 +952,25 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	/**
 	 * Custom adapter to display pretty tweets
 	 */
+
+	private void loginToTwitter(){
+		if(!myPreferences.isUserTwittLoggin()){
+			ConfigurationBuilder builder = new ConfigurationBuilder();
+			builder.setOAuthConsumerKey(myPreferences.getConsumerKey());
+			builder.setOAuthConsumerSecret(myPreferences.getConsumerSecret());
+			Configuration configuration = builder.build();
+
+			TwitterFactory factory = new TwitterFactory(configuration);
+			twitter = factory.getInstance();
+
+			try {
+				requestToken = twitter.getOAuthRequestToken(TWITTER_CALLBACK_URL);
+				Log.v("twitter login: request token",requestToken.toString());
+				this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requestToken.getAuthenticationURL())));
+			} catch (TwitterException e) { e.printStackTrace(); }
+		}
+	}
+
 	private class TweetAdapter extends BaseAdapter {
 
 		private ArrayList<Tweet> mTweets = new ArrayList<Tweet>();
@@ -890,25 +1032,32 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 
 			//TODO add images
-			//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
-			//
-			//				Log.v("tweet_username: ", tweet.getUsername());
-			//				Log.v("user_username: ", myPreferences.getUsername());
-			//				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
-			//					if (tweet.getUsername().equals(myPreferences.getUsername())){
-			//							String picture_location = myPreferences.getProfilePictureLocation();
-			//							BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-			//							twitUserImg.setImageDrawable(d);
-			//					}
-			//				}
-			//			}
+			Log.v("twitter login: ",String.valueOf(myPreferences.isUserTwittLoggin()));
+			Log.v("my user name: ", String.valueOf(myPreferences.hasUserName()));
+			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
+
+				Log.v("tweet_username: ", tweet.getUsername());
+				Log.v("user_username: ", myPreferences.getUsername());
+				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
+					if (tweet.getUsername().equals(myPreferences.getUsername())){
+						String picture_location = myPreferences.getProfilePictureLocation();
+						BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+						twitUserImg.setImageDrawable(d);
+					}
+				}
+			}
 
 
 			if(tweet instanceof TweetPoll){
 				pollImg.setVisibility(ImageView.VISIBLE);
 			}
 			else{
+				//TODO tweets nao teem coordenadas apesar de la serem enfiadas
+				//				Log.e("tweet coordenate details lat:","lat: " + tweet.getLAT().toString());
+				//				Log.e("tweet coordenate details lng:","long: " + tweet.getLNG().toString());
+				//				Log.e("tweet coordenate details:", String.valueOf(tweet.hasCoordenates()));
 				if (tweet.hasCoordenates()){
+
 					gpsImg.setVisibility(ImageView.VISIBLE);
 				}
 				if (tweet.hasImage()){

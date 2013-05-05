@@ -74,7 +74,7 @@ public class TweetDetailsActivity extends ListActivity {
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
 	public String tweet_text;
 
-	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
+	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample_details";
 
 	// Twitter oauth urls
 	static final String URL_TWITTER_AUTH = "auth_url";
@@ -85,6 +85,7 @@ public class TweetDetailsActivity extends ListActivity {
 	private static RequestToken requestToken;
 	private CmovPreferences myPreferences;
 	private ResponseUpdaterTask rut = null;
+	private UpdateTwitterStatus rut2 = null;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
@@ -109,7 +110,6 @@ public class TweetDetailsActivity extends ListActivity {
 	public static  ListView listView;
 
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -140,11 +140,15 @@ public class TweetDetailsActivity extends ListActivity {
 
 		final String tweet_uid = bundle.getString("tweet_uid");
 		// For Demo purposes
-		//final String location_lng = bundle.getString("gps_location_lng");
-		//inal String location_lat = bundle.getString("gps_location_lat");
+		final String location_lng = bundle.getString("gps_location_lng");
+		final String location_lat = bundle.getString("gps_location_lat");
+		final String area = bundle.getString("location");
+		//Log.v("location lat:tweetdet: ",location_lat);
+		//Log.v("location lng:tweetdet: ",location_lng);
+		//Log.v("location area:tweetdet: ",area);
 		//Toast.makeText(getApplicationContext(), "DO I HAVE LAT AND LNG " + location_lat + location_lng, Toast.LENGTH_LONG).show();	
-		final String location_lng = "-9.302851";
-		final String location_lat = "38.7371";
+		//final String location_lng = "-9.302851";
+		//final String location_lat = "38.7371";
 		// ----------		
 
 
@@ -187,8 +191,8 @@ public class TweetDetailsActivity extends ListActivity {
 			}
 		});
 
-		//OFFLINE 
-		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		//OFFLINE mudado para o onresume
+		//rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 		//rut.execute();
 
 		//		// Send Reply
@@ -265,14 +269,35 @@ public class TweetDetailsActivity extends ListActivity {
 		}
 
 	}
+	@Override
+	protected void onResume(){
+		super.onResume();
+		rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+	}
 
+	
+//	@Override
+//	protected void onPause(){
+//		super.onPause();
+//		Log.e("ServiceP", "Killing Details Activity");		
+//		rut.kill(); // Stops the assync thread gently the kills it 
+//		try {Thread.sleep(25);} catch (InterruptedException e) {}
+//		rut.cancel(true);
+//
+//		//unbinding from the Service
+//		if(mBound){ unbindService(mConnection); }
+//
+//		comments = new ArrayList<Comment>();
+//	}
+	
 	@Override
 	protected void onDestroy() {
-		Log.e("ServiceP", "Killing Details Activity");		
-		rut.kill(); // Stops the assync thread gently the kills it 
-		try {Thread.sleep(25);} catch (InterruptedException e) {}
-		rut.cancel(true);
-
+		Log.e("ServiceP", "Killing Details Activity");
+		if (rut!=null){
+			rut.kill(); // Stops the assync thread gently the kills it 
+			try {Thread.sleep(25);} catch (InterruptedException e) {}
+			rut.cancel(true);
+		}
 		//unbinding from the Service
 		if(mBound){ unbindService(mConnection); }
 
@@ -284,7 +309,12 @@ public class TweetDetailsActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.tweet_details, menu);
+		if(myPreferences.isUserTwittLoggin()){
+			getMenuInflater().inflate(R.menu.tweet_details, menu);
+		}
+		else{
+			getMenuInflater().inflate(R.menu.tweet_details_no_twitter, menu);
+		}
 		return true;
 	}
 
@@ -303,13 +333,26 @@ public class TweetDetailsActivity extends ListActivity {
 
 			try {
 				requestToken = twitter.getOAuthRequestToken(TWITTER_CALLBACK_URL);
+				Log.v("twitter login: request token tweet details",requestToken.toString());
 				this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requestToken.getAuthenticationURL())));
 			} catch (TwitterException e) { e.printStackTrace(); }
 		}
 		else{
 			Toast.makeText(getApplicationContext(),
 					"Already Logged into twitter", Toast.LENGTH_LONG).show();
-			new updateTwitterStatus().execute(tweet_text);
+			//new UpdateTwitterStatus().execute(tweet_text);
+			//desligar o rut do artur :P
+			if (rut!=null){
+				rut.kill(); // Stops the assync thread gently the kills it 
+				try {Thread.sleep(25);} catch (InterruptedException e) {}
+				rut.cancel(true);
+			}
+			pDialog = new ProgressDialog(TweetDetailsActivity.this);
+			pDialog.setMessage("Retwiting...");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(false);
+			//pDialog.show();
+			rut2 = (UpdateTwitterStatus) new UpdateTwitterStatus().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tweet_text);
 		}
 	}
 
@@ -363,7 +406,7 @@ public class TweetDetailsActivity extends ListActivity {
 	/**
 	 * Function to update status
 	 * */
-	class updateTwitterStatus extends AsyncTask<String, String, String> {
+	class UpdateTwitterStatus extends AsyncTask<String, String, String> {
 
 		/**
 		 * Before starting background thread Show Progress Dialog
@@ -371,11 +414,7 @@ public class TweetDetailsActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(TweetDetailsActivity.this);
-			pDialog.setMessage("Retwiting...");
-			pDialog.setIndeterminate(false);
-			pDialog.setCancelable(false);
-			pDialog.show();
+
 		}
 
 		/**
@@ -415,6 +454,7 @@ public class TweetDetailsActivity extends ListActivity {
 		 * **/
 		protected void onPostExecute(String file_url) {
 			pDialog.dismiss(); // dismiss the dialog after getting all products
+			rut = (ResponseUpdaterTask) new ResponseUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 			runOnUiThread(new Runnable() { // updating UI from Background Thread
 				@Override
 				public void run() {
