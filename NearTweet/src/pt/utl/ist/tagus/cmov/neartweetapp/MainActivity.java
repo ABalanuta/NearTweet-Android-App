@@ -40,10 +40,6 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.p2p.WifiP2pInfo;
-import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager.Channel;
-import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -77,12 +73,6 @@ import android.widget.Toast;
 import com.agimind.widget.SlideHolder;
 
 public class MainActivity extends ListActivity implements LocationListener {
-
-	WifiP2pManager mManager;
-	Channel mChannel;
-	BroadcastReceiver mReceiver;
-	IntentFilter mIntentFilter; // used for the Broadcast Receiver
-
 
 
 	public static final String TAG = MainActivity.class.getSimpleName();
@@ -211,16 +201,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 
 		Log.e("ServiceP", "1");
-
-		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-		mChannel = mManager.initialize(this, getMainLooper(), null);
-		mReceiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this);
-
-		mIntentFilter = new IntentFilter();
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
 		Log.e("ServiceP", "2");
 
