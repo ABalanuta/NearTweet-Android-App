@@ -112,6 +112,9 @@
         <activity
             android:name="pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity"
             android:label="@string/basic_map" />
+        <activity
+            android:name="pt.utl.ist.tagus.cmov.neartweetapp.maps.MultipleTweetMapActivity"
+            android:label="@string/map_tweets" />
     </application>
 
 </manifest>

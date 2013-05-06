@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.concurrent.Executor;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.maps.MultipleTweetMapActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
@@ -86,7 +87,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 	public static ImageView mImageLock;
 	public static TextView myUserName;
 	public static ImageView userImg;
-	
+
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
@@ -98,12 +99,12 @@ public class MainActivity extends ListActivity implements LocationListener {
 	public static double lng;
 
 	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
-	   // Twitter oauth urls
-    static final String URL_TWITTER_AUTH = "auth_url";
-    static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
-    static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
-    public static RequestToken requestToken;
-    public static Twitter twitter;
+	// Twitter oauth urls
+	static final String URL_TWITTER_AUTH = "auth_url";
+	static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
+	static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
+	public static RequestToken requestToken;
+	public static Twitter twitter;
 
 	private boolean isGO = false;
 	private boolean isClient = false;
@@ -245,7 +246,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 				inflater.inflate(R.menu.main_activity_special_actions, menu);
 				return true;
 			}
-			
+
 
 			@Override
 			public void onDestroyActionMode(ActionMode mode) {
@@ -283,16 +284,16 @@ public class MainActivity extends ListActivity implements LocationListener {
 			startActivity(intent);
 		} 
 		location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		
+
 		if(location == null){ Log.i("GPS FIX","location is a null"); }
 		else{ Log.i("GPS FIX","location is not a null"); }
-		
+
 		if (location!=null){
 			Log.v("location coordinates: ", location.toString());
-	
+
 			lat = location.getLatitude();
 			lng = location.getLongitude();
-			
+
 			geo = new Geocoder(getApplicationContext(), Locale.getDefault());
 			try {
 				Log.i("location geostuffed: ", geo.getFromLocation(lat, lng, 1).toString());
@@ -312,7 +313,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 		Log.v("is local", String.valueOf(myPreferences.isLocal()));
 		if (!myPreferences.isTweetLogin() && !myPreferences.isLocal()) {
-			
+
 			Uri uri = getIntent().getData();
 			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
 
@@ -438,9 +439,9 @@ public class MainActivity extends ListActivity implements LocationListener {
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 
 			//Toast.makeText(getApplicationContext(), "BANANAS " +tweet.getLAT(), Toast.LENGTH_LONG).show();
-			
+
 			Log.i("GPS FIX", "LAT: " +tweet.getLAT() + " LNG: " + tweet.getLNG());
-			
+
 			if (tweet.hasCoordenates()){
 				//Toast.makeText(getApplicationContext(), "I HAVE COORDINATES!", Toast.LENGTH_LONG).show();
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
@@ -562,6 +563,28 @@ public class MainActivity extends ListActivity implements LocationListener {
 			Intent newTweetPoolIntent = new Intent(this,NewTweetPoolActivity.class);
 			startActivity(newTweetPoolIntent);
 			return true;
+		case R.id.tweet_map:
+			
+			//1. obter todos os tweet location
+			//2. enviar para o map
+			String[] LATArray = new String[mTweetsArray.size()];
+			String[] LNGArray = new String[mTweetsArray.size()];
+			String[] TEXTArray = new String[mTweetsArray.size()];
+			int i = 0;
+			for(Tweet t : mTweetsArray){
+				LATArray[i] = t.getLAT();
+				LNGArray[i] = t.getLNG();
+				TEXTArray[i] = t.getUsername() + " said: " + t.getText();
+				i++;
+			}
+			Intent multipleTweetMapIntent = new Intent(this,MultipleTweetMapActivity.class);
+			multipleTweetMapIntent.putExtra("latArray", LATArray);
+			multipleTweetMapIntent.putExtra("lngArray", LNGArray);
+			multipleTweetMapIntent.putExtra("textArray", TEXTArray);
+			startActivity(multipleTweetMapIntent);
+			return true;
+		
+		
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -606,13 +629,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 				tweetInterface.put(KEY_TEXT,text);
 				tweetInterface.put(KEY_TWEETER,userId);
 				tweets.add(tweetInterface);
-
-
-				//---------------------------------------
-				//AQUI TEMOS DE POR LÁ TAMBEM AS COORDENADAS SE NÃO, NÃO
-				//HÁ GPS PARA NINGUÉM)
-
-				//---------------------------------------
 			}
 
 			TweetAdapter adapter = new TweetAdapter(mTweetsArray,this);
@@ -837,7 +853,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 	 */
 
 	private void loginToTwitter(){
-		
+
 		if(!myPreferences.isTweetLogin()){
 			ConfigurationBuilder builder = new ConfigurationBuilder();
 			builder.setOAuthConsumerKey(myPreferences.getConsumerKey());
@@ -860,11 +876,9 @@ public class MainActivity extends ListActivity implements LocationListener {
 		private ArrayList<Tweet> mTweets = new ArrayList<Tweet>();
 		private Context mContext;
 
-
 		public TweetAdapter(ArrayList<Tweet> tweets, Context context) {
 			mTweets = tweets;
 			mContext = context;
-
 		}
 
 
@@ -897,7 +911,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 			ImageView gpsImg = (ImageView) itemLayout.findViewById(R.id.imageGps);
 			ImageView imgImg = (ImageView) itemLayout.findViewById(R.id.imageImage);
 			ImageView twitUserImg = (ImageView) itemLayout.findViewById(R.id.imageViewUserPicTweet);
-			
+
 
 			gpsImg.setVisibility(ImageView.INVISIBLE);
 			pollImg.setVisibility(ImageView.INVISIBLE);
@@ -925,18 +939,18 @@ public class MainActivity extends ListActivity implements LocationListener {
 			Log.v("twitter login: ",String.valueOf(myPreferences.isTweetLogin()));
 			Log.v("my user name: ", String.valueOf(myPreferences.hasUserName()));
 			//TODO adicionar imagem que vem dos tweets
-//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
-//
-//				Log.v("tweet_username: ", tweet.getUsername());
-//				Log.v("user_username: ", myPreferences.getUsername());
-//				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
-//					if (tweet.getUsername().equals(myPreferences.getUsername())){
-//						String picture_location = myPreferences.getProfilePictureLocation();
-//						BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-//						twitUserImg.setImageDrawable(d);
-//					}
-//				}
-//			}
+			//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
+			//
+			//				Log.v("tweet_username: ", tweet.getUsername());
+			//				Log.v("user_username: ", myPreferences.getUsername());
+			//				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
+			//					if (tweet.getUsername().equals(myPreferences.getUsername())){
+			//						String picture_location = myPreferences.getProfilePictureLocation();
+			//						BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+			//						twitUserImg.setImageDrawable(d);
+			//					}
+			//				}
+			//			}
 
 
 			if(tweet instanceof TweetPoll){

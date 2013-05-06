@@ -9,4 +9,11 @@
           android:icon="@drawable/content_new_event"
           android:title="@string/criar_novo_tweet_pool"
           android:showAsAction="ifRoom|withText"/>
+    
+    <item android:id="@+id/tweet_map"
+          android:icon="@drawable/location_map"
+          android:title="@string/map_tweets"
+          android:showAsAction="ifRoom|withText"/>
+    
+    
 </menu>
