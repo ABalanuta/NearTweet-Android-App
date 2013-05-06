@@ -76,7 +76,7 @@ import android.widget.Toast;
 
 import com.agimind.widget.SlideHolder;
 
-public class MainActivity extends ListActivity implements LocationListener, ConnectionInfoListener {
+public class MainActivity extends ListActivity implements LocationListener {
 
 	WifiP2pManager mManager;
 	Channel mChannel;
@@ -518,95 +518,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
-
-	// Method call to find peers :)
-	public void findPeers(){
-		mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-			@Override
-			public void onSuccess() {
-				//If the discovery process succeeds and detects peers, the system broadcasts
-				//the WIFI_P2P_PEERS_CHANGED_ACTION intent, which you can listen for in a 
-				//broadcast receiver to obtain a list of peers.
-			}
-
-			@Override
-			public void onFailure(int reasonCode) {
-				//...
-			}
-		});
-	}
-
-
-	// Este método é chamado quando recebemos um connect e tem a informação do peer que se ligou a nós =)
-	@Override
-	public void onConnectionInfoAvailable(WifiP2pInfo info) {
-
-		Log.e("ServiceP", "Info Receved");
-		Log.e("ServiceP", "GO IP is " + info.groupOwnerAddress.getHostAddress());
-
-
-		//if Server
-		if(info.isGroupOwner){
-
-			// verifica se se já era server
-			if(this.mService.getGOStatus() == false){
-				this.mService.setGOStatus(true);
-
-				Log.e("ServiceP", "I am Server");
-				Toast t = Toast.makeText(this, "You are SERVER", Toast.LENGTH_LONG);
-				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-				t.show();
-
-				this.mService.StartGOServer();
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {}
-
-				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
-			}
-		}
-
-		// is Client
-		else{
-			// verifica se já era cliente
-			// caso não estabelece uma coneccao
-			if(this.mService.getClientStatus() == false){
-				this.mService.setClientStatus(true);
-
-				//mService.cleanOldTweets();
-
-				Log.e("ServiceP", "I am Client");
-				Toast t = Toast.makeText(this, "You are CLIENT", Toast.LENGTH_LONG);
-				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-				t.show();
-
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {}
-				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
-
-
-				// Caso falha da ligaçcao/Servidor 
-			}else if(!this.mService.isConnected()){
-				Log.e("ServiceP", "Server Probabily Failed");
-				Toast t = Toast.makeText(this, "Server Recovered", Toast.LENGTH_LONG);
-				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-				t.show();
-
-				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
-
-			}
-		}
-
-
-	}
-
-
-
-
-
-
+	
 	/***************************************************************************************
 	 * 
 	 * 							 Calls from other activities
@@ -836,10 +748,10 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			while(running){
 				if(mService != null){
-					// Apagado por tufa � bue verboso
+					// Apagado por tufa � bue verboso
 					//Log.e("ServiceP", "Loop Receve1");
 					if(mService.hasUpdates()){
-						// Apagado por tufa � bue verboso
+						// Apagado por tufa � bue verboso
 						//	Log.e("ServiceP", "Loop Receve2");
 						mTweetsArray = mService.getAllTweets();
 						mService.setNoUpdates();
