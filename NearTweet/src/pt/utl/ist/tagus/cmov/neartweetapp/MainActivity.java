@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 
-import pt.utl.ist.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
 import pt.utl.ist.tagus.cmov.neartweet.R;
-import pt.utl.ist.tagus.cmov.neartweetapp.TweetDetailsActivity.ResponseUpdaterTask;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
@@ -25,16 +23,12 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
@@ -50,13 +44,12 @@ import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.ActionMode;
-import android.view.View.OnClickListener;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.BaseAdapter;
@@ -290,30 +283,29 @@ public class MainActivity extends ListActivity implements LocationListener {
 			startActivity(intent);
 		} 
 		location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		
+		if(location == null){ Log.i("GPS FIX","location is a null"); }
+		else{ Log.i("GPS FIX","location is not a null"); }
+		
 		if (location!=null){
 			Log.v("location coordinates: ", location.toString());
 	
 			lat = location.getLatitude();
 			lng = location.getLongitude();
-	
+			
 			geo = new Geocoder(getApplicationContext(), Locale.getDefault());
 			try {
-				Log.v("location geostuffed: ", geo.getFromLocation(lat, lng, 1).toString());
-				Log.v("location amadora: ", geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea().toString());
-				Log.v("location Country: ", geo.getFromLocation(lat, lng, 1).get(0).getCountryName().toString());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				Log.i("location geostuffed: ", geo.getFromLocation(lat, lng, 1).toString());
+				Log.i("location amadora: ", geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea().toString());
+				Log.i("location Country: ", geo.getFromLocation(lat, lng, 1).get(0).getCountryName().toString());
+			} catch (IOException e) { e.printStackTrace(); }
 		}
-
-
 		if (location != null) {
 			System.out.println("Provider " + provider + " has been selected.");
 			onLocationChanged(location);
 		} else { }
 
-		Log.e("ServiceP", "4 -Assync Task Execute");
+		Log.e("ServiceP", "4 - Assync Task Execute");
 
 		connectionHandlerTask = new ConnectionHandlerTask();
 		connectionHandlerTask.execute();
@@ -360,12 +352,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 					long userID = accessToken.getUserId();
 					User user = twitter.showUser(userID);
 					String username = user.getName();
-
-
-				} catch (Exception e) {
-					// Check log for login errors
-					Log.e("Twitter Login Error", "> " + e.toString());
-				}
+				} catch (Exception e) { Log.e("Twitter Login Error", "> " + e.toString()); }
 			}
 		}
 		if(myPreferences.isTweetLogin() && !myPreferences.isLocal()){
@@ -377,26 +364,17 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 	@Override
 	protected void onResume(){
-		/**
-		 * Get location updates
-		 */
-		if (locationManager != null){
+		// Get location updates
+		if (locationManager != null){ 
 			locationManager.requestLocationUpdates(provider, 0, 0, this);
 		}
-
-		/**
-		 * Get login
-		 */
+		// Get login
 		myPreferences = new CmovPreferences(getApplicationContext());
 		//Toast.makeText(getApplicationContext(), String.valueOf((myPreferences.hasUserName())), Toast.LENGTH_LONG).show();
 		if (!myPreferences.hasUserName()){
-
 			Intent i = new Intent(getApplicationContext(), LoginActivity.class);			
 			startActivityForResult(i, REQUEST_CODE);		
 		}
-
-		
-
 		super.onResume();
 	}
 
@@ -460,6 +438,9 @@ public class MainActivity extends ListActivity implements LocationListener {
 			details.putExtra("tweet", Encoding.encodeTweet(tweet));
 
 			//Toast.makeText(getApplicationContext(), "BANANAS " +tweet.getLAT(), Toast.LENGTH_LONG).show();
+			
+			Log.i("GPS FIX", "LAT: " +tweet.getLAT() + " LNG: " + tweet.getLNG());
+			
 			if (tweet.hasCoordenates()){
 				//Toast.makeText(getApplicationContext(), "I HAVE COORDINATES!", Toast.LENGTH_LONG).show();
 				details.putExtra("gps_location_lng", "" + tweet.getLNG());
@@ -499,12 +480,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 		}
 
 		protected String doInBackground(String... args) {
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			try { Thread.sleep(5000); } catch (InterruptedException e) { e.printStackTrace(); }
 			return  myPreferences.getProfilePictureLocation();
 
 		}
@@ -560,7 +536,9 @@ public class MainActivity extends ListActivity implements LocationListener {
 		case R.id.new_tweet:
 			Intent newTweetIntent = new Intent(this,NewTweetActivity.class);
 
+			Log.i("GPS FIX", "Do I have GPS? LAT: " +  lat + " LNG: " +lng);
 			if(location!=null){
+				Log.i("GPS FIX", "I'VE LOCATION! WILL PUT IT ON THIS NEW TWEET");
 				newTweetIntent.putExtra("gps_location_lng", ((Double)lng).toString());
 				newTweetIntent.putExtra("gps_location_lat",((Double)lat).toString());
 			}
@@ -571,18 +549,11 @@ public class MainActivity extends ListActivity implements LocationListener {
 						try {
 							subadminarea = geo.getFromLocation(lat, lng, 1).get(0).getSubAdminArea().toString();
 							newTweetIntent.putExtra("location", subadminarea);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						} catch (IOException e) { e.printStackTrace(); }
 					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				} catch (IOException e) { e.printStackTrace(); }
 			}
 			//Toast.makeText(getApplicationContext(), "LAT: " + lat + " LNG: " + lng, Toast.LENGTH_LONG).show();
-
 			newTweetIntent.putExtra("username", mUsername);
 			newTweetIntent.putExtra("share_location", myPreferences.getShareMyLocation());
 			startActivity(newTweetIntent);
@@ -591,7 +562,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 			Intent newTweetPoolIntent = new Intent(this,NewTweetPoolActivity.class);
 			startActivity(newTweetPoolIntent);
 			return true;
-
 		default:
 			return super.onOptionsItemSelected(item);
 		}

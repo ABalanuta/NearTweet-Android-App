@@ -39,7 +39,7 @@ public class TweetDTO extends BasicDTO{
 	}
 	
 	public void setLNG(String lng) {
-		mCoordinates[0] = lng;
+		mCoordinates[1] = lng;
 	}
 
 	public byte[] getUserPhoto() {

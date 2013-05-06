@@ -3,7 +3,7 @@
 
     <string name="tweet_text_dummy">Hoje vou passear ao chiado</string>
     <string name="tweet_user_dummy">UserDummy</string>
-    <string name="app_name">NearTweet V0.99</string>
+    <string name="app_name">NearTweet</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="share">Partilha no Twitter</string>
@@ -21,11 +21,11 @@
     <string name="title_activity_new_comment">NewComment</string>
     <string name="opcoes">Opções:</string>
     <string name="latitude">Lat: </string>
-    <string name="longitude">Long: </string>
+    <string name="longitude"></string>
     <string name="title_activity_tweet_details_pool">TweetDetailsPool</string>
     <string name="spam">spam </string>
     <string name="iamegemTweet">iamegemTweet</string>
-    <string name="tweet_Location">At  </string>
+    <string name="tweet_Location">close to </string>
     <string name="basic_map">Basic Map</string>
 	<string name="handle">Handle</string>
 	<string name="picture">Adicionar Foto</string>

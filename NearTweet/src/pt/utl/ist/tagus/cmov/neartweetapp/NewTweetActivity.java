@@ -100,7 +100,10 @@ public class NewTweetActivity extends Activity{
 			lng = bundle.getString("gps_location_lng");
 		}
 		
-		location = bundle.getString("location");
+		Log.i("GPS FIX","NEW TWEET ACTIVITY LAT: " + lat + " LNG: " + lng);
+		
+		
+		location = bundle.getString("location"); //This location is like "Sintra"
 		//Toast.makeText(getApplicationContext(), "I WANT THE LOCATION " + lat + " " + lng, Toast.LENGTH_LONG).show();
 		
 		mUsername = myPreferences.getUsername();
@@ -110,7 +113,7 @@ public class NewTweetActivity extends Activity{
 		BitmapDrawable d = new BitmapDrawable(getResources(), myPreferences.getProfilePictureLocation());
 		userImage.setImageDrawable(d);
 		
-		// Conect with the Service
+		// Connect with the Service
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 
@@ -149,9 +152,6 @@ public class NewTweetActivity extends Activity{
 				add_url_layout.setVisibility(LinearLayout.INVISIBLE);
 			}
 		});
-		//Bundle bundle = getIntent().getExtras();
-		//String gpsLocation = bundle.getString("gps_location");
-		//Toast.makeText(getApplicationContext(), gpsLocation, Toast.LENGTH_LONG).show();
 	}
 	
 	@Override
@@ -171,7 +171,6 @@ public class NewTweetActivity extends Activity{
 	}
 
 	private ServiceConnection mConnection = new ServiceConnection() {
-
 		@Override
 		public void onServiceConnected(ComponentName className,
 				IBinder service) {
@@ -226,19 +225,18 @@ public class NewTweetActivity extends Activity{
 					tweet.setUserPhoto(Encoding.encodeImage(bitmap));
 				}
 				//Toast.makeText(getApplicationContext(), "SENDING TWWET WITH LAT+LNG: " + lat + lng, Toast.LENGTH_LONG).show();
+				
+				Log.i("GPS FIX", "SENDING NEW TWEET WITH LAT: " +lat + " LNG: " +lng);
 				tweet.setLAT(lat);
 				tweet.setLNG(lng);
+				//TODO PASSAR AQUI A LOCATION(AKA ADDRESS) TAMBÈM PARA DENTRO DO TWEET
 				
 				
 				mService.sendTweet(tweet);
 				mSendTextBox.setText(null);
-				//Toast t = Toast.makeText(getApplicationContext(), "SENT", Toast.LENGTH_SHORT);
-				//t.setGravity(Gravity.CENTER, 0, 0);
-				//t.show();
 				finish();
 			}else{ Toast.makeText(getApplicationContext(), "server Error", Toast.LENGTH_SHORT).show(); }
             return true;
-            
 		case R.id.attach_url:
 			attatchUrlFotoToTwitt();
             return true;

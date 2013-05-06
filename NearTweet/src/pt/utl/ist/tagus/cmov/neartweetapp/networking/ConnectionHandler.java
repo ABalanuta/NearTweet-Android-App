@@ -204,38 +204,26 @@ class InputConnectionHandler extends Thread{
 
 		while (this.running) {
 			try {
-
 				Object oo = in.readObject();
 				if(oo != null){
-
 					synchronized (this.connectionHandler.getObjectList()) {
 						this.connectionHandler.getObjectList().add((BasicDTO) oo);
 					}
 					System.out.println("Object Receved");
-
-				}else{
-					System.out.println("Null Value Receved");
-				}
+				}else{ System.out.println("Null Value Receved");}
 			}
-
 			catch(EOFException e){
 				System.out.println("Channel was closed");
 				this.running = false;
 				return;
 			}
-
 			catch(SocketException e){
 				System.out.println("Channel is closed");
 				this.running = false;
 				return;
 			}
-
-			catch (IOException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-
+			catch (IOException e) { e.printStackTrace(); } 
+			catch (ClassNotFoundException e) { e.printStackTrace(); }
 		}
 	}
 }
@@ -256,9 +244,7 @@ class OutConnectionHandler extends Thread{
 				out.writeObject(oo);
 				out.flush();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException e) { e.printStackTrace(); }
 
 	}
 
@@ -267,13 +253,7 @@ class OutConnectionHandler extends Thread{
 		this.running = true;
 
 		while (this.running) {
-
-			try {
-				Thread.sleep(2);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
+			try { Thread.sleep(2); } catch (InterruptedException e) { e.printStackTrace(); }
 			//Thread.yield();
 		}
 	}
