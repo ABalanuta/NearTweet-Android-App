@@ -32,7 +32,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
@@ -91,6 +93,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 	public static ImageView mImageLock;
 	public static TextView myUserName;
 	public static ImageView userImg;
+	
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
@@ -164,10 +167,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 			StrictMode.setThreadPolicy(policy);
 		}
-
-		//if (myPreferences.isUserTwittLoggin()){
-		GetImageUpdaterTask rut_twitter_image_location = (GetImageUpdaterTask) new GetImageUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
-		//}
 
 		myUserName = (TextView) findViewById(R.id.textViewUsername);
 		myUserName.setText(myPreferences.getUsername());
@@ -382,6 +381,10 @@ public class MainActivity extends ListActivity implements LocationListener {
 				}
 			}
 		}
+		if(myPreferences.isUserTwittLoggin()){
+			GetImageUpdaterTask rut_twitter_image_location = (GetImageUpdaterTask) new GetImageUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		}
+
 
 	}
 
@@ -538,9 +541,9 @@ public class MainActivity extends ListActivity implements LocationListener {
 				t.show();
 
 				this.mService.StartGOServer();
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {}
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e) {}
 
 				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
 			}
@@ -590,6 +593,12 @@ public class MainActivity extends ListActivity implements LocationListener {
 		}
 
 		protected String doInBackground(String... args) {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return  myPreferences.getProfilePictureLocation();
 
 		}
@@ -1011,6 +1020,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 			ImageView gpsImg = (ImageView) itemLayout.findViewById(R.id.imageGps);
 			ImageView imgImg = (ImageView) itemLayout.findViewById(R.id.imageImage);
 			ImageView twitUserImg = (ImageView) itemLayout.findViewById(R.id.imageViewUserPicTweet);
+			
 
 			gpsImg.setVisibility(ImageView.INVISIBLE);
 			pollImg.setVisibility(ImageView.INVISIBLE);
@@ -1019,6 +1029,11 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 			tweetText.setText(tweet.getText());
 			tweetUsername.setText("@" + tweet.getUsername());
+			if(tweet.getUserImage()!=null){
+				byte[] tweet_image = tweet.getUserImage();
+				Bitmap b = Encoding.decodeImage(tweet_image);
+				twitUserImg.setImageBitmap(b);
+			}
 
 			/**
 			 * Lets You access internet on the interface thread
@@ -1032,18 +1047,19 @@ public class MainActivity extends ListActivity implements LocationListener {
 			//TODO add images
 			Log.v("twitter login: ",String.valueOf(myPreferences.isUserTwittLoggin()));
 			Log.v("my user name: ", String.valueOf(myPreferences.hasUserName()));
-			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
-
-				Log.v("tweet_username: ", tweet.getUsername());
-				Log.v("user_username: ", myPreferences.getUsername());
-				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
-					if (tweet.getUsername().equals(myPreferences.getUsername())){
-						String picture_location = myPreferences.getProfilePictureLocation();
-						BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-						twitUserImg.setImageDrawable(d);
-					}
-				}
-			}
+			//TODO adicionar imagem que vem dos tweets
+//			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){
+//
+//				Log.v("tweet_username: ", tweet.getUsername());
+//				Log.v("user_username: ", myPreferences.getUsername());
+//				if (tweet.getUsername()!=null && myPreferences.getUsername() != null){
+//					if (tweet.getUsername().equals(myPreferences.getUsername())){
+//						String picture_location = myPreferences.getProfilePictureLocation();
+//						BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
+//						twitUserImg.setImageDrawable(d);
+//					}
+//				}
+//			}
 
 
 			if(tweet instanceof TweetPoll){

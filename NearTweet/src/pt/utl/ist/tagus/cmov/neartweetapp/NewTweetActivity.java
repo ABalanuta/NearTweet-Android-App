@@ -13,6 +13,7 @@ import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandler;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.ConnectionHandlerService.LocalBinder;
+import pt.utl.ist.tagus.cmov.neartweetapp.networking.Encoding;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetDTO;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -67,6 +68,7 @@ public class NewTweetActivity extends Activity{
 	private static String lng;
 	private static String location;
 	private static Boolean share_location;
+	public CmovPreferences myPreferences;
 
 	// Connection to Service Variables
 	public boolean mBound = false;
@@ -88,6 +90,8 @@ public class NewTweetActivity extends Activity{
 		add_url_layout = (LinearLayout) findViewById(R.id.addUrlLayout);
 		userImage = (ImageView) findViewById(R.id.newCommentImageViewUserPicTweet);
 
+		myPreferences = new CmovPreferences(getApplicationContext());
+		
 		Bundle bundle = getIntent().getExtras();
 		share_location = bundle.getBoolean("share_location");
 		//if true user wants to share his location
@@ -99,7 +103,6 @@ public class NewTweetActivity extends Activity{
 		location = bundle.getString("location");
 		//Toast.makeText(getApplicationContext(), "I WANT THE LOCATION " + lat + " " + lng, Toast.LENGTH_LONG).show();
 		
-		CmovPreferences myPreferences = new CmovPreferences(getApplicationContext());
 		mUsername = myPreferences.getUsername();
 		Toast.makeText(getApplicationContext(), mUsername + lat +lng, Toast.LENGTH_LONG).show();
 		imgChoosen.setVisibility(ImageView.INVISIBLE);
@@ -191,7 +194,7 @@ public class NewTweetActivity extends Activity{
             parentActivityIntent.addFlags(
                     Intent.FLAG_ACTIVITY_CLEAR_TOP |
                     Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(parentActivityIntent);
+            //startActivity(parentActivityIntent);
             finish();
 		case R.id.take_picture:
 			startDialog();
@@ -213,7 +216,15 @@ public class NewTweetActivity extends Activity{
 					byte[] byteArray = stream.toByteArray();
 					tweet.setPhoto(byteArray);
 				}
-				
+				//TODO tweet.setUserPhoto(userPhoto)
+				if(myPreferences.isUserTwittLoggin()){
+					File user_photo = new File(myPreferences.getProfilePictureLocation());
+					bitmap = decodeFile(user_photo);
+//					ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//					bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//					byte[] byteArray = stream.toByteArray();
+					tweet.setUserPhoto(Encoding.encodeImage(bitmap));
+				}
 				//Toast.makeText(getApplicationContext(), "SENDING TWWET WITH LAT+LNG: " + lat + lng, Toast.LENGTH_LONG).show();
 				tweet.setLAT(lat);
 				tweet.setLNG(lng);

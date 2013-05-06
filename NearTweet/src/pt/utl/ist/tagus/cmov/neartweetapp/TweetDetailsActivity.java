@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -133,7 +134,7 @@ public class TweetDetailsActivity extends ListActivity {
 		txtLat = (TextView) findViewById(R.id.textViewCoordinateLat);
 		txtLong = (TextView) findViewById(R.id.textViewCoordinateLong);
 		image = (ImageView) findViewById(R.id.imageViewTweetImage);
-		userImage = (ImageView) findViewById(R.id.imageViewUserPicTweet);
+		userImage = (ImageView) findViewById(R.id.userAvatar);
 		
 
 		Bundle bundle = getIntent().getExtras();
@@ -143,6 +144,7 @@ public class TweetDetailsActivity extends ListActivity {
 		final String location_lng = bundle.getString("gps_location_lng");
 		final String location_lat = bundle.getString("gps_location_lat");
 		final String area = bundle.getString("location");
+
 		//Log.v("location lat:tweetdet: ",location_lat);
 		//Log.v("location lng:tweetdet: ",location_lng);
 		//Log.v("location area:tweetdet: ",area);
@@ -161,6 +163,11 @@ public class TweetDetailsActivity extends ListActivity {
 			finish();
 		}else{ 
 			tweet = Encoding.decodeTweet(bundle.getByteArray("tweet"));
+			if (tweet.getUserImage()!=null){
+				byte[] tweet_image = tweet.getUserImage();
+				Bitmap b = Encoding.decodeImage(tweet_image);
+				userImage.setImageBitmap(b);
+			}
 		}
 
 		// If Existes Insrt Image
@@ -168,6 +175,7 @@ public class TweetDetailsActivity extends ListActivity {
 			image.setImageBitmap(Encoding.decodeImage(bundle.getByteArray("tweet_image")));
 			image.setVisibility(View.VISIBLE);
 		}
+		
 
 		// If Existes Insert LOcation
 		if (location_lat!=null || location_lng!=null){
@@ -529,6 +537,7 @@ public class TweetDetailsActivity extends ListActivity {
 			for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
 				//Log.e("ServiceP", "MSG:"+ dto.toString());						
 				mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
+				
 			}
 			publishProgress();
 
