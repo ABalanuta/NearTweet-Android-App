@@ -159,7 +159,7 @@ public class NewTweetPoolActivity extends Activity {
 			parentActivityIntent.addFlags(
 					Intent.FLAG_ACTIVITY_CLEAR_TOP |
 					Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivity(parentActivityIntent);
+			//startActivity(parentActivityIntent);
 			finish();
 			return true;
 

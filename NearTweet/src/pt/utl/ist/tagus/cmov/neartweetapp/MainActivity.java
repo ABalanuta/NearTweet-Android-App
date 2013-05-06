@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 
 import pt.utl.ist.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
 import pt.utl.ist.tagus.cmov.neartweet.R;
+import pt.utl.ist.tagus.cmov.neartweetapp.TweetDetailsActivity.ResponseUpdaterTask;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
@@ -99,6 +100,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	public static EditText mSendTextBox;
 	public static ImageView mImageLock;
 	public static TextView myUserName;
+	public static ImageView userImg;
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
@@ -174,10 +176,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		}
 
 		//if (myPreferences.isUserTwittLoggin()){
-		String picture_location = myPreferences.getProfilePictureLocation();
-		ImageView userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
-		BitmapDrawable d = new BitmapDrawable(getResources(), picture_location);
-		userImg.setImageDrawable(d);
+		GetImageUpdaterTask rut_twitter_image_location = (GetImageUpdaterTask) new GetImageUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 		//}
 
 		myUserName = (TextView) findViewById(R.id.textViewUsername);
@@ -274,6 +273,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 				inflater.inflate(R.menu.main_activity_special_actions, menu);
 				return true;
 			}
+			
 
 			@Override
 			public void onDestroyActionMode(ActionMode mode) {
@@ -602,6 +602,26 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 	}
 
+	class GetImageUpdaterTask extends AsyncTask<String, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+
+		}
+
+		protected String doInBackground(String... args) {
+			return  myPreferences.getProfilePictureLocation();
+
+		}
+
+		protected void onPostExecute(String image_location) {
+			userImg = (ImageView) findViewById(R.id.imageViewMeSettings);
+			BitmapDrawable d = new BitmapDrawable(getResources(), image_location);
+			userImg.setImageDrawable(d);
+		}
+
+	}
 
 
 
