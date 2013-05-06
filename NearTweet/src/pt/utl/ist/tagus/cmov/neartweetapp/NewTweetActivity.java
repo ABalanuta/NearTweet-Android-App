@@ -191,7 +191,7 @@ public class NewTweetActivity extends Activity{
             parentActivityIntent.addFlags(
                     Intent.FLAG_ACTIVITY_CLEAR_TOP |
                     Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(parentActivityIntent);
+            //startActivity(parentActivityIntent);
             finish();
 		case R.id.take_picture:
 			startDialog();
@@ -213,6 +213,7 @@ public class NewTweetActivity extends Activity{
 					byte[] byteArray = stream.toByteArray();
 					tweet.setPhoto(byteArray);
 				}
+				//TODO tweet.setUserPhoto(userPhoto)
 				
 				//Toast.makeText(getApplicationContext(), "SENDING TWWET WITH LAT+LNG: " + lat + lng, Toast.LENGTH_LONG).show();
 				tweet.setLAT(lat);

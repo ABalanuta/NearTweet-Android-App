@@ -60,13 +60,17 @@ public class CmovPreferences {
 	}
 	
 	public String getProfilePictureLocation(){
+		Log.v("cmovpref oauthscrt",getTwitOautScrt());
+		Log.v("cmovpref oauthtkn",getTwitOautTkn());
 		if (getTwitOautScrt()!=null && getTwitOautTkn()!=null){
 
 			//foto nao existe
 			File sdCardDirectory = Environment.getExternalStorageDirectory();
-			File file = new File("/sdcard/neartweet/me.png");
+			File file = new File(sdCardDirectory + "/neartweet/me.png");
 
+			Log.v("twitter_image_url verificar se a imagem existe: ","");
 			if(!file.exists()){
+				
 
 				//get profile url from twitter
 				ConfigurationBuilder builder = new ConfigurationBuilder();
