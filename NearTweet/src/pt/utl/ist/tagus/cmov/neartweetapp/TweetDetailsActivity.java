@@ -233,7 +233,7 @@ public class TweetDetailsActivity extends ListActivity {
 		 * once redirected form the login page
 		 */
 
-		if (!isTwitterLoggedInAlready()) {
+		if (!myPreferences.isTweetLogin()) {
 			Uri uri = getIntent().getData();
 			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
 				String verifier = uri
@@ -264,6 +264,7 @@ public class TweetDetailsActivity extends ListActivity {
 					long userID = accessToken.getUserId();
 					User user = twitter.showUser(userID);
 					String username = user.getName();
+					myPreferences.setTwitLogin();
 
 
 				} catch (Exception e) {
@@ -540,7 +541,7 @@ public class TweetDetailsActivity extends ListActivity {
 			mComments = new ArrayList<Comment>();
 			for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
 				//Log.e("ServiceP", "MSG:"+ dto.toString());
-				if(!myPreferences.isLocal()){
+				if(dto.getUserPhoto()==null){
 					mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
 				}else{
 				mComments.add(new Comment(dto.getNickName(), dto.getResponse(), Encoding.decodeImage(dto.getUserPhoto())));
@@ -554,7 +555,7 @@ public class TweetDetailsActivity extends ListActivity {
 					mComments = new ArrayList<Comment>();
 					for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
 						//Log.e("ServiceP", "MSG:"+ dto.toString());	
-						if(!myPreferences.isLocal()){
+						if(dto.getUserPhoto()!=null){
 							mComments.add(new Comment(dto.getNickName(), dto.getResponse(), Encoding.decodeImage(dto.getUserPhoto())));
 						}
 						else{

@@ -144,6 +144,7 @@ public class LoginActivity extends Activity {
 					mUsername = username;
 					Log.v("A	UTENTICACAO COM SUCESSO!!",username);
 					mUsernameView.setText(username);
+					myPreferences.setTwitLogin();
 					
 					startActivity(new Intent(this,MainActivity.class));
 
@@ -163,7 +164,9 @@ public class LoginActivity extends Activity {
 	}
 
 	private void loginToTwitter(){
+		
 		if(!myPreferences.isTweetLogin()){
+			myPreferences.setLocalFalse();
 			ConfigurationBuilder builder = new ConfigurationBuilder();
 			builder.setOAuthConsumerKey(myPreferences.getConsumerKey());
 			builder.setOAuthConsumerSecret(myPreferences.getConsumerSecret());

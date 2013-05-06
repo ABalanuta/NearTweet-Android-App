@@ -119,52 +119,10 @@ public class NewCommentActivity extends Activity {
 			responseText.setHint("Responde privado");
 		}
 
-		String url = new String();
-		url = myPreferences.getProfileImgUrl();
-		ConfigurationBuilder builder = new ConfigurationBuilder();
-		builder.setOAuthConsumerKey(myPreferences.getConsumerKey());
-		builder.setOAuthConsumerSecret(myPreferences.getConsumerSecret());
-
-		AccessToken accessToken = new AccessToken(myPreferences.getTwitOautTkn(), myPreferences.getTwitOautScrt());
-		Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);;
-		User user;
-		String image_url = new String();
-		Toast.makeText(getApplicationContext(), "twitter token: " + myPreferences.getTwitOautTkn() +
-				" twitter secret: " + myPreferences.getTwitOautTkn(), Toast.LENGTH_LONG).show();
-		try {
-			user = twitter.showUser(twitter.getId());
-			image_url = user.getProfileImageURL();
-		} catch (IllegalStateException e1) {
-			e1.printStackTrace();
-		} catch (TwitterException e1) {
-			e1.printStackTrace();
+		if(!myPreferences.isTweetLogin() && myPreferences.getProfilePictureLocation()!=null){
+			BitmapDrawable d = new BitmapDrawable(getResources(), myPreferences.getProfilePictureLocation());
+			personImage.setImageDrawable(d);
 		}
-		Toast.makeText(getApplicationContext(), "has url: " + image_url, Toast.LENGTH_LONG).show();
-		Log.v("URL",image_url);
-
-		URL newurl;
-		try {
-			newurl = new URL(image_url);
-			Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()); 
-			//personImage.setImageBitmap(mIcon_val);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-		//open file from sdcard
-		String result = new String();
-		result = myPreferences.getProfilePictureLocation();
-
-		//personImage.setImageBitmap(bitmap);
-		//String myJpgPath = "/sdcard/neartweet/me.jpg";
-		BitmapDrawable d = new BitmapDrawable(getResources(), result);
-		if (d!=null){
-			Log.v("byte array", String.valueOf(d.toString()));
-		}
-			Log.v("byte array � null", "I am null");
-
-		personImage.setImageDrawable(d);
 		
 	}		
 
