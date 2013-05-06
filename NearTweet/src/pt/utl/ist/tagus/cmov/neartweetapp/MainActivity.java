@@ -405,7 +405,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 			startActivityForResult(i, REQUEST_CODE);		
 		}
 
-		registerReceiver(mReceiver, mIntentFilter); // Aqui é que se faz a associação entre o intentFilter e o Receiver
+		
 
 		super.onResume();
 	}
@@ -424,7 +424,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 			locationManager.removeUpdates(this);
 		}
 
-		unregisterReceiver(mReceiver);
 
 	}
 
