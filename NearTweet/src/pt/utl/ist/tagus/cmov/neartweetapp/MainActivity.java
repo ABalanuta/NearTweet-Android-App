@@ -41,10 +41,6 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.p2p.WifiP2pInfo;
-import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager.Channel;
-import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -77,13 +73,7 @@ import android.widget.Toast;
 
 import com.agimind.widget.SlideHolder;
 
-public class MainActivity extends ListActivity implements LocationListener, ConnectionInfoListener {
-
-	WifiP2pManager mManager;
-	Channel mChannel;
-	BroadcastReceiver mReceiver;
-	IntentFilter mIntentFilter; // used for the Broadcast Receiver
-
+public class MainActivity extends ListActivity implements LocationListener {
 
 
 	public static final String TAG = MainActivity.class.getSimpleName();
@@ -210,16 +200,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 
 		Log.e("ServiceP", "1");
-
-		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-		mChannel = mManager.initialize(this, getMainLooper(), null);
-		mReceiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this);
-
-		mIntentFilter = new IntentFilter();
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
 		Log.e("ServiceP", "2");
 
@@ -425,7 +405,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			startActivityForResult(i, REQUEST_CODE);		
 		}
 
-		registerReceiver(mReceiver, mIntentFilter); // Aqui Ã© que se faz a associaÃ§Ã£o entre o intentFilter e o Receiver
+		
 
 		super.onResume();
 	}
@@ -444,7 +424,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			locationManager.removeUpdates(this);
 		}
 
-		unregisterReceiver(mReceiver);
 
 	}
 
@@ -622,7 +601,6 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 		}
 
 	}
-
 
 
 
@@ -856,10 +834,10 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			while(running){
 				if(mService != null){
-					// Apagado por tufa Ž bue verboso
+					// Apagado por tufa ï¿½ bue verboso
 					//Log.e("ServiceP", "Loop Receve1");
 					if(mService.hasUpdates()){
-						// Apagado por tufa Ž bue verboso
+						// Apagado por tufa ï¿½ bue verboso
 						//	Log.e("ServiceP", "Loop Receve2");
 						mTweetsArray = mService.getAllTweets();
 						mService.setNoUpdates();
