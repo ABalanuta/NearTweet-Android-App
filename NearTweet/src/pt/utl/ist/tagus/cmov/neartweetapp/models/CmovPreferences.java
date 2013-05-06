@@ -64,12 +64,12 @@ public class CmovPreferences {
 		Log.v("cmovpref oauthscrt",getTwitOautScrt());
 		Log.v("cmovpref oauthtkn",getTwitOautTkn());
 		if (getTwitOautScrt()!=null && getTwitOautTkn()!=null){
-
+			Log.v("oal: ","ola");
 			//foto nao existe
 			File sdCardDirectory = Environment.getExternalStorageDirectory();
 			File file = new File(sdCardDirectory + "/neartweet/me.png");
 
-			Log.v("twitter_image_url verificar se a imagem existe: ","");
+			Log.v("twitter_image_url se a imagem existe: ","ola");
 			if(!file.exists()){
 				
 
@@ -139,6 +139,7 @@ public class CmovPreferences {
 					return "/sdcard/neartweet/me.png";
 				}
 				else{
+					file.delete();
 					return null;
 				}
 			}
