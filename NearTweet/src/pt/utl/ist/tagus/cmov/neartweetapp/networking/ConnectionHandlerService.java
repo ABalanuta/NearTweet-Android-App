@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
@@ -20,9 +21,17 @@ import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TweetResponseDTO;
 import pt.utl.ist.tagus.cmov.neartweetshared.dtos.TypeofDTO;
 import android.app.Service;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pManager.ActionListener;
+import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener;
+import android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.provider.Settings.Secure;
@@ -44,35 +53,18 @@ public class ConnectionHandlerService extends Service {
 	private boolean goStatus = false;
 	private boolean clientStatus = false;
 
+	//WIFI DIRECT
+	WifiP2pManager mManager = null;
+	Channel mChannel = null;
+
 
 	@Override
 	public void onCreate() {
-
-
-		//StartGOServer();
-
-
-		//before wifidirect
-		//this.mConectionHandler = new ConnectionHandler(this);
-		//mConectionHandler.start();
-
-
-		// para nao matar o Service
-		//sheep = new CountingSheep();
-		//sheep.start();
-
-
 
 		deviceID = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
 		if(deviceID == null){
 			deviceID = "BogusID"+(new Random()).nextLong();
 		}
-
-		//while(!this.isConnected()){
-		//	try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
-		//}
-
-		//mConectionHandler.send(new IdentityDTO(deviceID));
 
 		searcher = new SearchingForTweets();
 		searcher.start();
@@ -80,6 +72,23 @@ public class ConnectionHandlerService extends Service {
 
 		Log.e("ServiceP", "MyDeviceID is " + deviceID);
 		Log.e("ServiceP", "TCP Service Created");
+
+		//WIFI MANAGER
+		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+		mChannel = mManager.initialize(this, getMainLooper(), null);
+		startRegistration();
+		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		discoverService();
+
+
+
 
 		super.onCreate();
 	}
@@ -134,6 +143,98 @@ public class ConnectionHandlerService extends Service {
 			// Return this instance of LocalService so clients can call public methods
 			return ConnectionHandlerService.this;
 		}
+	}
+
+	//###############################################################
+	// WIFI DIRECT METHODS
+	//###############################################################
+
+	private void startRegistration() {
+
+		//  Create a string map containing information about your service.
+		Map record = new HashMap();
+		record.put("listenport", String.valueOf("trololo"));
+		record.put("buddyname", "John Doe" + (int) (Math.random() * 1000));
+		record.put("available", "visible");
+
+		// Service information.  Pass it an instance name, service type
+		// _protocol._transportlayer , and the map containing
+		// information other devices will want once they connect to this one.
+		WifiP2pDnsSdServiceInfo serviceInfo =
+				WifiP2pDnsSdServiceInfo.newInstance("_test", "_presence._tcp", record);
+
+
+		// Add the local service, sending the service info, network channel,
+		// and listener that will be used to indicate success or failure of
+		// the request.
+		mManager.addLocalService(mChannel, serviceInfo, new ActionListener() {
+
+			@Override
+			public void onSuccess() {
+				Log.e("ServiceP", "Sucess Registering DNS SERVICE");
+				// Command successful! Code isn't necessarily needed here,
+				// Unless you want to update the UI or add logging statements.
+			}
+
+			@Override
+			public void onFailure(int arg0) {
+				Log.e("ServiceP", "Failure Registering DNS SERVICE");
+				// Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+			}
+		});
+	}
+
+
+	private void discoverService() {
+
+		final HashMap<String, String> buddies = new HashMap<String, String>();
+
+
+		DnsSdTxtRecordListener txtListener = new DnsSdTxtRecordListener() {
+			@Override
+			/* Callback includes:
+			 * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
+			 * record: TXT record dta as a map of key/value pairs.
+			 * device: The device running the advertised service.
+			 */
+
+			public void onDnsSdTxtRecordAvailable(
+					String fullDomain, Map record, WifiP2pDevice device) {
+				Log.e("ServiceP", "DnsSdTxtRecord available -" + record.toString());
+				buddies.put(device.deviceAddress, (String) record.get("buddyname"));
+			}
+		};
+
+
+
+		DnsSdServiceResponseListener servListener = new DnsSdServiceResponseListener() {
+
+			@Override
+			public void onDnsSdServiceAvailable(String instanceName, String registrationType,
+					WifiP2pDevice resourceType) {
+
+				// Update the device name with the human-friendly version from
+				// the DnsTxtRecord, assuming one arrived.
+				resourceType.deviceName = buddies
+						.containsKey(resourceType.deviceAddress) ? buddies
+								.get(resourceType.deviceAddress) : resourceType.deviceName;
+
+								// Add to the custom adapter defined specifically for showing
+								// wifi devices.
+								//WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
+								//		.findFragmentById(R.id.frag_peerlist);
+								//WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
+								//		.getListAdapter());
+
+								//adapter.add(resourceType);
+								//adapter.notifyDataSetChanged();
+								Log.e("ServiceP", "onBonjourServiceAvailable " + instanceName);
+			}
+
+		};
+
+		mManager.setDnsSdResponseListeners(mChannel, servListener, txtListener);
+
 	}
 
 
@@ -589,7 +690,7 @@ public class ConnectionHandlerService extends Service {
 	public boolean getClientStatus() {
 		return this.clientStatus;
 	}
-	
+
 	public void setClientStatus(boolean b) {
 		this.clientStatus = b;
 	}

@@ -423,8 +423,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 		if (locationManager != null){
 			locationManager.removeUpdates(this);
 		}
-
-
 	}
 
 	@Override
