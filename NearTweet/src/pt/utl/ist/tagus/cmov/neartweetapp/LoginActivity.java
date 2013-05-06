@@ -82,6 +82,7 @@ public class LoginActivity extends Activity {
 					@Override
 					public void onClick(View view) {
 						attemptLogin();
+						myPreferences.setLocal();
 					}
 				});
 		mLoginTwitter = (Button) findViewById(R.id.sign_in_button_twitter);
@@ -98,7 +99,7 @@ public class LoginActivity extends Activity {
 		if(mUsername != null){
 			finish();
 		}
-		if (!myPreferences.isUserTwittLoggin()) {
+		if (!myPreferences.isTweetLogin()) {
 
 
 			Uri uri = getIntent().getData();
@@ -162,7 +163,7 @@ public class LoginActivity extends Activity {
 	}
 
 	private void loginToTwitter(){
-		if(!myPreferences.isUserTwittLoggin()){
+		if(!myPreferences.isTweetLogin()){
 			ConfigurationBuilder builder = new ConfigurationBuilder();
 			builder.setOAuthConsumerKey(myPreferences.getConsumerKey());
 			builder.setOAuthConsumerSecret(myPreferences.getConsumerSecret());

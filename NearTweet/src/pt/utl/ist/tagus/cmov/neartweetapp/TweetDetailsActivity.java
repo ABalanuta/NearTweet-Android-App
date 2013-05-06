@@ -319,7 +319,7 @@ public class TweetDetailsActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		if(myPreferences.isUserTwittLoggin()){
+		if(myPreferences.isTweetLogin()){
 			getMenuInflater().inflate(R.menu.tweet_details, menu);
 		}
 		else{
@@ -369,7 +369,7 @@ public class TweetDetailsActivity extends ListActivity {
 	// *
 	private boolean isTwitterLoggedInAlready() {
 		// return twitter login status from Shared Preferences
-		return myPreferences.isUserTwittLoggin();
+		return myPreferences.isTweetLogin();
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -538,9 +538,11 @@ public class TweetDetailsActivity extends ListActivity {
 			mComments = new ArrayList<Comment>();
 			for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
 				//Log.e("ServiceP", "MSG:"+ dto.toString());
-
+				if(!myPreferences.isLocal()){
+					mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
+				}else{
 				mComments.add(new Comment(dto.getNickName(), dto.getResponse(), Encoding.decodeImage(dto.getUserPhoto())));
-				
+				}
 			}
 			publishProgress();
 
@@ -549,8 +551,13 @@ public class TweetDetailsActivity extends ListActivity {
 				if(mService.hasResponseUpdates(srcDeviceID, tweetID)){
 					mComments = new ArrayList<Comment>();
 					for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
-						//Log.e("ServiceP", "MSG:"+ dto.toString());						
-						mComments.add(new Comment(dto.getNickName(), dto.getResponse(), Encoding.decodeImage(dto.getUserPhoto())));
+						//Log.e("ServiceP", "MSG:"+ dto.toString());	
+						if(!myPreferences.isLocal()){
+							mComments.add(new Comment(dto.getNickName(), dto.getResponse(), Encoding.decodeImage(dto.getUserPhoto())));
+						}
+						else{
+							mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
+						}
 					}
 					publishProgress();
 				}else{

@@ -37,6 +37,7 @@ public class CmovPreferences {
 	public final String TWITTER_CONSUMER_SECRET = "pmLgr4ozXj2Dw8HBk3sqHykuOwAf0mDrjed4fzlkc";
 	public final String USER_PROFILE_PICTURE_LOCATION_PATH = "USER_PROFILE_PICTURE_LOCATION";
 	public final String USER_PROFILE_PICTURE_LOCATION_IMAGE_NAME = "USER_PROFILE_PICTURE_LOCATION_IMAGE_NAME";
+	public final String IM_LOCAL = "IM_LOCAL";
 	public final Context mAppContext;
 	public final String SHARE_MY_LOCATION = "SHARE_MY_LOCATION";
 
@@ -133,7 +134,13 @@ public class CmovPreferences {
 
 			//foto ja existe
 			else{
-				return "/sdcard/neartweet/me.png";
+				Log.v("file size", "" + file.length());
+				if(file.length()!=0){
+					return "/sdcard/neartweet/me.png";
+				}
+				else{
+					return null;
+				}
 			}
 		}
 		return null;
@@ -156,6 +163,17 @@ public class CmovPreferences {
 		e.putString(USERNAME, username);
 		e.commit();
 	}
+	public void setLocalFalse(){
+		Editor e = mSharedPreferences.edit();
+		e.putBoolean(IM_LOCAL,false);
+		e.commit();	
+	}
+	public void setLocal(){
+		Editor e = mSharedPreferences.edit();
+		e.putBoolean(IM_LOCAL,true);
+		e.commit();
+	}
+	
 	public void setRequestToken(String request_token){
 		Editor e = mSharedPreferences.edit();
 		e.putString(REQUEST_TOKEN, request_token);
@@ -213,6 +231,9 @@ public class CmovPreferences {
 		return mSharedPreferences.getString(PREF_KEY_OAUTH_TOKEN,"");
 
 	}
+	public boolean isTweetLogin(){
+		return mSharedPreferences.getBoolean(IS_TWITTER_LOGGEDIN,false);
+	}
 	public String getConsumerSecret(){
 		return TWITTER_CONSUMER_SECRET;
 	}
@@ -224,14 +245,13 @@ public class CmovPreferences {
 		if (mSharedPreferences.contains(USERNAME)) return true;
 		else return false;
 	}
+	public boolean isLocal(){
+		return mSharedPreferences.getBoolean(IM_LOCAL, true);
+
+	}
 	public boolean hasProfileImgUrl(){
 		if (mSharedPreferences.contains(PROFILE_IMG_URL)) return true;
 		else return false;
-	}
-	public boolean isUserTwittLoggin(){
-		if (mSharedPreferences.contains(PREF_KEY_OAUTH_TOKEN) && 
-				mSharedPreferences.contains(PREF_KEY_OAUTH_SECRET)) return true;
-		return false;
 	}
 
 }

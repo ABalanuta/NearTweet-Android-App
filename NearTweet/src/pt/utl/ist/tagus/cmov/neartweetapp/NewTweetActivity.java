@@ -216,7 +216,7 @@ public class NewTweetActivity extends Activity{
 					tweet.setPhoto(byteArray);
 				}
 				//TODO tweet.setUserPhoto(userPhoto)
-				if(myPreferences.isUserTwittLoggin()){
+				if(myPreferences.isTweetLogin()){
 					File user_photo = new File(myPreferences.getProfilePictureLocation());
 					bitmap = decodeFile(user_photo);
 //					ByteArrayOutputStream stream = new ByteArrayOutputStream();
