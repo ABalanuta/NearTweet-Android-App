@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+
 import pt.utl.ist.tagus.cmov.neartweetapp.models.Tweet;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.TweetPoll;
 import pt.utl.ist.tagus.cmov.neartweetapp.networking.goserver.GOServer;
@@ -73,20 +74,23 @@ public class ConnectionHandlerService extends Service {
 		Log.e("ServiceP", "MyDeviceID is " + deviceID);
 		Log.e("ServiceP", "TCP Service Created");
 
-		//WIFI MANAGER
-		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-		mChannel = mManager.initialize(this, getMainLooper(), null);
-		startRegistration();
-		
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		discoverService();
-
+//		//WIFI MANAGER
+//		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+//		mChannel = mManager.initialize(this, getMainLooper(), null);
+//		//startRegistration();
+//		
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		//discoverService();
+//
+//		
+//		WiFiMaster m = new WiFiMaster();
+//		m.registerService(9000);
 
 
 
@@ -153,7 +157,7 @@ public class ConnectionHandlerService extends Service {
 
 		//  Create a string map containing information about your service.
 		Map record = new HashMap();
-		record.put("listenport", String.valueOf("trololo"));
+		record.put("listenport", String.valueOf("localhost"));
 		record.put("buddyname", "John Doe" + (int) (Math.random() * 1000));
 		record.put("available", "visible");
 
@@ -189,7 +193,8 @@ public class ConnectionHandlerService extends Service {
 
 		final HashMap<String, String> buddies = new HashMap<String, String>();
 
-
+		Log.e("ServiceP", "##");
+		
 		DnsSdTxtRecordListener txtListener = new DnsSdTxtRecordListener() {
 			@Override
 			/* Callback includes:
@@ -212,6 +217,8 @@ public class ConnectionHandlerService extends Service {
 			@Override
 			public void onDnsSdServiceAvailable(String instanceName, String registrationType,
 					WifiP2pDevice resourceType) {
+				
+				Log.e("ServiceP", "------->YEYYYYEYEYEYYES " + instanceName);
 
 				// Update the device name with the human-friendly version from
 				// the DnsTxtRecord, assuming one arrived.

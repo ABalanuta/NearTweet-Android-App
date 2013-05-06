@@ -39,4 +39,5 @@
 	<string name="enviar_resposta">Responder</string>
 	<string name="enviar_resposta_todos">Responder a Todos</string>
 	<string name="partilhar_tweet">Partilhar Twitter</string>
+	<string name="new_group">New Group</string>
 </resources>

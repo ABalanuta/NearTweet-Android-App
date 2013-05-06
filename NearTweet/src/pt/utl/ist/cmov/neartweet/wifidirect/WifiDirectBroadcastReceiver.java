@@ -41,35 +41,41 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		String action = intent.getAction();
 
-		Log.e("ServiceP", "epsylon");
-
-		PeerListListener myPeerListListener = new PeerListListener() {			
+		PeerListListener myPeerListListener = new PeerListListener() {
+			
+			
 			@Override
 			public void onPeersAvailable(WifiP2pDeviceList peers) { //este callback é chamado quando o requestPeers é chamado
 				// WifiP2pDeviceList peers - contém todos os peers que encontrar :)
-				Toast.makeText(mActivity.getApplicationContext(), "*There are peers available", Toast.LENGTH_LONG).show();
-				Log.e("ServiceP", "e1");
+				//Toast.makeText(mActivity.getApplicationContext(), "*There are peers available", Toast.LENGTH_LONG).show();
 
+				
+				
+				
+				
 				//Iterar e ligar-me a todos os peers que encontrar :)
 				for (WifiP2pDevice d : peers.getDeviceList()){
 					//obtain a peer from the WifiP2pDeviceList
 					WifiP2pDevice device = d;
 					WifiP2pConfig config = new WifiP2pConfig();
 					config.deviceAddress = device.deviceAddress;
-					mManager.connect(mChannel, config, new ActionListener() {
-						@Override
-						public void onSuccess() {
-							//success logic
-							Toast.makeText(mActivity.getApplicationContext(), "*Connected to a Peer", Toast.LENGTH_LONG).show();
-							Log.e("ServiceP", "e2");
-						}
-
-						@Override
-						public void onFailure(int reason) {
-							Log.e("ServiceP", "efailure");
-							//failure logic
-						}
-					});
+					
+					Log.e("ServiceP", d.deviceName+ " " +d.deviceAddress + " GO:" + d.isGroupOwner());
+					Log.e("ServiceP", d.toString());
+//					mManager.connect(mChannel, config, new ActionListener() {
+//						@Override
+//						public void onSuccess() {
+//							//success logic
+//							Toast.makeText(mActivity.getApplicationContext(), "*Connected to a Peer", Toast.LENGTH_LONG).show();
+//							Log.e("ServiceP", "e2");
+//						}
+//
+//						@Override
+//						public void onFailure(int reason) {
+//							Log.e("ServiceP", "efailure");
+//							//failure logic
+//						}
+//					});
 					break;
 				}
 			}
@@ -96,9 +102,11 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 			// asynchronous call and the calling activity is notified with a
 			// callback on PeerListListener.onPeersAvailable()
 			Log.e("ServiceP", "WIFI_P2P_PEERS_CHANGED_ACTION");
-			//if (mManager != null) {
-			//	mManager.requestPeers(mChannel, myPeerListListener);
-			//}
+			
+			if (mManager != null) {
+				mManager.requestPeers(mChannel, myPeerListListener);
+				
+			}
 
 
 
