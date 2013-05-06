@@ -1,5 +1,8 @@
 package pt.utl.ist.tagus.cmov.neartweetapp;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -535,8 +539,9 @@ public class TweetDetailsActivity extends ListActivity {
 			// primeiro get Preencher
 			mComments = new ArrayList<Comment>();
 			for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
-				//Log.e("ServiceP", "MSG:"+ dto.toString());						
-				mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
+				//Log.e("ServiceP", "MSG:"+ dto.toString());
+
+				mComments.add(new Comment(dto.getNickName(), dto.getResponse(), Encoding.decodeImage(dto.getUserPhoto())));
 				
 			}
 			publishProgress();
@@ -547,7 +552,7 @@ public class TweetDetailsActivity extends ListActivity {
 					mComments = new ArrayList<Comment>();
 					for(TweetResponseDTO dto : mService.getAllResponses(srcDeviceID, tweetID)){
 						//Log.e("ServiceP", "MSG:"+ dto.toString());						
-						mComments.add(new Comment(dto.getNickName(), dto.getResponse()));
+						mComments.add(new Comment(dto.getNickName(), dto.getResponse(), Encoding.decodeImage(dto.getUserPhoto())));
 					}
 					publishProgress();
 				}else{
@@ -560,4 +565,5 @@ public class TweetDetailsActivity extends ListActivity {
 			return null;
 		}
 	}
+	
 }

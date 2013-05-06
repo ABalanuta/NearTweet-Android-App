@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class CommentCustomAdapter extends ArrayAdapter<Comment> {
@@ -32,6 +33,7 @@ public class CommentCustomAdapter extends ArrayAdapter<Comment> {
 		if (comment != null) {
 			TextView mUsername = (TextView) v.findViewById(R.id.username);
 			TextView mComment = (TextView) v.findViewById(R.id.comment);
+			ImageView mAvatar = (ImageView) v.findViewById(R.id.avatar);
 
 			if (mUsername != null) {
 				mUsername.setText(comment.username);
@@ -40,6 +42,10 @@ public class CommentCustomAdapter extends ArrayAdapter<Comment> {
 			if(mComment != null) {
 				mComment.setText("Comment: " + comment.comment);
 			}
+			if(comment.avatar != null){
+				mAvatar.setImageBitmap(comment.avatar);
+			}
+			
 		}
 		return v;
 	}

@@ -10,6 +10,7 @@ public class TweetResponseDTO extends BasicDTO {
 	private String resp = null;
 	private String srcDeviceID = null;
 	private String destDeviceID = null;
+	private byte[] userPhoto = null;
 	private long desTweetID = -1;
 	private boolean isPrivate;
 	
@@ -29,7 +30,9 @@ public class TweetResponseDTO extends BasicDTO {
 	public boolean isPrivate(){
 		return isPrivate;
 	}
-	
+	public byte[] getUserPhoto() {
+		return userPhoto;
+	}
 	
 	public String getSrcDeviceID() {
 		return srcDeviceID;
@@ -37,6 +40,9 @@ public class TweetResponseDTO extends BasicDTO {
 
 	public void setSrcDeviceID(String srcDeviceID) {
 		this.srcDeviceID = srcDeviceID;
+	}
+	public void setUserPhoto(byte[] userPhoto) {
+		this.userPhoto = userPhoto;
 	}
 
 	public String getDestDeviceID() {
