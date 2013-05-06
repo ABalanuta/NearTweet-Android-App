@@ -173,7 +173,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 		Switch toggle_gps = (Switch) findViewById(R.id.switchGps);
 
-		if(myPreferences.isUserTwittLoggin()){
+		if(myPreferences.isTweetLogin()){
 			mBtnLoginTwitter.setVisibility(Button.INVISIBLE);
 		}
 
@@ -275,6 +275,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 			@Override
 			public void onClick(View v) {
 				loginToTwitter();
+				myPreferences.setLocalFalse();
 				mBtnLoginTwitter.setVisibility(Button.INVISIBLE);
 			}
 		});
@@ -317,23 +318,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 		connectionHandlerTask = new ConnectionHandlerTask();
 		connectionHandlerTask.execute();
 
-
-		/**
-		 * offline dummies: NAO APAGAR	
-		 */
-		//Tweet tweetGenerator = new Tweet();
-		//mTweetsArray = tweetGenerator.generateTweets();
-		//handleServerResponse();
-		//}
-		//else{
-		//Toast.makeText(this, "Sem Acesso a Internet", Toast.LENGTH_LONG).show();
-		//}
-		/**
-		 * Verifies if user is already logedin to twitter
-		 * once redirected form the login page
-		 */
-
-		if (!myPreferences.isUserTwittLoggin()) {
+		Log.v("is local", String.valueOf(myPreferences.isLocal()));
+		if (!myPreferences.isTweetLogin() && !myPreferences.isLocal()) {
 			
 			Uri uri = getIntent().getData();
 			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
@@ -367,6 +353,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 					//					e.commit(); // save changes
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
+					myPreferences.setTwitLogin();
 
 					// Getting user details from twitter
 					// For now i am getting his name only
@@ -381,7 +368,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 				}
 			}
 		}
-		if(myPreferences.isUserTwittLoggin()){
+		if(myPreferences.isTweetLogin() && !myPreferences.isLocal()){
 			GetImageUpdaterTask rut_twitter_image_location = (GetImageUpdaterTask) new GetImageUpdaterTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 		}
 
@@ -880,7 +867,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 	 */
 
 	private void loginToTwitter(){
-		if(!myPreferences.isUserTwittLoggin()){
+		
+		if(!myPreferences.isTweetLogin()){
 			ConfigurationBuilder builder = new ConfigurationBuilder();
 			builder.setOAuthConsumerKey(myPreferences.getConsumerKey());
 			builder.setOAuthConsumerSecret(myPreferences.getConsumerSecret());
@@ -964,7 +952,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 
 			//TODO add images
-			Log.v("twitter login: ",String.valueOf(myPreferences.isUserTwittLoggin()));
+			Log.v("twitter login: ",String.valueOf(myPreferences.isTweetLogin()));
 			Log.v("my user name: ", String.valueOf(myPreferences.hasUserName()));
 			//TODO adicionar imagem que vem dos tweets
 //			if (myPreferences.isUserTwittLoggin() && myPreferences.hasUserName()){

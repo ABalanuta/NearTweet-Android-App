@@ -186,9 +186,15 @@ public class NewCommentActivity extends Activity {
 				if(mService != null && mService.isConnected()){
 					String text = responseText.getText().toString();
 					TweetResponseDTO res = new TweetResponseDTO(myPreferences.getUsername(), text, tweet.getDeviceID(), tweet.getTweetId(), !toAll);
-					File user_photo = new File(myPreferences.getProfilePictureLocation());
-					Bitmap bitmap = decodeFile(user_photo);
-					res.setUserPhoto(Encoding.encodeImage(bitmap));
+
+					Log.v("user picture scrt",myPreferences.getTwitOautScrt());
+					Log.v("user picture tkn",myPreferences.getTwitOautTkn());
+					Log.v("user picture location",myPreferences.getProfilePictureLocation());
+					if(myPreferences.getProfilePictureLocation()!=null&& !myPreferences.isLocal()){
+						File user_photo = new File(myPreferences.getProfilePictureLocation());
+						Bitmap bitmap = decodeFile(user_photo);
+						res.setUserPhoto(Encoding.encodeImage(bitmap));
+					}
 
 					
 					mService.sendResponseTweet(res);
