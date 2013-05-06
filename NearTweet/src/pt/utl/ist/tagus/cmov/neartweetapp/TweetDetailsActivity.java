@@ -3,8 +3,10 @@ package pt.utl.ist.tagus.cmov.neartweetapp;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity;
@@ -35,6 +37,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -147,17 +150,13 @@ public class TweetDetailsActivity extends ListActivity {
 		// For Demo purposes
 		final String location_lng = bundle.getString("gps_location_lng");
 		final String location_lat = bundle.getString("gps_location_lat");
-		final String area = bundle.getString("location");
-
-		//Log.v("location lat:tweetdet: ",location_lat);
-		//Log.v("location lng:tweetdet: ",location_lng);
-		//Log.v("location area:tweetdet: ",area);
-		//Toast.makeText(getApplicationContext(), "DO I HAVE LAT AND LNG " + location_lat + location_lng, Toast.LENGTH_LONG).show();	
-		//final String location_lng = "-9.302851";
-		//final String location_lat = "38.7371";
-		// ----------		
-
-
+		//final String area = bundle.getString("location");
+		Geocoder geo  = new Geocoder(getApplicationContext(), Locale.getDefault());
+		String area = "Não consegui apanhar a area";
+		try { area = geo.getFromLocation(Double.parseDouble(location_lat), Double.parseDouble(location_lng), 1).get(0).getSubAdminArea().toString();
+		} catch (NumberFormatException e1) { e1.printStackTrace();
+		} catch (IOException e1) { e1.printStackTrace(); }
+	
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
 		tweet_text = bundle.getString("tweet_text");
@@ -180,11 +179,11 @@ public class TweetDetailsActivity extends ListActivity {
 			image.setVisibility(View.VISIBLE);
 		}
 		
-
 		// If Existes Insert LOcation
 		if (location_lat!=null || location_lng!=null){
-			txtLat.setText("Lat: " +  location_lat);
-			txtLong.setText("Long: " + location_lng);
+			//txtLat.setText("Lat: " +  location_lat);
+			//txtLong.setText("Long: " + location_lng);
+			txtLat.setText(area);
 		}
 		txtTweet.setText(tweet_text);
 		txtUserName.setText("@ " + tweet_uid);
@@ -193,7 +192,6 @@ public class TweetDetailsActivity extends ListActivity {
 
 			@Override
 			public boolean onLongClick(View v) {
-
 				Intent map = new Intent(getApplicationContext(),pt.utl.ist.tagus.cmov.neartweetapp.maps.BasicMapActivity.class);
 				map.putExtra("gps_location_lat", location_lat);
 				map.putExtra("gps_location_lng", location_lng);
