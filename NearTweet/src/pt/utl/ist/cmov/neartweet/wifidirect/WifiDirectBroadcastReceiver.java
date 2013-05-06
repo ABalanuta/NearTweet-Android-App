@@ -60,8 +60,8 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 					WifiP2pConfig config = new WifiP2pConfig();
 					config.deviceAddress = device.deviceAddress;
 					
-					Log.e("ServiceP", d.deviceName+ " " +d.deviceAddress + " GO:" + d.isGroupOwner());
-					Log.e("ServiceP", d.toString());
+					//Log.e("ServiceP", d.deviceName+ " " +d.deviceAddress + " GO:" + d.isGroupOwner());
+					//Log.e("ServiceP", d.toString());
 //					mManager.connect(mChannel, config, new ActionListener() {
 //						@Override
 //						public void onSuccess() {

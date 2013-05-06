@@ -2,9 +2,11 @@ package pt.utl.ist.tagus.cmov.neartweetapp;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executor;
 
 import pt.utl.ist.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
@@ -25,6 +27,7 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -140,6 +143,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 	static Channel mChannel;
 	BroadcastReceiver mReceiver;
 	IntentFilter mIntentFilter; // used for the Broadcast Receiver
+	static boolean AnounceService = false;
+	static Map Services = Collections.synchronizedMap(new HashMap<String,String>());
 
 
 
@@ -165,17 +170,16 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 		//wifi direct
 		mIntentFilter = new IntentFilter();
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+		//mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+		//mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+		//mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+		//mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
 		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
 		mChannel = mManager.initialize(this, getMainLooper(), null);
 		mReceiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this);
-		startRegistration();
 
-
+			
 
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
@@ -228,11 +232,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 			}
 		});
-
-
-		Log.e("ServiceP", "1");
-
-		Log.e("ServiceP", "2");
 
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 			int calledPosition = -1;
@@ -299,8 +298,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 			}
 		});
 
-		Log.e("ServiceP", "3");
-
 		mBtnLoginTwitter.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -343,10 +340,10 @@ public class MainActivity extends ListActivity implements LocationListener {
 			onLocationChanged(location);
 		} else { }
 
-		Log.e("ServiceP", "4 -Assync Task Execute");
-
 		connectionHandlerTask = new ConnectionHandlerTask();
 		connectionHandlerTask.execute();
+		startRegistration();
+		discoverService();
 
 
 		/**
@@ -541,11 +538,10 @@ public class MainActivity extends ListActivity implements LocationListener {
 		//  Create a string map containing information about your service.
 		Map record = new HashMap();
 		record.put("listenport", String.valueOf(4444));
-		record.put("buddyname", MainActivity.mUsername + (int) (Math.random() * 1000));
 		record.put("available", "visible");
 
 		WifiP2pDnsSdServiceInfo serviceInfo =
-				WifiP2pDnsSdServiceInfo.newInstance("MEGA_SERVICE", "_presence._tcp", record);
+				WifiP2pDnsSdServiceInfo.newInstance("NearTweetService"+new Random().nextInt(), "_presence._tcp", record);
 
 		mManager.addLocalService(mChannel, serviceInfo, new android.net.wifi.p2p.WifiP2pManager.ActionListener() {
 
@@ -581,25 +577,11 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 		DnsSdServiceResponseListener servListener = new DnsSdServiceResponseListener() {
 			@Override
-			public void onDnsSdServiceAvailable(String instanceName, String registrationType,
-					WifiP2pDevice resourceType) {
+			public void onDnsSdServiceAvailable(String instanceName, String registrationType, WifiP2pDevice resourceType) {
 
-				//	                    // Update the device name with the human-friendly version from
-				//	                    // the DnsTxtRecord, assuming one arrived.
-				//	                    resourceType.deviceName = buddies
-				//	                            .containsKey(resourceType.deviceAddress) ? buddies
-				//	                            .get(resourceType.deviceAddress) : resourceType.deviceName;
-				//
-				//	                    // Add to the custom adapter defined specifically for showing
-				//	                    // wifi devices.
-				//	                    WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
-				//	                            .findFragmentById(R.id.frag_peerlist);
-				//	                    WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
-				//	                            .getListAdapter());
-				//
-				//	                    adapter.add(resourceType);
-				//	                    adapter.notifyDataSetChanged();
-				Log.e("ServiceP", "onBonjourServiceAvailable " + instanceName);
+				Log.e("ServiceP", "ServiceAvailable:  " + instanceName + " From " +
+						resourceType.deviceName +" "+  resourceType.deviceAddress);
+				Services.put(instanceName, resourceType.deviceAddress);
 			}
 		};
 
@@ -628,6 +610,25 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 	}
 
+
+	private static void ReloadSearch(){
+
+		mManager.discoverServices(mChannel, new  WifiP2pManager.ActionListener() {
+
+			@Override
+			public void onSuccess() {
+				Log.e("ServiceP", "discoverServices success");
+			}
+
+			@Override
+			public void onFailure(int code) {
+				// Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+				if (code == WifiP2pManager.P2P_UNSUPPORTED) {
+					Log.d(TAG, "P2P isn't supported on this device.");
+				}
+			}
+		});
+	}
 
 
 
@@ -803,15 +804,12 @@ public class MainActivity extends ListActivity implements LocationListener {
 		@Override
 		protected String doInBackground(String... message) {
 
-			Log.e("ServiceP", "do 1");
-
 			running = true;
 			mProgressBar.setVisibility(View.VISIBLE);
 
 			// LIgar Serviço
 			service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
 			bindService(service, mConnection, Context.BIND_AUTO_CREATE);
-			Log.e("ServiceP", "do 2");
 			Thread.yield();
 
 			Log.e("ServiceP", "Assync Started");
@@ -835,6 +833,45 @@ public class MainActivity extends ListActivity implements LocationListener {
 							mService.setClientStatus(true);
 						}
 					}
+					
+					
+//					// WIFI DIRECT
+//					if(AnounceService){
+//						if(mService.getGOStatus() == false){
+//							//Start Server
+//							mService.StartGOServer();
+//							mService.setGOStatus(true);
+//						}
+//
+//						if(mService.getClientStatus() == false){
+//							//Start Client
+//							mService.startClient("localhost");
+//							mService.setClientStatus(true);
+//						}
+//					}else{
+//						if(mService.getClientStatus() == false){
+//							while(true){
+//								// remove os Serviços desbertos ate agora
+//								Map s = Services;
+//								Services = Collections.synchronizedMap(new HashMap<String,String>());
+//								
+//								if(s.containsKey("NearTweetService")){
+//									System.out.println("ServersFound:");
+//									System.out.println(s.get("NearTweetService"));
+//								}else{
+//									try {
+//										Thread.sleep(3000);
+//									} catch (InterruptedException e) {
+//										// TODO Auto-generated catch block
+//										e.printStackTrace();
+//									}
+//								}
+//								
+//							}
+//						}
+//					}
+					
+					
 					break;
 				}
 				else{
@@ -855,7 +892,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 					try { Thread.sleep(250); } catch (InterruptedException e) {}
 				}
 			}
-			Log.e("ServiceP", "do 3");
 			Log.e("ServiceP", "Bound with Service");
 
 			while(running){
@@ -876,10 +912,13 @@ public class MainActivity extends ListActivity implements LocationListener {
 						}
 						publishProgress("Reload_Screen");
 					}else{
-						try { Thread.sleep(2000); } catch (InterruptedException e) {}
+						try { Thread.sleep(250); } catch (InterruptedException e) {}
+						
+						ReloadSearch();
 					}
+
 				}else{
-					try { Thread.sleep(2000); } catch (InterruptedException e) {}
+					try { Thread.sleep(250); } catch (InterruptedException e) {}
 				}
 			}
 			return "";
@@ -898,11 +937,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 					mProgressBar.setVisibility(View.INVISIBLE);
 
 					System.out.println("----");
-					MainActivity.
 
-
-
-					MainActivity.discoverService();
+					//MainActivity.discoverService();
 
 					System.out.println("----");
 
@@ -915,25 +951,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 				}
 				else if(updadeCommand.equals("Reload_Screen")){
 					onProgressUpdateAux();
-					
-					
-					mManager.discoverServices(mChannel, new  WifiP2pManager.ActionListener() {
 
-						@Override
-						public void onSuccess() {
-							Log.e("ServiceP", "discoverServices success");
-						}
 
-						@Override
-						public void onFailure(int code) {
-							// Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
-							if (code == WifiP2pManager.P2P_UNSUPPORTED) {
-								Log.d(TAG, "P2P isn't supported on this device.");
-							}
-						}
-					});
-					
-					
 				}else if(updadeCommand.equals("Ban_Me")){
 					this.running = false;
 					MainActivity.mListView.setVisibility(View.INVISIBLE);
