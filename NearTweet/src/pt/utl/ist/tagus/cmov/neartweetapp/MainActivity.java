@@ -32,7 +32,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
@@ -101,7 +103,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 	public static ImageView mImageLock;
 	public static TextView myUserName;
 	public static ImageView userImg;
-	public static ImageView twitUserImg;
+	
 
 	protected final String KEY_TEXT = "texto";
 	protected final String KEY_TWEETER = "utilizador";
@@ -1039,6 +1041,7 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 			ImageView pollImg = (ImageView) itemLayout.findViewById(R.id.imagePool);
 			ImageView gpsImg = (ImageView) itemLayout.findViewById(R.id.imageGps);
 			ImageView imgImg = (ImageView) itemLayout.findViewById(R.id.imageImage);
+			ImageView twitUserImg = (ImageView) itemLayout.findViewById(R.id.imageViewUserPicTweet);
 			
 
 			gpsImg.setVisibility(ImageView.INVISIBLE);
@@ -1048,6 +1051,11 @@ public class MainActivity extends ListActivity implements LocationListener, Conn
 
 			tweetText.setText(tweet.getText());
 			tweetUsername.setText("@" + tweet.getUsername());
+			if(tweet.getUserImage()!=null){
+				byte[] tweet_image = tweet.getUserImage();
+				Bitmap b = Encoding.decodeImage(tweet_image);
+				twitUserImg.setImageBitmap(b);
+			}
 
 			/**
 			 * Lets You access internet on the interface thread
