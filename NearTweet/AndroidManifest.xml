@@ -102,6 +102,10 @@
             android:label="@string/title_activity_new_tweet_pool" >
         </activity>
         <activity
+            android:name="pt.utl.ist.cmov.neartweet.wifidirect.GroupSelectionActivity"
+            android:label="@string/group_selection" >
+        </activity>
+        <activity
             android:name="pt.utl.ist.tagus.cmov.neartweetapp.NewCommentActivity"
             android:label="@string/title_activity_new_comment" >
         </activity>

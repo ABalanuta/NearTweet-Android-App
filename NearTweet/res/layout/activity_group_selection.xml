@@ -12,44 +12,56 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/new_group"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/createGroupTextBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/TextView01"
         android:layout_below="@+id/textView1"
-        android:ems="10" android:inputType="text">
+        android:ems="10"
+        android:inputType="text" >
 
         <requestFocus />
     </EditText>
 
-    <TextView
-        android:id="@+id/TextView01"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView1"
-        android:layout_below="@+id/editText1"
-        android:layout_marginTop="29dp"
-        android:text="Existing Groups"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/createGroupButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/TextView01"
-        android:layout_toRightOf="@+id/editText1"
+        android:layout_alignRight="@+id/groupsList"
+        android:layout_alignTop="@+id/createGroupTextBox"
         android:text="Create" />
 
     <ListView
-        android:id="@+id/listView1"
+        android:id="@+id/groupsList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/TextView01"
         android:layout_below="@+id/TextView01"
         android:layout_marginTop="20dp" >
     </ListView>
+
+    <TextView
+        android:id="@+id/TextView01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_below="@+id/createGroupTextBox"
+        android:layout_marginTop="78dp"
+        android:text="Groups Scaned"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/scanGroups"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/TextView01"
+        android:layout_alignBottom="@+id/TextView01"
+        android:layout_alignRight="@+id/groupsList"
+        android:layout_toRightOf="@+id/createGroupTextBox"
+        android:text="scan" />
 
 </RelativeLayout>

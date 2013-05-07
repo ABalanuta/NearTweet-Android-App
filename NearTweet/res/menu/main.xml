@@ -1,12 +1,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-   <item android:id="@+id/new_tweet"
-          android:icon="@drawable/ic_action_mail_add"
-          android:title="@string/criar_novo_tweet"
-          android:showAsAction="ifRoom|withText"/>
-   
-    <item android:id="@+id/new_tweet_pool"
-          android:icon="@drawable/content_new_event"
-          android:title="@string/criar_novo_tweet_pool"
-          android:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/new_tweet"
+        android:icon="@drawable/ic_action_mail_add"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/criar_novo_tweet"/>
+    <item
+        android:id="@+id/new_tweet_pool"
+        android:icon="@drawable/content_new_event"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/criar_novo_tweet_pool"/>
+    <item
+        android:id="@+id/wifi_direct"
+        android:icon="@drawable/carlos_martins"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/wifi_direct"/>
+
 </menu>

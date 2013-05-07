@@ -40,4 +40,8 @@
 	<string name="enviar_resposta_todos">Responder a Todos</string>
 	<string name="partilhar_tweet">Partilhar Twitter</string>
 	<string name="new_group">New Group</string>
+	<string name="wifi_direct">Wifi Direct</string>
+	<string name="group_selection">Group Selection</string>
+	
+	
 </resources>
