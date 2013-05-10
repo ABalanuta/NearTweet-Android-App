@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 
+import pt.utl.ist.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver;
 import pt.utl.ist.tagus.cmov.neartweet.R;
 import pt.utl.ist.tagus.cmov.neartweetapp.maps.MultipleTweetMapActivity;
 import pt.utl.ist.tagus.cmov.neartweetapp.models.CmovPreferences;
@@ -24,13 +25,14 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -38,6 +40,10 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -45,6 +51,7 @@ import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -69,7 +76,7 @@ import android.widget.Toast;
 
 import com.agimind.widget.SlideHolder;
 
-public class MainActivity extends ListActivity implements LocationListener {
+public class MainActivity extends ListActivity implements LocationListener, ConnectionInfoListener {
 
 
 	public static final String TAG = MainActivity.class.getSimpleName();
@@ -123,9 +130,16 @@ public class MainActivity extends ListActivity implements LocationListener {
 	public ConnectionHandlerService mService;
 
 
-	private static boolean LOCAL_SERVER__ENVYROMENT = true;
+	private static boolean LOCAL_SERVER_ENVINRONMENT = false;
 
 
+	// WIFI DIRECT STUFF
+	WifiP2pManager mManager;
+	Channel mChannel;
+	BroadcastReceiver mReceiver;
+	IntentFilter mIntentFilter; // used for the Broadcast Receiver
+	
+	
 	/***************************************************************************************
 	 * 
 	 * 							 Activity LifeCycle Methods
@@ -142,7 +156,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 		// Ligar Serviço
 		service = new Intent(getApplicationContext(), ConnectionHandlerService.class);
-		//startService(service);
+		startService(service);
 		bindService(service, mConnection, Context.BIND_AUTO_CREATE);
 		Log.e("ServiceP", "Binding...");
 
@@ -152,8 +166,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 		mImageLock = (ImageView) findViewById(R.id.imageViewMainLockBan);
 		mBtnLoginTwitter = (Button) findViewById(R.id.btnLoginTwitter);
 		myPreferences = new CmovPreferences(getApplicationContext());
-
-
+		
+		
 		ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
@@ -176,67 +190,61 @@ public class MainActivity extends ListActivity implements LocationListener {
 		else 
 			toggle_gps.setChecked(false);
 
+		
 		toggle_gps.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if(isChecked) {
-					myPreferences.setShareMyLocationTrue();
-					//Toast.makeText(getApplicationContext(), "GPS esta: " + String.valueOf(myPreferences.getShareMyLocation()), Toast.LENGTH_LONG).show();
-				} else {
-					myPreferences.setShareMyLocationFalse();
-					//Toast.makeText(getApplicationContext(), "GPS esta: " + String.valueOf(myPreferences.getShareMyLocation()), Toast.LENGTH_LONG).show();
-				}
-
-			}
+				if(isChecked) { myPreferences.setShareMyLocationTrue(); } 
+				else { myPreferences.setShareMyLocationFalse(); }
+			}	
 		});
 
 
 		Log.e("ServiceP", "1");
+		
+		
 
+		mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+		mChannel = mManager.initialize(this, getMainLooper(), null);
+		mReceiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this);
+
+		mIntentFilter = new IntentFilter();
+		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+		mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+		
+		
 		Log.e("ServiceP", "2");
 
+		
 		listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 			int calledPosition = -1;
 
 			@Override
-			public void onItemCheckedStateChanged(ActionMode mode, int position,
-					long id, boolean checked) {
+			public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
 				calledPosition = position;
-				// Here you can do something when items are selected/de-selected,
-				// such as update the title in the CAB
 			}
 
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-
 				// Respond to clicks on the actions in the CAB
 				switch (item.getItemId()) {
-
-
 				case R.id.share_twitter:
 					Toast.makeText(getApplicationContext(), "Partilhado no twitter", Toast.LENGTH_LONG).show();
 					mode.finish(); // Action picked, so close the CAB
 					return true;
-
-
 				case R.id.mark_as_spam:
 					if(mService != null && mService.isConnected()){
 						Tweet t = mTweetsArray.get(calledPosition);
 						mService.reportSpammer(t.getDeviceID(), t.getTweetId());
 						Toast.makeText(getApplicationContext(), "Marcado como spam", Toast.LENGTH_LONG).show();
-					}else{
-						Toast.makeText(getApplicationContext(), "Erro na Ligação", Toast.LENGTH_LONG).show();
-					}
+					}else{ Toast.makeText(getApplicationContext(), "Erro na Ligação", Toast.LENGTH_LONG).show(); }
 					mode.finish(); // Action picked, so close the CAB
 					return true;
-
-
 				default:
 					return false;
 				}
-
-
 			}
 
 			@Override
@@ -246,14 +254,11 @@ public class MainActivity extends ListActivity implements LocationListener {
 				inflater.inflate(R.menu.main_activity_special_actions, menu);
 				return true;
 			}
-
-
 			@Override
 			public void onDestroyActionMode(ActionMode mode) {
 				// Here you can make any necessary updates to the activity when
 				// the CAB is removed. By default, selected items are deselected/unchecked.
 			}
-
 			@Override
 			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
 				// Here you can perform updates to the CAB due to
@@ -263,9 +268,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 		});
 
 		Log.e("ServiceP", "3");
-
 		mBtnLoginTwitter.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				loginToTwitter();
@@ -376,6 +379,9 @@ public class MainActivity extends ListActivity implements LocationListener {
 			Intent i = new Intent(getApplicationContext(), LoginActivity.class);			
 			startActivityForResult(i, REQUEST_CODE);		
 		}
+		
+		registerReceiver(mReceiver, mIntentFilter); // Aqui Ã© que se faz a associaÃ§Ã£o entre o intentFilter e o Receiver
+		mProgressBar.setVisibility(View.INVISIBLE);
 		super.onResume();
 	}
 
@@ -393,7 +399,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 			locationManager.removeUpdates(this);
 		}
 
-
+		unregisterReceiver(mReceiver);
 	}
 
 	@Override
@@ -526,6 +532,69 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 
 
+	// Este mÃ©todo Ã© chamado quando recebemos um connect e tem a informaÃ§Ã£o do peer que se ligou a nÃ³s =)
+	@Override
+	public void onConnectionInfoAvailable(WifiP2pInfo info) {
+
+		Log.e("ServiceP", "Info Receved");
+		Log.e("ServiceP", "GO IP is " + info.groupOwnerAddress.getHostAddress());
+
+
+		//if Server
+		if(info.isGroupOwner){
+
+			// verifica se se jÃ¡ era server
+			if(this.mService.getGOStatus() == false){
+				this.mService.setGOStatus(true);
+
+				Log.e("ServiceP", "I am Server");
+				Toast t = Toast.makeText(this, "You are SERVER", Toast.LENGTH_LONG);
+				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+				t.show();
+
+				this.mService.StartGOServer();
+				try { Thread.sleep(1000); } catch (InterruptedException e) {}
+
+				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
+			}
+		}
+
+		// is Client
+		else{
+			// verifica se jÃ¡ era cliente
+			// caso nÃ£o estabelece uma coneccao
+			if(this.mService.getClientStatus() == false){
+				this.mService.setClientStatus(true);
+
+				//mService.cleanOldTweets();
+
+				Log.e("ServiceP", "I am Client");
+				Toast t = Toast.makeText(this, "You are CLIENT", Toast.LENGTH_LONG);
+				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+				t.show();
+
+				try { Thread.sleep(1000); } catch (InterruptedException e) {}
+				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
+
+
+				// Caso falha da ligaÃ§cao/Servidor 
+			}else if(!this.mService.isConnected()){
+				Log.e("ServiceP", "Server Probabily Failed");
+				Toast t = Toast.makeText(this, "Server Recovered", Toast.LENGTH_LONG);
+				t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+				t.show();
+
+				this.mService.startClient(info.groupOwnerAddress.getHostAddress());
+
+			}
+		}
+
+
+	}
+
+	
+	
+
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
@@ -564,7 +633,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 			startActivity(newTweetPoolIntent);
 			return true;
 		case R.id.tweet_map:
-			
+
 			//1. obter todos os tweet location
 			//2. enviar para o map
 			String[] LATArray = new String[mTweetsArray.size()];
@@ -583,8 +652,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 			multipleTweetMapIntent.putExtra("textArray", TEXTArray);
 			startActivity(multipleTweetMapIntent);
 			return true;
-		
-		
+
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -692,18 +761,15 @@ public class MainActivity extends ListActivity implements LocationListener {
 			Log.e("ServiceP", "Assync Started");
 			publishProgress("Waiting...");
 
-
 			// For local Server Testing
 			while(running){
 				if(mService != null){
-					if(MainActivity.LOCAL_SERVER__ENVYROMENT){
-
+					if(MainActivity.LOCAL_SERVER_ENVINRONMENT){
 						if(mService.getGOStatus() == false){
 							//Start Server
 							mService.StartGOServer();
 							mService.setGOStatus(true);
 						}
-
 						if(mService.getClientStatus() == false){
 							//Start Client
 							mService.startClient("localhost");
@@ -712,12 +778,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 					}
 					break;
 				}
-				else{
-					try { Thread.sleep(250); } catch (InterruptedException e) {}
-				}
+				else{ try { Thread.sleep(250); } catch (InterruptedException e) {} }
 			}
-
-
 
 
 			// Espera que se ligue ao server
@@ -726,9 +788,7 @@ public class MainActivity extends ListActivity implements LocationListener {
 					publishProgress("Connected");
 					break;
 				}
-				else{
-					try { Thread.sleep(250); } catch (InterruptedException e) {}
-				}
+				else{ try { Thread.sleep(250); } catch (InterruptedException e) {} }
 			}
 			Log.e("ServiceP", "do 3");
 			Log.e("ServiceP", "Bound with Service");
@@ -750,12 +810,8 @@ public class MainActivity extends ListActivity implements LocationListener {
 							}
 						}
 						publishProgress("Reload_Screen");
-					}else{
-						try { Thread.sleep(2000); } catch (InterruptedException e) {}
-					}
-				}else{
-					try { Thread.sleep(2000); } catch (InterruptedException e) {}
-				}
+					}else{ try { Thread.sleep(2000); } catch (InterruptedException e) {} }
+				}else{ try { Thread.sleep(2000); } catch (InterruptedException e) {} }
 			}
 			return "";
 		}
@@ -763,18 +819,14 @@ public class MainActivity extends ListActivity implements LocationListener {
 
 		@Override
 		protected void onProgressUpdate(Object... values) {
-
 			if(values[0] instanceof String){
 				String updadeCommand = (String)values[0];
-
 				if(updadeCommand.equals("Connected")){
-
 					Toast.makeText(getApplicationContext(), "Connected", Toast.LENGTH_LONG).show();
 					mProgressBar.setVisibility(View.INVISIBLE);
 					return;
 				}
 				else if(updadeCommand.equals("Waiting...")){
-
 					Toast.makeText(getApplicationContext(), "Waiting Connections", Toast.LENGTH_LONG).show();
 					return;
 				}
@@ -789,8 +841,6 @@ public class MainActivity extends ListActivity implements LocationListener {
 				}
 			}
 		}
-
-
 	}
 
 	public void onProgressUpdateAux(){

@@ -115,6 +115,12 @@
         <activity
             android:name="pt.utl.ist.tagus.cmov.neartweetapp.maps.MultipleTweetMapActivity"
             android:label="@string/map_tweets" />
+        <receiver
+            android:name="pt.ist.utl.cmov.neartweet.wifidirect.WifiDirectBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" >
+        </receiver>
+        
     </application>
 
 </manifest>
