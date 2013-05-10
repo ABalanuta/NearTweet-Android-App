@@ -154,8 +154,10 @@ public class TweetDetailsActivity extends ListActivity {
 		Geocoder geo  = new Geocoder(getApplicationContext(), Locale.getDefault());
 		String area = "Não consegui apanhar a area";
 		try { area = geo.getFromLocation(Double.parseDouble(location_lat), Double.parseDouble(location_lng), 1).get(0).getSubAdminArea().toString();
-		} catch (NumberFormatException e1) { e1.printStackTrace();
-		} catch (IOException e1) { e1.printStackTrace(); }
+		} catch (NumberFormatException e1) { 
+		} catch (IOException e1) {  
+		} catch (Exception e1) { }
+		 
 	
 		final String tweet_deviceID = bundle.getString("tweet_deviceID");
 		final long tweet_ID = bundle.getLong("tweet_id");
